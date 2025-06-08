@@ -1,8 +1,8 @@
-Depois do login vá em add new server
+# Depois do login vá em add new server
 
 Name: qualquer nome
 
-Seção de conexão
+## Seção de conexão
 
     Host name/address: postgres
 
