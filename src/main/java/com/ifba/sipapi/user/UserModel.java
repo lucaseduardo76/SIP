@@ -1,19 +1,22 @@
 package com.ifba.sipapi.user;
 
 import com.ifba.sipapi.Auditable;
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
-public class Model extends Auditable {
+@Getter
+@EqualsAndHashCode
+@Entity
+@Table(name = "sip_user")
+public class UserModel extends Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    @NotBlank(message = "O nome não pode ser nulo")
+    @NotBlank(message = "O nome não pode ser vazio")
     private String name;
 
     @NotBlank(message = "O CPF não pode estar vazio ou em branco")
@@ -30,7 +33,7 @@ public class Model extends Auditable {
     private String email;
 
     @Column(nullable = false)
-    @NotBlank(message = "A função não pode ser nula")
+    @NotBlank(message = "A função deve ser vazia")
     private Role role;
 
     @NotBlank(message = "A senha não pode ser vazia")

@@ -1,4 +1,7 @@
 package com.ifba.sipapi.user;
 
-public class Role {
+public enum Role {
+    COMMOM,
+    ADMIN,
+    ROOT,
 }

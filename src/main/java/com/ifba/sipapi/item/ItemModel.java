@@ -3,27 +3,28 @@ package com.ifba.sipapi.item;
 import com.ifba.sipapi.Auditable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import com.ifba.sipapi.pictures.PictureModel;
 import lombok.EqualsAndHashCode;
-import com.ifba.sipapi.pictures.Model;
 import lombok.Getter;
 
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @EqualsAndHashCode
 @Entity
 @Table(name = "item")
-public class Model extends Auditable {
+public class ItemModel extends Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    @NotBlank(message = "Descrição não pode ser nula")
+    @NotBlank(message = "Descrição não pode ser vazia")
     private String description;
 
     @Column(nullable = false)
-    @NotBlank(message = "A cor não pode ser nula")
+    @NotBlank(message = "A cor não pode ser vazia")
     private String color;
 
     @Column(nullable = false)
@@ -39,6 +40,6 @@ public class Model extends Auditable {
     private Date date_return;
 
     @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<> pictures;
+    private List<PictureModel> pictures;
 
 }

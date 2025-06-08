@@ -1,18 +1,20 @@
 package com.ifba.sipapi.category;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
-public class Model {
+@Getter
+@EqualsAndHashCode
+@Entity
+@Table(name = "category")
+public class CategoryModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    @NotBlank(message = "O nome não pode ser nulo")
+    @NotBlank(message = "O nome da categoria não pode ser nulo")
     private String name;
 }

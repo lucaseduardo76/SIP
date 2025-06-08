@@ -1,4 +1,7 @@
 package com.ifba.sipapi.category;
 
-public class CategoryRepository {
-}
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface CategoryRepository extends JpaRepository<CategoryModel, Long> {}
