@@ -1,5 +1,8 @@
-package com.ifba.sipapi.user;
+package com.ifba.sipapi.user.services;
 
+import com.ifba.sipapi.user.UserModel;
+import com.ifba.sipapi.user.UserPrincipal;
+import com.ifba.sipapi.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -16,8 +19,11 @@ public class SIPUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         UserModel user = userRepository.findByEmail(email);
 
-        if (user == null) throw new UsernameNotFoundException(email);
+        if (user.getPassword() == null) {
+            throw new IllegalArgumentException("❌ user.getPassword() is null before encoding!");
+        }
 
-        return null;
+        System.out.println(user.getEmail());
+        return new UserPrincipal(user);
     }
 }
