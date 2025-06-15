@@ -1,10 +1,9 @@
-POST http://localhost:8080/user/register
+POST http://localhost:8080/auth/register
 Content-Type: application/json
-Authorization: Basic am9obi5kb2UyQGV4YW1wbGUuY29tOnBhc3N3b3JkMg==
 
 {
   "name": "John Doe",
-  "email": "john.doe3@example.com",
+  "email": "john.doe5@example.com",
   "password": "Password3@",
   "role": "COMMOM",
   "phone": "(11) 91234-5678",
