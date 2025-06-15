@@ -1,6 +1,6 @@
 package com.ifba.sipapi.config;
 
-import com.ifba.sipapi.user.services.SIPUserDetailsService;
+import com.ifba.sipapi.auth.services.SIPUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

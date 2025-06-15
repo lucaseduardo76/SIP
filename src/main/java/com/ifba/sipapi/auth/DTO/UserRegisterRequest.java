@@ -1,4 +1,4 @@
-package com.ifba.sipapi.user.DTO;
+package com.ifba.sipapi.auth.DTO;
 
 import com.ifba.sipapi.user.Role;
 import jakarta.validation.constraints.*;
@@ -19,7 +19,7 @@ public record UserRegisterRequest(
         @Email(message = "Formato de e-mail inválido")
         String email,
 
-        @NotBlank(message = "A função não deve ser vazia")
+        @NotNull(message = "A função não pode ser nula")
         Role role,
 
         @NotBlank(message = "A senha não pode ser vazia")

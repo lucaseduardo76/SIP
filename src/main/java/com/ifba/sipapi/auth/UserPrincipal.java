@@ -1,5 +1,6 @@
-package com.ifba.sipapi.user;
+package com.ifba.sipapi.auth;
 
+import com.ifba.sipapi.user.UserModel;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

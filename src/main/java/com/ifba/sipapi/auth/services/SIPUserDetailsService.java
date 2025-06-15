@@ -1,7 +1,7 @@
-package com.ifba.sipapi.user.services;
+package com.ifba.sipapi.auth.services;
 
 import com.ifba.sipapi.user.UserModel;
-import com.ifba.sipapi.user.UserPrincipal;
+import com.ifba.sipapi.auth.UserPrincipal;
 import com.ifba.sipapi.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;

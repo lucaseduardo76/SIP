@@ -5,7 +5,8 @@ Authorization: Basic am9obi5kb2UyQGV4YW1wbGUuY29tOnBhc3N3b3JkMg==
 {
   "name": "John Doe",
   "email": "john.doe3@example.com",
-  "password": "password3",
-  "role": "ADMIN",
-  "phone": "555-1234"
+  "password": "Password3@",
+  "role": "COMMOM",
+  "phone": "(11) 91234-5678",
+  "cpf": "123.456.789-00"
 }
