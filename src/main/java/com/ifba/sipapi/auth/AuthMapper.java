@@ -1,6 +1,7 @@
 package com.ifba.sipapi.auth;
 
 import com.ifba.sipapi.auth.DTO.UserRegisterRequest;
+import com.ifba.sipapi.user.Role;
 import com.ifba.sipapi.user.UserModel;
 import org.springframework.stereotype.Component;
 
@@ -11,14 +12,14 @@ public class AuthMapper {
             throw new IllegalArgumentException("Request cannot be null");
         }
 
-        UserModel user = new UserModel();
-        user.setName(request.name());
-        user.setCpf(request.cpf());
-        user.setEmail(request.email());
-        user.setRole(request.role());
-        user.setPassword(request.password());
-        user.setPhone(request.phone());
-
-        return user;
+        return new UserModel(
+                null,
+                request.name(),
+                request.cpf(),
+                request.email(),
+                request.role(),
+                request.password(),
+                request.phone()
+        );
     }
 }

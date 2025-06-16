@@ -3,16 +3,13 @@ package com.ifba.sipapi.user;
 import com.ifba.sipapi.Auditable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 @Getter
-@EqualsAndHashCode
 @Entity
-@Setter
 @ToString
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "sip_user")
 public class UserModel extends Auditable {
 

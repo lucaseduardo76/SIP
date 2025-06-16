@@ -22,20 +22,18 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JWTService jwtService;
 
-    public UserModel save(UserRegisterRequest request) {
+    public String save(UserRegisterRequest request) {
         UserModel user = AuthMapper.toUserModel(request);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-
-        return userRepository.save(user);
+        userRepository.save(user);
+        return "Verifique seu e-mail para acessar a sua conta";
     }
 
     public String verify(UserLoginRequest request) {
         try {
-            System.out.println(request.email() + " " + request.password());
-            Authentication authentication = authenticationManager.authenticate(
+            authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.email(), request.password())
             );
-
 
             return jwtService.generateToken(request.email());
 
