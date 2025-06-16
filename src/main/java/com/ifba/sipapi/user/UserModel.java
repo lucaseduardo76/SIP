@@ -1,9 +1,12 @@
 package com.ifba.sipapi.user;
 
 import com.ifba.sipapi.Auditable;
+import com.ifba.sipapi.item.ItemModel;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
+
+import java.util.List;
 
 @Getter
 @Entity
@@ -35,4 +38,7 @@ public class UserModel extends Auditable {
     private String password;
 
     private String phone;
+
+    @OneToMany(mappedBy = "owner")
+    private List<ItemModel> items;
 }
