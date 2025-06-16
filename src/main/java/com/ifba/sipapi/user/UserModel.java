@@ -1,10 +1,13 @@
 package com.ifba.sipapi.user;
 
 import com.ifba.sipapi.Auditable;
+import com.ifba.sipapi.item.ItemModel;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+
+import java.util.List;
 
 @Getter
 @EqualsAndHashCode
@@ -49,4 +52,7 @@ public class UserModel extends Auditable {
             message = "O número de telefone deve ser no formato (99) 99999-9999"
     )
     private String phone;
+
+    @OneToMany(mappedBy = "owner")
+    private List<ItemModel> items;
 }

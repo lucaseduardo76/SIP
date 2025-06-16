@@ -1,6 +1,9 @@
 package com.ifba.sipapi.item;
 
 import com.ifba.sipapi.Auditable;
+import com.ifba.sipapi.category.CategoryModel;
+import com.ifba.sipapi.region.RegionModel;
+import com.ifba.sipapi.user.UserModel;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import com.ifba.sipapi.pictures.PictureModel;
@@ -41,5 +44,18 @@ public class ItemModel extends Auditable {
 
     @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PictureModel> pictures;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "region_id", nullable = false)
+    private RegionModel region;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", nullable = false)
+    private CategoryModel category;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id", nullable = false)
+    private UserModel owner;
+
 
 }
