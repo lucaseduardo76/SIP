@@ -3,13 +3,11 @@ package com.ifba.sipapi.auth.services;
 import com.ifba.sipapi.auth.DTO.UserLoginRequest;
 import com.ifba.sipapi.auth.DTO.UserRegisterRequest;
 import com.ifba.sipapi.auth.AuthMapper;
-import com.ifba.sipapi.auth.JWTService;
 import com.ifba.sipapi.user.UserModel;
 import com.ifba.sipapi.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 

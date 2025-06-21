@@ -19,7 +19,8 @@ public class AuthMapper {
                 request.email(),
                 request.role(),
                 request.password(),
-                request.phone()
+                request.phone(),
+                null
         );
     }
 }
