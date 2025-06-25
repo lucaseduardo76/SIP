@@ -1,6 +1,6 @@
-package com.ifba.sipapi.category;
+package com.ifba.sipapi.category.domain;
 
-import com.ifba.sipapi.item.ItemModel;
+import com.ifba.sipapi.item.domain.item.Item;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.EqualsAndHashCode;
@@ -12,7 +12,7 @@ import java.util.List;
 @EqualsAndHashCode
 @Entity
 @Table(name = "category")
-public class CategoryModel {
+public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,5 +22,5 @@ public class CategoryModel {
     private String name;
 
     @OneToMany(mappedBy = "category")
-    private List<ItemModel> items;
+    private List<Item> items;
 }

@@ -1,6 +1,6 @@
-package com.ifba.sipapi.region;
+package com.ifba.sipapi.region.domain;
 
-import com.ifba.sipapi.item.ItemModel;
+import com.ifba.sipapi.item.domain.item.Item;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.EqualsAndHashCode;
@@ -22,5 +22,5 @@ public class RegionModel {
     private String name;
 
     @OneToMany(mappedBy = "region")
-    private List<ItemModel> items;
+    private List<Item> items;
 }
