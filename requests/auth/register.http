@@ -1,0 +1,11 @@
+POST http://localhost:8080/auth/register
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "email": "john.doe6@example.com",
+  "password": "Password3@",
+  "role": "COMMOM",
+  "phone": "(11) 91234-5678",
+  "cpf": "123.456.789-00"
+}
