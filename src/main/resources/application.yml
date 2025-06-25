@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: sip-api
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/sip
+    username: sip-root
+    password: sip2025
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update

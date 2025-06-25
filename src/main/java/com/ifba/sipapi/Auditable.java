@@ -25,6 +25,5 @@ public abstract class Auditable {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
-
 }
 
