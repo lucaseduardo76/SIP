@@ -1,49 +1,44 @@
-package com.ifba.sipapi.item;
+package com.ifba.sipapi.item.domain.item;
 
 import com.ifba.sipapi.Auditable;
-import com.ifba.sipapi.category.CategoryModel;
-import com.ifba.sipapi.region.RegionModel;
-import com.ifba.sipapi.user.UserModel;
+import com.ifba.sipapi.category.domain.Category;
+import com.ifba.sipapi.item.domain.picture.Picture;
+import com.ifba.sipapi.region.domain.RegionModel;
+import com.ifba.sipapi.user.domain.Member;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import com.ifba.sipapi.pictures.PictureModel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 @Getter
 @EqualsAndHashCode
 @Entity
 @Table(name = "item")
-public class ItemModel extends Auditable {
+public class Item extends Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    @NotBlank(message = "Descrição não pode ser vazia")
     private String description;
 
     @Column(nullable = false)
-    @NotBlank(message = "A cor não pode ser vazia")
     private String color;
 
     @Column(nullable = false)
-    @NotBlank(message = "A data em que o item foi achado deve ser preenchida")
-    private Date finding_date;
+    private LocalDate finding_date;
 
     @Column(nullable = false)
-    @NotBlank(message = "O status deve ser preenchido com os valores: DISPONIBLE | CLAIMED | CHARITY")
     private Status status;
 
     private DayPeriod day_period;
 
-    private Date date_return;
+    private LocalDate date_return;
 
     @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PictureModel> pictures;
+    private List<Picture> pictures;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "region_id", nullable = false)
@@ -51,11 +46,11 @@ public class ItemModel extends Auditable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
-    private CategoryModel category;
+    private Category category;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
-    private UserModel owner;
+    private Member owner;
 
 
 }

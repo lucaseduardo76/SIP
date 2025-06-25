@@ -1,6 +1,6 @@
-package com.ifba.sipapi.pictures;
+package com.ifba.sipapi.item.domain.picture;
 
-import com.ifba.sipapi.item.ItemModel;
+import com.ifba.sipapi.item.domain.item.Item;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.EqualsAndHashCode;
@@ -10,7 +10,7 @@ import lombok.Getter;
 @EqualsAndHashCode
 @Entity
 @Table(name = "picture")
-public class PictureModel {
+public class Picture {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -21,5 +21,5 @@ public class PictureModel {
 
     @ManyToOne
     @JoinColumn(name = "item_id", nullable = false)
-    private ItemModel item;
+    private Item item;
 }
