@@ -18,6 +18,7 @@ spring:
     bootstrap-servers: localhost:9092
     consumer:
       group-id: email-verification-sender
+      topic: email-verification
 
   mail:
     host: smtp.gmail.com

@@ -9,14 +9,14 @@ import org.springframework.stereotype.Service;
 @Service
 @Log4j2
 @RequiredArgsConstructor
-public class KafkaConsumerEmailVerificationService {
+public class KafkaConsumerEmailVerificationService implements KafkaConsumerEmail {
 
     private final EmailService emailService;
 
     @KafkaListener(
-            topics = "email-verification",
-            groupId = "email-verification-sender",
-            containerFactory = "emailVerificationKafkaListenerContainerFactory"
+        topics  = "${spring.kafka.consumer.topic}",
+        groupId = "${spring.kafka.consumer.group-id}",
+        containerFactory = "emailVerificationKafkaListenerContainerFactory"
     )
     public void listen(EmailVerificationDTO payload) {
         log.info("[start] KafkaConsumerEmailVerification - listen");
