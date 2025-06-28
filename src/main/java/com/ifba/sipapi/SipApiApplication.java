@@ -1,7 +1,7 @@
 package com.ifba.sipapi;
 
-import com.ifba.sipapi.mail.domain.EmailVerificationPayload;
-import com.ifba.sipapi.mail.infra.KafkaEmailProducer;
+import com.ifba.sipapi.mail.domain.EmailVerificationDTO;
+import com.ifba.sipapi.mail.infra.KafkaApplicationEmailProducer;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -14,19 +14,17 @@ public class SipApiApplication {
         SpringApplication.run(SipApiApplication.class, args);
     }
 
-    /*
     @Bean
-    public CommandLineRunner testKafkaProducer(KafkaEmailProducer kafkaEmailProducer) {
+    public CommandLineRunner testKafkaProducer(KafkaApplicationEmailProducer kafkaApplicationEmailProducer) {
         return args -> {
-            EmailVerificationPayload payload = EmailVerificationPayload.builder()
+            EmailVerificationDTO payload = EmailVerificationDTO.builder()
                     .to("contatopedrolucascg@gmail.com")
                     .subject("Verify your email")
                     .verificationToken("123456")
                     .build();
 
-            kafkaEmailProducer.publishEmailVerification(payload);
+            kafkaApplicationEmailProducer.publishEmailVerification(payload);
             System.out.println("✅ Test message sent to Kafka");
         };
     }
-    */
 }
