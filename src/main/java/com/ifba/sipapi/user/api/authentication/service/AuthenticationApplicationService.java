@@ -49,16 +49,15 @@ public class AuthenticationApplicationService implements AuthenticationService {
         log.info("[start] AuthenticationApplicationService - login");
         var usernamePassword = new UsernamePasswordAuthenticationToken(userLoginDto.getEmail().toLowerCase(), userLoginDto.getPassword());
         try {
-            System.out.println("Entrei aqui");
             var auth = this.authenticationManager.authenticate(usernamePassword);
-            System.out.println("Entrei aqui 2");
             var token = tokenService.generateToken((User) auth.getPrincipal());
-            System.out.println("Entrei aqui 2");
+            checkLoginAttempts(LoginType.SUCCESS, userLoginDto.getEmail());
             log.debug("[finish] AuthenticationApplicationService - authenticate");
             return new AuthenticationResponseDto(TokenType.BEARER, LocalDateTime.now().plusHours(expiration), token);
         } catch (Exception e) {
             log.error("[error] AuthenticationApplicationService - authenticate - {}", e.getMessage());
-//            throw APIException.build(HttpStatus.FORBIDDEN, mensagemPorTipoErro(usuarioAdmLoginDto.getUsername()));
+//            throw APIException.build(HttpStatus.FORBIDDEN, mensagemPorTipoErro(userLoginDto.getEmail()));
+            checkLoginAttempts(LoginType.FAILED, userLoginDto.getEmail());
             throw new RuntimeException("AGUARDANDO EXCEPTIONS - AUTHENTICATIONSERVICE");
         }
     }
@@ -66,11 +65,22 @@ public class AuthenticationApplicationService implements AuthenticationService {
     private String mensagemPorTipoErro(String username) {
         return userRepository.findByEmail(username)
                 .map(usuario -> {
-                    if (usuario.getStatusMember() == StatusMember.ACTIVE) {
+                    if(usuario.getStatusMember() == StatusMember.NOT_VERIFIED){
+                        return "Usuario ainda não foi verificado, procure o codigo no seu email e faça a verificação.";
+                    }else if (usuario.getStatusMember() == StatusMember.ACTIVE) {
                         return "Usuário ou senha inválidos. Verifique e tente novamente.";
                     }
-                    return "Usuário bloqueado por excesso de tentativas. Entre em contato com o suporte.";
+                    return "Usuário bloqueado por excesso de tentativas. Faça a recuperação da conta.";
                 })
                 .orElse("Usuário não encontrado. Verifique e tente novamente.");
+    }
+
+    private void checkLoginAttempts(LoginType loginType, String email) {
+        log.info("[start] AuthenticationApplicationService - checkLoginAttempts");
+        userRepository.findByEmail(email).ifPresent(user -> {
+                    user.checkLoginType(loginType);
+                    userRepository.save(user);
+                });
+        log.debug("[finish] AuthenticationApplicationService - checkLoginAttempts");
     }
 }

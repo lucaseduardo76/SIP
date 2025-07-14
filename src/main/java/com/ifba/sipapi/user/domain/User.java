@@ -2,6 +2,7 @@ package com.ifba.sipapi.user.domain;
 
 import com.ifba.sipapi.Auditable;
 import com.ifba.sipapi.item.domain.item.Item;
+import com.ifba.sipapi.user.api.authentication.service.LoginType;
 import com.ifba.sipapi.user.dto.UserCommomRegisterDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -43,6 +44,9 @@ public class User extends Auditable implements UserDetails {
     private StatusMember statusMember;
 
     @Column(nullable = false)
+    private Integer failedLoginAttempts;
+
+    @Column(nullable = false)
     private String password;
 
     @Column(nullable = false)
@@ -59,6 +63,7 @@ public class User extends Auditable implements UserDetails {
         this.phone = userCommomRegisterDto.getPhone();
         this.role = Role.COMMOM;
         this.statusMember = StatusMember.NOT_VERIFIED;
+        this.failedLoginAttempts = 0;
     }
 
     @Override
@@ -95,5 +100,37 @@ public class User extends Auditable implements UserDetails {
         return email;
     }
 
+    @Override
+    public boolean isEnabled() {
+        return this.statusMember == StatusMember.ACTIVE;
+    }
+
+    public void checkLoginType(LoginType loginType) {
+        if (loginType == LoginType.FAILED) {
+            incrementFailedLoginAttempts();
+        } else {
+            resetFailedLoginAttempts();
+        }
+
+        if (hasExceededLoginAttempts()) {
+            blockUser();
+        }
+    }
+
+    private void incrementFailedLoginAttempts() {
+        this.failedLoginAttempts++;
+    }
+
+    private void resetFailedLoginAttempts() {
+        this.failedLoginAttempts = 0;
+    }
+
+    private boolean hasExceededLoginAttempts() {
+        return this.failedLoginAttempts >= 5;
+    }
+
+    private void blockUser() {
+        this.statusMember = StatusMember.BLOCKED;
+    }
 
 }
