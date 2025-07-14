@@ -7,9 +7,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
-@ResponseStatus
-@RequestMapping("/authentication")
+@RestController
 @RequiredArgsConstructor
 @Log4j2
 public class AuthenticationApplicationApi implements AuthenticationApi {
@@ -25,6 +25,9 @@ public class AuthenticationApplicationApi implements AuthenticationApi {
 
     @Override
     public AuthenticationResponseDto login(UserLoginDto userLoginDto) {
-        return null;
+        log.info("[start] AuthenticationApplicationApi - login");
+        AuthenticationResponseDto authenticationResponse = authenticationService.login(userLoginDto);
+        log.debug("[finish] AuthenticationApplicationApi - login");
+        return authenticationResponse;
     }
 }

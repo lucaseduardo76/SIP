@@ -3,6 +3,7 @@ package com.ifba.sipapi.user.dto;
 import jakarta.validation.constraints.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import org.hibernate.validator.constraints.br.CPF;
 
 @Getter
 @EqualsAndHashCode
@@ -12,7 +13,7 @@ public class UserCommomRegisterDto {
     private String name;
 
     @NotBlank(message = "O CPF é obrigatório")
-    @Pattern(regexp = "\\d{11}", message = "O CPF deve conter exatamente 11 dígitos numéricos")
+    @CPF
     private String cpf;
 
     @NotBlank(message = "O e-mail é obrigatório")
@@ -31,4 +32,8 @@ public class UserCommomRegisterDto {
     @NotBlank(message = "O telefone é obrigatório")
     @Pattern(regexp = "\\d{10,11}", message = "O telefone deve conter 10 ou 11 dígitos numéricos")
     private String phone;
+
+    public void updateHasedPassword(String hashedPassword) {
+        this.password = hashedPassword;
+    }
 }
