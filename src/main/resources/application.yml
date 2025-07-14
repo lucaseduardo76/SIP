@@ -12,3 +12,10 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
+
+
+security:
+  token:
+    jwt:
+      expiration: ${SECURITY_JWT_EXPIRATION_EM_HORAS:8}
+      secret: ${SECURITY_JWT_SECRET:1234567abcdeABCDE}
