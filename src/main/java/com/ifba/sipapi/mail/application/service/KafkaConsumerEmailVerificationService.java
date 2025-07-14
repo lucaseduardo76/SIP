@@ -14,9 +14,9 @@ public class KafkaConsumerEmailVerificationService implements KafkaConsumerEmail
     private final EmailService emailService;
 
     @KafkaListener(
-        topics  = "${spring.kafka.consumer.topic}",
-        groupId = "${spring.kafka.consumer.group-id}",
-        containerFactory = "emailVerificationKafkaListenerContainerFactory"
+        topics  = "${spring.kafka.consumer.email-verification.topic}",
+        groupId = "${spring.kafka.consumer.email-verification.group-id}",
+        containerFactory = "${spring.kafka.consumer.email-verification.factory}"
     )
     public void listen(EmailVerificationDTO payload) {
         log.info("[start] KafkaConsumerEmailVerification - listen");

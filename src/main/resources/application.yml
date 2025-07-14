@@ -17,8 +17,10 @@ spring:
   kafka:
     bootstrap-servers: localhost:9092
     consumer:
-      group-id: email-verification-sender
-      topic: email-verification
+      email-verification:
+        group-id: email-verification-sender
+        topic: email-verification
+        factory: emailVerificationKafkaListenerContainerFactory
 
   mail:
     host: smtp.gmail.com
