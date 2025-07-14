@@ -4,7 +4,7 @@ import com.ifba.sipapi.Auditable;
 import com.ifba.sipapi.category.domain.Category;
 import com.ifba.sipapi.item.domain.picture.Picture;
 import com.ifba.sipapi.region.domain.RegionModel;
-import com.ifba.sipapi.user.domain.Member;
+import com.ifba.sipapi.user.domain.User;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -50,7 +50,7 @@ public class Item extends Auditable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
-    private Member owner;
+    private User owner;
 
 
 }

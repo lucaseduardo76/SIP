@@ -18,8 +18,8 @@ services:
     container_name: postgres-db
     restart: always
     environment:
-      POSTGRES_USER: sip-root
-      POSTGRES_PASSWORD: sip2025
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
       POSTGRES_DB: sip
     ports:
       - "5432:5432"

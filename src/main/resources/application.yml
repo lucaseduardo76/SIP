@@ -3,12 +3,24 @@ spring:
     name: sip-api
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/sip
-    username: sip-root
-    password: sip2025
+    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/sip}
+    username: ${DATASOURCE_USER:postgres}
+    password: ${DATASOURCE_PASS:postgres}
     driver-class-name: org.postgresql.Driver
-
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      poolName: SpringBootJPAHikariCP
+      minimumIdle: 15
+      maximumPoolSize: 50
+      connectionTimeout: 30000
+      idleTimeout: 30000
   jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
+
+
+security:
+  token:
+    jwt:
+      expiration: ${SECURITY_JWT_EXPIRATION_EM_HORAS:8}
+      secret: ${SECURITY_JWT_SECRET:1234567abcdeABCDE}
