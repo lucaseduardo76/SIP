@@ -5,8 +5,8 @@ spring:
 
   datasource:
     url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/sip}
-    username: ${DATASOURCE_USER}
-    password: ${DATASOURCE_PASS}
+    username: ${DATASOURCE_USER:postgres}
+    password: ${DATASOURCE_PASS:postgres}
     driver-class-name: org.postgresql.Driver
     type: com.zaxxer.hikari.HikariDataSource
     hikari:

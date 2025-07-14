@@ -18,4 +18,7 @@ public interface AuthenticationApi {
     @ResponseStatus(HttpStatus.OK)
     AuthenticationResponseDto login(@RequestBody @Valid UserLoginDto userLoginDto);
 
+    @PostMapping("/verify-account")
+    @ResponseStatus(HttpStatus.OK)
+    public void verify(@RequestParam String token, @RequestParam String verificationCode);
 }

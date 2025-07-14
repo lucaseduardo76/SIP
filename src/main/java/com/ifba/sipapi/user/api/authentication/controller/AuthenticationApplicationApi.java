@@ -30,4 +30,11 @@ public class AuthenticationApplicationApi implements AuthenticationApi {
         log.debug("[finish] AuthenticationApplicationApi - login");
         return authenticationResponse;
     }
+
+    @Override
+    public void verify(String token, String verificationCode) {
+        log.info("[start] AuthenticationApplicationApi - verify");
+        authenticationService.verifyAccount(token, verificationCode);
+        log.debug("[finish] AuthenticationApplicationApi - verify");
+    }
 }

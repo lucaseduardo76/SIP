@@ -1,5 +1,8 @@
 package com.ifba.sipapi.mail.application.service;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.ifba.sipapi.util.JwtUtils;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +15,9 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+import java.time.Instant;
+import java.util.Date;
+
 @Service
 @Log4j2
 @RequiredArgsConstructor
@@ -19,14 +25,15 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
     private final TemplateEngine templateEngine;
+    private JwtUtils jwtUtils;
 
     @Value("${spring.application.baseUrl}")
     private String baseUrl;
 
-    public void sendVerificationEmail(String to, String subject, String token) {
+    public void sendVerificationEmail(String to, String subject) {
         log.info("[start] EmailService - sendVerificationEmail");
         Context context = new Context();
-        context.setVariable("verificationLink", baseUrl + "/verify?token=" + token);
+        context.setVariable("verificationLink", baseUrl + "/verify?token=" + jwtUtils.generateToken(to));
 
         String body = templateEngine.process("email_verification", context);
 
@@ -53,4 +60,5 @@ public class EmailService {
         }
         log.debug("[finish] EmailService - sendHtmlEmail");
     }
+
 }
