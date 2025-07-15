@@ -13,18 +13,4 @@ public class SipApiApplication {
     public static void main(String[] args) {
         SpringApplication.run(SipApiApplication.class, args);
     }
-
-    @Bean
-    public CommandLineRunner testKafkaProducer(KafkaApplicationEmailProducer kafkaApplicationEmailProducer) {
-        return args -> {
-            EmailVerificationDTO payload = EmailVerificationDTO.builder()
-                    .to("contatopedrolucascg@gmail.com")
-                    .subject("Verify your email")
-                    .verificationToken("123456")
-                    .build();
-
-            kafkaApplicationEmailProducer.publishEmailVerification(payload);
-            System.out.println("✅ Test message sent to Kafka");
-        };
-    }
 }
