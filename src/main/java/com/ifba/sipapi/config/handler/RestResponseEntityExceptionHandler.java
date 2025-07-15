@@ -1,6 +1,7 @@
 package com.ifba.sipapi.config.handler;
 
 import lombok.extern.log4j.Log4j2;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -48,6 +49,14 @@ public class RestResponseEntityExceptionHandler {
 		log.error("Exception: " + ex.getMessage());
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorApiResponse.builder().description("BAD REQUEST!")
 						.message("REVISE OS DADOS OU INFORME O ADMINISTRADOR!").build());
+	}
+
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	@ExceptionHandler(DataIntegrityViolationException.class)
+	public ResponseEntity<ErrorApiResponse> handleMethodArgumentTypeMismatchException(DataIntegrityViolationException ex) {
+		log.error("Exception: " + ex.getMessage());
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorApiResponse.builder().description("BAD REQUEST!")
+				.message("REVISE OS DADOS OU INFORME O ADMINISTRADOR!").build());
 	}
 
 }

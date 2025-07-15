@@ -36,8 +36,19 @@ public class AuthenticationApplicationService implements AuthenticationService {
     public void createNewUser(UserCommomRegisterDto userCommomRegisterDto) {
         log.info("[start] AuthenticationApplicationService - createNewUser");
         generatePasswordHash(userCommomRegisterDto);
+        handleNewUserValidations(userCommomRegisterDto);
         userRepository.save(new User(userCommomRegisterDto));
         log.debug("[finish] AuthenticationApplicationService - createNewUser");
+    }
+
+    private void handleNewUserValidations(UserCommomRegisterDto dto) {
+        if (userRepository.existsByEmail(dto.getEmail())) {
+            throw APIException.build(HttpStatus.BAD_REQUEST, "E-mail já está em uso. Por favor, utilize outro.");
+        }
+
+        if (userRepository.existsByCpf(dto.getCpf())) {
+            throw APIException.build(HttpStatus.BAD_REQUEST, "CPF já está em uso. Por favor, verifique os dados informados.");
+        }
     }
 
     private void generatePasswordHash(UserCommomRegisterDto userCommomRegisterDto) {
