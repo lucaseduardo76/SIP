@@ -32,9 +32,9 @@ public class AuthenticationApplicationApi implements AuthenticationApi {
     }
 
     @Override
-    public void verify(String token, String verificationCode) {
+    public void verify(String token) {
         log.info("[start] AuthenticationApplicationApi - verify");
-        authenticationService.verifyAccount(token, verificationCode);
+        authenticationService.verifyAccount(token);
         log.debug("[finish] AuthenticationApplicationApi - verify");
     }
 }

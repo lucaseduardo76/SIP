@@ -10,6 +10,4 @@ public class EmailVerificationDTO implements EmailDataPattern {
 
     @Builder.Default
     private final String subject = "Verificação de e-mail SIP";
-
-    private final String verificationToken;
 }

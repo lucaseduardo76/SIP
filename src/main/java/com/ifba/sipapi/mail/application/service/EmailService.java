@@ -1,8 +1,9 @@
 package com.ifba.sipapi.mail.application.service;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
-import com.ifba.sipapi.util.JwtUtils;
+import com.ifba.sipapi.config.security.TokenService;
+import com.ifba.sipapi.user.domain.User;
+import com.ifba.sipapi.user.dto.UserAccountVerificationPayloadDto;
+import com.ifba.sipapi.user.infra.UserRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import org.thymeleaf.context.Context;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.Optional;
 
 @Service
 @Log4j2
@@ -25,19 +27,27 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
     private final TemplateEngine templateEngine;
-    private JwtUtils jwtUtils;
+    private final TokenService tokenService;
+    private final UserRepository userRepository;
 
     @Value("${spring.application.baseUrl}")
     private String baseUrl;
 
     public void sendVerificationEmail(String to, String subject) {
         log.info("[start] EmailService - sendVerificationEmail");
+
+        User user = userRepository.findByEmail(to)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        String token = tokenService.generateToken(new UserAccountVerificationPayloadDto(to, user.getAccountVerificationCode()));
+
         Context context = new Context();
-        context.setVariable("verificationLink", baseUrl + "/verify?token=" + jwtUtils.generateToken(to));
+        context.setVariable("verificationLink", baseUrl + "/verify?token=" + token);
 
         String body = templateEngine.process("email_verification", context);
 
         sendHtmlEmail(to, subject, body);
+
         log.debug("[finish] EmailService - sendVerificationEmail");
     }
 
