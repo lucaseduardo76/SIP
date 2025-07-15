@@ -42,7 +42,7 @@ public class EmailService {
         String token = tokenService.generateToken(new UserAccountVerificationPayloadDto(to, user.getAccountVerificationCode()));
 
         Context context = new Context();
-        context.setVariable("verificationLink", baseUrl + "/verify?token=" + token);
+        context.setVariable("verificationLink", baseUrl + "/authentication/verify-account?token=" + token);
 
         String body = templateEngine.process("email_verification", context);
 
