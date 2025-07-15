@@ -1,6 +1,7 @@
 package com.ifba.sipapi.user.api.authentication.service;
 
 
+import com.ifba.sipapi.config.handler.APIException;
 import com.ifba.sipapi.user.infra.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,13 +18,8 @@ public class AuthozirationApplicationService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-//        return userRepository.findByEmail(email)
-//                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuario não encontrado!"));
-
-
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuario não encontrado!"));
-
+                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuario não encontrado!"));
 
     }
 }
