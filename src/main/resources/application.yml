@@ -1,4 +1,6 @@
 spring:
+  profiles:
+    active: ${APP_PROFILE:local}
   application:
     name: sip-api
 
@@ -24,3 +26,11 @@ security:
     jwt:
       expiration: ${SECURITY_JWT_EXPIRATION_EM_HORAS:8}
       secret: ${SECURITY_JWT_SECRET:1234567abcdeABCDE}
+
+
+
+spring doc:
+  swagger-ui:
+    enabled: false
+  api-docs:
+    enabled: false
