@@ -6,11 +6,13 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.ifba.sipapi.config.handler.APIException;
 import com.ifba.sipapi.user.domain.User;
 import com.ifba.sipapi.user.infra.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -40,9 +42,7 @@ public class TokenService {
                     .withExpiresAt(genarateExpirationTime())
                     .sign(algorithm);
         }catch (JWTCreationException exception) {
-//            throw APIException.build(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao gerar token" + exception.getMessage());
-            log.error("Aguardando implementação exception  - TOKENSERVICE");
-            throw new RuntimeException("Aguardando implementação exception  - TOKENSERVICE");
+            throw APIException.build(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao gerar token" + exception.getMessage());
         }
     }
 
