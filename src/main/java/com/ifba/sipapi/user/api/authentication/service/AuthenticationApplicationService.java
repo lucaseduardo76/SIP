@@ -1,5 +1,6 @@
 package com.ifba.sipapi.user.api.authentication.service;
 
+import com.ifba.sipapi.config.handler.APIException;
 import com.ifba.sipapi.config.security.TokenService;
 import com.ifba.sipapi.user.api.authentication.controller.AuthenticationResponseDto;
 import com.ifba.sipapi.user.api.authentication.controller.TokenType;
@@ -11,6 +12,7 @@ import com.ifba.sipapi.user.infra.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -56,24 +58,28 @@ public class AuthenticationApplicationService implements AuthenticationService {
             return new AuthenticationResponseDto(TokenType.BEARER, LocalDateTime.now().plusHours(expiration), token);
         } catch (Exception e) {
             log.error("[error] AuthenticationApplicationService - authenticate - {}", e.getMessage());
-//            throw APIException.build(HttpStatus.FORBIDDEN, mensagemPorTipoErro(userLoginDto.getEmail()));
             checkLoginAttempts(LoginType.FAILED, userLoginDto.getEmail());
-            throw new RuntimeException("AGUARDANDO EXCEPTIONS - AUTHENTICATIONSERVICE");
+            throw APIException.build(HttpStatus.FORBIDDEN, handleMessageError(userLoginDto.getEmail()));
         }
     }
 
-    private String mensagemPorTipoErro(String username) {
+    private String handleMessageError(String username) {
         return userRepository.findByEmail(username)
-                .map(usuario -> {
-                    if(usuario.getStatusMember() == StatusMember.NOT_VERIFIED){
-                        return "Usuario ainda não foi verificado, procure o codigo no seu email e faça a verificação.";
-                    }else if (usuario.getStatusMember() == StatusMember.ACTIVE) {
-                        return "Usuário ou senha inválidos. Verifique e tente novamente.";
-                    }
-                    return "Usuário bloqueado por excesso de tentativas. Faça a recuperação da conta.";
-                })
+                .map(this::buildErrorMessageForUser)
                 .orElse("Usuário não encontrado. Verifique e tente novamente.");
     }
+
+    private String buildErrorMessageForUser(User user) {
+        StatusMember status = user.getStatusMember();
+
+        return switch (status) {
+            case NOT_VERIFIED -> "Usuário ainda não foi verificado. Procure o código no seu email e faça a verificação.";
+            case ACTIVE -> "Usuário ou senha inválidos. Verifique e tente novamente.";
+            case BLOCKED -> "Usuário bloqueado por excesso de tentativas. Faça a recuperação da conta.";
+            default -> "Status do usuário inválido ou desconhecido.";
+        };
+    }
+
 
     private void checkLoginAttempts(LoginType loginType, String email) {
         log.info("[start] AuthenticationApplicationService - checkLoginAttempts");

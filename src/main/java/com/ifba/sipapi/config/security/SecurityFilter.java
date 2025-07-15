@@ -1,6 +1,7 @@
 package com.ifba.sipapi.config.security;
 
 
+import com.ifba.sipapi.config.handler.ErrorApiResponse;
 import com.ifba.sipapi.user.infra.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -44,18 +45,15 @@ public class SecurityFilter extends OncePerRequestFilter {
             }
             filterChain.doFilter(request, response);
         } catch (RuntimeException e) {
-//            response.setStatus(HttpServletResponse.SC_FORBIDDEN);response.setContentType("application/json");
-//            var errorResponse = ErrorApiResponse.builder()
-//                    .message("Usuário não encontrado ou token inválido.")
-//                    .description("Faça login novamente ou busque ajuda do suporte.")
-//                    .build();
-//            var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-//            var json = mapper.writeValueAsString(errorResponse);
-//
-//            response.getWriter().write(json);
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);response.setContentType("application/json");
+            var errorResponse = ErrorApiResponse.builder()
+                    .message("Usuário não encontrado ou token inválido.")
+                    .description("Faça login novamente ou busque ajuda do suporte.")
+                    .build();
+            var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            var json = mapper.writeValueAsString(errorResponse);
 
-            log.error("Aguardando criação das exceptions...");
-
+            response.getWriter().write(json);
         }
     }
 
