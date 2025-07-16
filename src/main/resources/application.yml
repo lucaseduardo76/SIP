@@ -3,6 +3,7 @@ spring:
     active: ${APP_PROFILE:local}
   application:
     name: sip-api
+    baseUrl: http://localhost:8080
 
   datasource:
     url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/sip}
@@ -20,6 +21,26 @@ spring:
     hibernate:
       ddl-auto: update
 
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      email-verification:
+        group-id: email-verification-sender
+        topic: email-verification
+        factory: emailVerificationKafkaListenerContainerFactory
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${EMAIL_USERNAME:example@sip.com}
+    password: ${EMAIL_PASSWORD:12345678}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+    default-encoding: UTF-8
 
 security:
   token:
