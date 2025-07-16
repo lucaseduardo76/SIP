@@ -48,9 +48,8 @@ public class AuthenticationApplicationService implements AuthenticationService {
     }
 
     @Override
-    public void verifyAccount(String token) {
-        log.info("[start] AuthenticationApplicationService - verifyAccount");
-
+    public void verifyAccountWithToken(String token) {
+        log.info("[start] AuthenticationApplicationService - verifyAccountWithToken");
         String json = tokenService.validateToken(token);
 
         UserAccountVerificationPayloadDto payload;
@@ -59,11 +58,18 @@ public class AuthenticationApplicationService implements AuthenticationService {
         } catch (Exception e) {
             throw new RuntimeException("Token inválido ou malformado", e);
         }
+        this.verifyAccount(payload);
+        log.debug("[finish] AuthenticationApplicationService - verifyAccountWithToken");
+    }
 
-        User user = userRepository.findByEmail(payload.getEmail())
+    @Override
+    public void verifyAccount(UserAccountVerificationPayloadDto userAccountVerificationPayloadDto) {
+        log.info("[start] AuthenticationApplicationService - verifyAccount");
+
+        User user = userRepository.findByEmail(userAccountVerificationPayloadDto.getEmail())
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
-        if (!payload.getVerificationCode().equals(user.getAccountVerificationCode())) {
+        if (!userAccountVerificationPayloadDto.getVerificationCode().equals(user.getAccountVerificationCode())) {
             throw new RuntimeException("Código de verificação inválido");
         }
 

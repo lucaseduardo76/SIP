@@ -39,10 +39,12 @@ public class EmailService {
         User user = userRepository.findByEmail(to)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
-        String token = tokenService.generateToken(new UserAccountVerificationPayloadDto(to, user.getAccountVerificationCode()));
+        String verificationCode = user.getAccountVerificationCode();
+        String token = tokenService.generateToken(new UserAccountVerificationPayloadDto(to, verificationCode));
 
         Context context = new Context();
-        context.setVariable("verificationLink", baseUrl + "/authentication/verify-account?token=" + token);
+        context.setVariable("verificationLink", baseUrl + "/authentication/verify-account/token/" + token);
+        context.setVariable("verificationCode", verificationCode);
 
         String body = templateEngine.process("email_verification", context);
 

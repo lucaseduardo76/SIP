@@ -1,6 +1,7 @@
 package com.ifba.sipapi.user.api.authentication.controller;
 
 import com.ifba.sipapi.user.api.authentication.service.AuthenticationService;
+import com.ifba.sipapi.user.dto.UserAccountVerificationPayloadDto;
 import com.ifba.sipapi.user.dto.UserLoginDto;
 import com.ifba.sipapi.user.dto.UserCommomRegisterDto;
 import lombok.RequiredArgsConstructor;
@@ -32,9 +33,15 @@ public class AuthenticationApplicationApi implements AuthenticationApi {
     }
 
     @Override
-    public void verify(String token) {
+    public void verifyWithToken(String token) {
+        log.info("[start] AuthenticationApplicationApi - verifyWithToken");
+        authenticationService.verifyAccountWithToken(token);
+        log.debug("[finish] AuthenticationApplicationApi - verifyWithToken");
+    }
+
+    public void verify(UserAccountVerificationPayloadDto userAccountVerificationPayloadDto){
         log.info("[start] AuthenticationApplicationApi - verify");
-        authenticationService.verifyAccount(token);
+        authenticationService.verifyAccount(userAccountVerificationPayloadDto);
         log.debug("[finish] AuthenticationApplicationApi - verify");
     }
 }

@@ -1,5 +1,6 @@
 package com.ifba.sipapi.user.api.authentication.controller;
 
+import com.ifba.sipapi.user.dto.UserAccountVerificationPayloadDto;
 import com.ifba.sipapi.user.dto.UserLoginDto;
 import com.ifba.sipapi.user.dto.UserCommomRegisterDto;
 import jakarta.validation.Valid;
@@ -20,5 +21,9 @@ public interface AuthenticationApi {
 
     @PostMapping("/verify-account/{token}")
     @ResponseStatus(HttpStatus.OK)
-    void verify(@PathVariable String token);
+    void verifyWithToken(@PathVariable String token);
+
+    @PostMapping("/verify-account")
+    @ResponseStatus(HttpStatus.OK)
+    void verify(@RequestBody @Valid UserAccountVerificationPayloadDto userAccountVerificationPayloadDto);
 }
