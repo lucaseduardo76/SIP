@@ -64,8 +64,8 @@ public class RestResponseEntityExceptionHandler {
 	@ExceptionHandler(NoResourceFoundException.class)
 	public ResponseEntity<ErrorApiResponse> handleNoResourceFoundExceptionException(NoResourceFoundException ex) {
 		log.error("Exception: " + ex.getMessage());
-		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorApiResponse.builder().description("BAD REQUEST!")
-				.message("REVISE OS DADOS OU INFORME O ADMINISTRADOR!").build());
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorApiResponse.builder().description("NOT FOUND!")
+				.message("O RECURSO SOLICITADO NÃO FOI ENCONTRADO!").build());
 	}
 
 }
