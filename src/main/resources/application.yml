@@ -27,9 +27,11 @@ security:
       expiration: ${SECURITY_JWT_EXPIRATION_EM_HORAS:8}
       secret: ${SECURITY_JWT_SECRET:1234567abcdeABCDE}
 
+server:
+  servlet:
+    context-path: /sip/api
 
-
-spring doc:
+springdoc:
   swagger-ui:
     enabled: false
   api-docs:
