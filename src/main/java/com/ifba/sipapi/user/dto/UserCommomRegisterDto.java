@@ -8,7 +8,7 @@ import org.hibernate.validator.constraints.br.CPF;
 
 @Getter
 @EqualsAndHashCode
-public class UserCommomRegisterDto {
+public class  UserCommomRegisterDto {
     @NotBlank(message = "O nome é obrigatório")
     @Size(min = 2, max = 100, message = "O nome deve ter entre 2 e 100 caracteres")
     @Schema(example = "João da Silva")

@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import com.ifba.sipapi.util.GenerateNumber;
 
 import java.util.*;
 
@@ -52,6 +53,8 @@ public class User extends Auditable implements UserDetails {
     @Column(nullable = false)
     private String phone;
 
+    private String accountVerificationCode;
+
     @OneToMany(mappedBy = "owner")
     private List<Item> items;
 
@@ -64,6 +67,7 @@ public class User extends Auditable implements UserDetails {
         this.role = Role.COMMOM;
         this.statusMember = StatusMember.NOT_VERIFIED;
         this.failedLoginAttempts = 0;
+        this.accountVerificationCode = GenerateNumber.generateVerificationCode();
     }
 
     @Override
@@ -115,6 +119,10 @@ public class User extends Auditable implements UserDetails {
         if (hasExceededLoginAttempts()) {
             blockUser();
         }
+    }
+
+    public void setAsVerified() {
+        this.statusMember = StatusMember.ACTIVE;
     }
 
     private void incrementFailedLoginAttempts() {

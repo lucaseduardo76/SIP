@@ -20,7 +20,7 @@ public class KafkaConsumerEmailVerificationService implements KafkaConsumerEmail
     )
     public void listen(EmailVerificationDTO payload) {
         log.info("[start] KafkaConsumerEmailVerification - listen");
-        emailService.sendVerificationEmail(payload.getTo(), payload.getSubject(), payload.getVerificationToken());
+        emailService.sendVerificationEmail(payload.getTo(), payload.getSubject());
         log.debug("[email-send] E-Mail sent to - {}", payload.getTo());
         log.debug("[finish] KafkaConsumerEmailVerification - listen");
     }

@@ -1,14 +1,19 @@
 package com.ifba.sipapi.user.api.authentication.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ifba.sipapi.config.handler.APIException;
 import com.ifba.sipapi.config.security.TokenService;
+import com.ifba.sipapi.mail.domain.EmailVerificationDTO;
+import com.ifba.sipapi.mail.infra.KafkaApplicationEmailProducer;
 import com.ifba.sipapi.user.api.authentication.controller.AuthenticationResponseDto;
 import com.ifba.sipapi.user.api.authentication.controller.TokenType;
 import com.ifba.sipapi.user.domain.StatusMember;
 import com.ifba.sipapi.user.domain.User;
+import com.ifba.sipapi.user.dto.UserAccountVerificationPayloadDto;
 import com.ifba.sipapi.user.dto.UserCommomRegisterDto;
 import com.ifba.sipapi.user.dto.UserLoginDto;
 import com.ifba.sipapi.user.infra.UserRepository;
+import com.ifba.sipapi.util.GenerateNumber;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,7 +22,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 
 @Service
@@ -28,6 +32,8 @@ public class AuthenticationApplicationService implements AuthenticationService {
     private final TokenService tokenService;
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
+    private final ObjectMapper objectMapper;
+    private final KafkaApplicationEmailProducer kafkaApplicationEmailProducer;
 
     @Value("${security.token.jwt.expiration}")
     private Long expiration;
@@ -37,8 +43,40 @@ public class AuthenticationApplicationService implements AuthenticationService {
         log.info("[start] AuthenticationApplicationService - createNewUser");
         generatePasswordHash(userCommomRegisterDto);
         handleNewUserValidations(userCommomRegisterDto);
-        userRepository.save(new User(userCommomRegisterDto));
+        sendVerificationEmail(userRepository.save(new User(userCommomRegisterDto)).getEmail());
         log.debug("[finish] AuthenticationApplicationService - createNewUser");
+    }
+
+    @Override
+    public void verifyAccountWithToken(String token) {
+        log.info("[start] AuthenticationApplicationService - verifyAccountWithToken");
+        String json = tokenService.validateToken(token);
+
+        UserAccountVerificationPayloadDto payload;
+        try {
+            payload = objectMapper.readValue(json, UserAccountVerificationPayloadDto.class);
+        } catch (Exception e) {
+            throw APIException.build(HttpStatus.BAD_REQUEST, "Token Inválido ou malformado.");
+        }
+        this.verifyAccount(payload);
+        log.debug("[finish] AuthenticationApplicationService - verifyAccountWithToken");
+    }
+
+    @Override
+    public void verifyAccount(UserAccountVerificationPayloadDto userAccountVerificationPayloadDto) {
+        log.info("[start] AuthenticationApplicationService - verifyAccount");
+
+        User user = userRepository.findByEmail(userAccountVerificationPayloadDto.getEmail())
+                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado."));
+
+        if (!userAccountVerificationPayloadDto.getVerificationCode().equals(user.getAccountVerificationCode())) {
+            throw APIException.build(HttpStatus.BAD_REQUEST, "Token Inválido ou malformado.");
+        }
+
+        user.setAsVerified();
+        userRepository.save(user);
+
+        log.debug("[finish] AuthenticationApplicationService - verifyAccount");
     }
 
     private void handleNewUserValidations(UserCommomRegisterDto dto) {
@@ -80,6 +118,29 @@ public class AuthenticationApplicationService implements AuthenticationService {
                 .orElse("Usuário não encontrado. Verifique e tente novamente.");
     }
 
+    @Override
+    public void resendVerificationEmail(String email) {
+        log.info("[start] AuthenticationApplicationService - resendVerificationEmail");
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado."));
+
+        if(user.getStatusMember() != StatusMember.NOT_VERIFIED)
+            throw APIException.build(HttpStatus.BAD_REQUEST, "Usuário já está ativado.");
+
+        userRepository.updateVerificationCodeByEmail(email, GenerateNumber.generateVerificationCode());
+        sendVerificationEmail(email);
+        log.debug("[finish] AuthenticationApplicationService - resendVerificationEmail");
+    }
+
+    private void sendVerificationEmail(String userEmail){
+        log.info("[start] AuthenticationApplicationService - sendEmail");
+        EmailVerificationDTO payload = EmailVerificationDTO.builder()
+                .to(userEmail)
+                .build();
+        kafkaApplicationEmailProducer.publishEmailVerification(payload);
+        log.debug("[finish] AuthenticationApplicationService - sendEmail");
+    }
+
     private String buildErrorMessageForUser(User user) {
         StatusMember status = user.getStatusMember();
 
@@ -90,7 +151,6 @@ public class AuthenticationApplicationService implements AuthenticationService {
             default -> "Status do usuário inválido ou desconhecido.";
         };
     }
-
 
     private void checkLoginAttempts(LoginType loginType, String email) {
         log.info("[start] AuthenticationApplicationService - checkLoginAttempts");

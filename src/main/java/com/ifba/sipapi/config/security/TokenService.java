@@ -6,8 +6,11 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ifba.sipapi.config.handler.APIException;
 import com.ifba.sipapi.user.domain.User;
+import com.ifba.sipapi.user.dto.UserAccountVerificationPayloadDto;
 import com.ifba.sipapi.user.infra.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -23,13 +26,13 @@ import java.time.ZoneOffset;
 @RequiredArgsConstructor
 @Log4j2
 public class TokenService {
+    private final ObjectMapper objectMapper;
+
     @Value("${security.token.jwt.secret}")
     private String secret;
 
     @Value("${security.token.jwt.expiration}")
     private Long expiration;
-
-
 
     private final UserRepository userRepository;
 
@@ -39,9 +42,23 @@ public class TokenService {
             return JWT.create()
                     .withIssuer("wakanda-ai")
                     .withSubject(user.getUsername())
-                    .withExpiresAt(genarateExpirationTime())
+                    .withExpiresAt(generateExpirationTime())
                     .sign(algorithm);
         }catch (JWTCreationException exception) {
+            throw APIException.build(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao gerar token" + exception.getMessage());
+        }
+    }
+
+    public String generateToken(UserAccountVerificationPayloadDto payload) {
+        try{
+            Algorithm algorithm = Algorithm.HMAC256(secret);
+            String subjectJson = objectMapper.writeValueAsString(payload);
+            return JWT.create()
+                    .withIssuer("wakanda-ai")
+                    .withSubject(subjectJson)
+                    .withExpiresAt(generateExpirationTime())
+                    .sign(algorithm);
+        }catch (JWTCreationException | JsonProcessingException exception) {
             throw APIException.build(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao gerar token" + exception.getMessage());
         }
     }
@@ -60,7 +77,7 @@ public class TokenService {
         }
     }
 
-    private Instant genarateExpirationTime() {
+    private Instant generateExpirationTime() {
         return LocalDateTime.now().plusHours(expiration).toInstant(ZoneOffset.of("-03:00"));
     }
 

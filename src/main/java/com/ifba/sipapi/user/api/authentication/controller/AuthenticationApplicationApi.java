@@ -1,6 +1,7 @@
 package com.ifba.sipapi.user.api.authentication.controller;
 
 import com.ifba.sipapi.user.api.authentication.service.AuthenticationService;
+import com.ifba.sipapi.user.dto.UserAccountVerificationPayloadDto;
 import com.ifba.sipapi.user.dto.UserLoginDto;
 import com.ifba.sipapi.user.dto.UserCommomRegisterDto;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -42,5 +43,26 @@ public class AuthenticationApplicationApi implements AuthenticationApi {
         String message = "Token valido!";
         log.debug("[finish] AuthenticationAPI - tokenTeste");
         return Map.of("message", message);
+    }
+
+    @Override
+    public void verifyWithToken(String token) {
+        log.info("[start] AuthenticationApplicationApi - verifyWithToken");
+        authenticationService.verifyAccountWithToken(token);
+        log.debug("[finish] AuthenticationApplicationApi - verifyWithToken");
+    }
+
+    @Override
+    public void verify(UserAccountVerificationPayloadDto userAccountVerificationPayloadDto){
+        log.info("[start] AuthenticationApplicationApi - verify");
+        authenticationService.verifyAccount(userAccountVerificationPayloadDto);
+        log.debug("[finish] AuthenticationApplicationApi - verify");
+    }
+
+    @Override
+    public void resendVerification(String email){
+        log.info("[start] AuthenticationApplicationApi - resendVerification");
+        authenticationService.resendVerificationEmail(email);
+        log.debug("[finish] AuthenticationApplicationApi - resendVerification");
     }
 }
