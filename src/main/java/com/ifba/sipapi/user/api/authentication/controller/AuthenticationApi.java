@@ -6,6 +6,7 @@ import com.ifba.sipapi.user.dto.UserLoginDto;
 import com.ifba.sipapi.user.dto.UserCommomRegisterDto;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,4 +41,9 @@ public interface AuthenticationApi {
     @PostMapping("/verify-account")
     @ResponseStatus(HttpStatus.OK)
     void verify(@RequestBody @Valid UserAccountVerificationPayloadDto userAccountVerificationPayloadDto);
+
+    @AuthenticationAPIDocs.VerifyAccount
+    @PostMapping("/resend-verify-account")
+    @ResponseStatus(HttpStatus.OK)
+    void resendVerification(@RequestBody String email);
 }

@@ -58,4 +58,11 @@ public class AuthenticationApplicationApi implements AuthenticationApi {
         authenticationService.verifyAccount(userAccountVerificationPayloadDto);
         log.debug("[finish] AuthenticationApplicationApi - verify");
     }
+
+    @Override
+    public void resendVerification(String email){
+        log.info("[start] AuthenticationApplicationApi - resendVerification");
+        authenticationService.resendVerificationEmail(email);
+        log.debug("[finish] AuthenticationApplicationApi - resendVerification");
+    }
 }

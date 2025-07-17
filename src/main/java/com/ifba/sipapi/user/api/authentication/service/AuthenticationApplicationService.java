@@ -13,6 +13,7 @@ import com.ifba.sipapi.user.dto.UserAccountVerificationPayloadDto;
 import com.ifba.sipapi.user.dto.UserCommomRegisterDto;
 import com.ifba.sipapi.user.dto.UserLoginDto;
 import com.ifba.sipapi.user.infra.UserRepository;
+import com.ifba.sipapi.util.GenerateNumber;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
@@ -117,15 +118,18 @@ public class AuthenticationApplicationService implements AuthenticationService {
                 .orElse("Usuário não encontrado. Verifique e tente novamente.");
     }
 
-    private String buildErrorMessageForUser(User user) {
-        StatusMember status = user.getStatusMember();
+    @Override
+    public void resendVerificationEmail(String email) {
+        log.info("[start] AuthenticationApplicationService - resendVerificationEmail");
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado."));
 
-        return switch (status) {
-            case NOT_VERIFIED -> "Usuário ainda não foi verificado. Procure o código no seu email e faça a verificação.";
-            case ACTIVE -> "Usuário ou senha inválidos. Verifique e tente novamente.";
-            case BLOCKED -> "Usuário bloqueado por excesso de tentativas. Faça a recuperação da conta.";
-            default -> "Status do usuário inválido ou desconhecido.";
-        };
+        if(user.getStatusMember() != StatusMember.NOT_VERIFIED)
+            throw APIException.build(HttpStatus.BAD_REQUEST, "Usuário já está ativado.");
+
+        userRepository.updateVerificationCodeByEmail(email, GenerateNumber.generateVerificationCode());
+        sendVerificationEmail(email);
+        log.debug("[finish] AuthenticationApplicationService - resendVerificationEmail");
     }
 
     private void sendVerificationEmail(String userEmail){
@@ -137,6 +141,16 @@ public class AuthenticationApplicationService implements AuthenticationService {
         log.debug("[finish] AuthenticationApplicationService - sendEmail");
     }
 
+    private String buildErrorMessageForUser(User user) {
+        StatusMember status = user.getStatusMember();
+
+        return switch (status) {
+            case NOT_VERIFIED -> "Usuário ainda não foi verificado. Procure o código no seu email e faça a verificação.";
+            case ACTIVE -> "Usuário ou senha inválidos. Verifique e tente novamente.";
+            case BLOCKED -> "Usuário bloqueado por excesso de tentativas. Faça a recuperação da conta.";
+            default -> "Status do usuário inválido ou desconhecido.";
+        };
+    }
 
     private void checkLoginAttempts(LoginType loginType, String email) {
         log.info("[start] AuthenticationApplicationService - checkLoginAttempts");

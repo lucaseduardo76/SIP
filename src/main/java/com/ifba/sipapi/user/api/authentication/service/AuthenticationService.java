@@ -10,4 +10,5 @@ public interface AuthenticationService {
     AuthenticationResponseDto login(UserLoginDto userLoginDto);
     void verifyAccountWithToken(String token);
     void verifyAccount(UserAccountVerificationPayloadDto userAccountVerificationPayloadDto);
+    void resendVerificationEmail(String email);
 }
