@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -53,10 +54,18 @@ public class RestResponseEntityExceptionHandler {
 
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ExceptionHandler(DataIntegrityViolationException.class)
-	public ResponseEntity<ErrorApiResponse> handleMethodArgumentTypeMismatchException(DataIntegrityViolationException ex) {
+	public ResponseEntity<ErrorApiResponse> handleDataIntegrityViolationExceptionException(DataIntegrityViolationException ex) {
 		log.error("Exception: " + ex.getMessage());
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorApiResponse.builder().description("BAD REQUEST!")
 				.message("REVISE OS DADOS OU INFORME O ADMINISTRADOR!").build());
+	}
+
+	@ResponseStatus(HttpStatus.NOT_FOUND)
+	@ExceptionHandler(NoResourceFoundException.class)
+	public ResponseEntity<ErrorApiResponse> handleNoResourceFoundExceptionException(NoResourceFoundException ex) {
+		log.error("Exception: " + ex.getMessage());
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorApiResponse.builder().description("NOT FOUND!")
+				.message("O RECURSO SOLICITADO NÃO FOI ENCONTRADO!").build());
 	}
 
 }

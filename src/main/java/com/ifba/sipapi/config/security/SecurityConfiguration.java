@@ -28,12 +28,22 @@ public class SecurityConfiguration {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/authentication/**").permitAll()
+                        .requestMatchers(
+                                "public/**",
+                                "v3/api-docs/**",
+                                "swagger-ui/**",
+                                "swagger-ui.html",
+                                "v3/api-docs/swagger-config",
+                                "v3/api-docs"
+                        ).permitAll()
+                        .requestMatchers(HttpMethod.POST, "authentication/**").permitAll()
                         .anyRequest().authenticated()
+
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
+
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
