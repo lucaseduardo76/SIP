@@ -31,10 +31,12 @@ public interface AuthenticationApi {
     @ResponseStatus(code = HttpStatus.OK)
     public Map<String, String> tokenTeste();
 
+    @AuthenticationAPIDocs.VerifyAccount
     @PostMapping("/verify-account/{token}")
     @ResponseStatus(HttpStatus.OK)
     void verifyWithToken(@PathVariable String token);
 
+    @AuthenticationAPIDocs.VerifyAccount
     @PostMapping("/verify-account")
     @ResponseStatus(HttpStatus.OK)
     void verify(@RequestBody @Valid UserAccountVerificationPayloadDto userAccountVerificationPayloadDto);

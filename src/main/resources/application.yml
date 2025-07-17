@@ -3,7 +3,7 @@ spring:
     active: ${APP_PROFILE:local}
   application:
     name: sip-api
-    baseUrl: http://localhost:8080
+    applicationUrl: http://localhost:8080
 
   datasource:
     url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/sip}

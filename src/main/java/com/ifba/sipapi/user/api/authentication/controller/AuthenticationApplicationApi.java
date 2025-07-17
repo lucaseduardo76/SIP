@@ -52,6 +52,7 @@ public class AuthenticationApplicationApi implements AuthenticationApi {
         log.debug("[finish] AuthenticationApplicationApi - verifyWithToken");
     }
 
+    @Override
     public void verify(UserAccountVerificationPayloadDto userAccountVerificationPayloadDto){
         log.info("[start] AuthenticationApplicationApi - verify");
         authenticationService.verifyAccount(userAccountVerificationPayloadDto);

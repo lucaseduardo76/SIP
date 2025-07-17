@@ -55,7 +55,7 @@ public class AuthenticationApplicationService implements AuthenticationService {
         try {
             payload = objectMapper.readValue(json, UserAccountVerificationPayloadDto.class);
         } catch (Exception e) {
-            throw new RuntimeException("Token inválido ou malformado", e);
+            throw APIException.build(HttpStatus.BAD_REQUEST, "Token Inválido ou malformado.");
         }
         this.verifyAccount(payload);
         log.debug("[finish] AuthenticationApplicationService - verifyAccountWithToken");
@@ -66,10 +66,10 @@ public class AuthenticationApplicationService implements AuthenticationService {
         log.info("[start] AuthenticationApplicationService - verifyAccount");
 
         User user = userRepository.findByEmail(userAccountVerificationPayloadDto.getEmail())
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado."));
 
         if (!userAccountVerificationPayloadDto.getVerificationCode().equals(user.getAccountVerificationCode())) {
-            throw new RuntimeException("Código de verificação inválido");
+            throw APIException.build(HttpStatus.BAD_REQUEST, "Token Inválido ou malformado.");
         }
 
         user.setAsVerified();

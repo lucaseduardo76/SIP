@@ -30,8 +30,8 @@ public class EmailService {
     private final TokenService tokenService;
     private final UserRepository userRepository;
 
-    @Value("${spring.application.baseUrl}")
-    private String baseUrl;
+    @Value("${spring.application.applicationUrl}")
+    private String applicationUrl;
 
     public void sendVerificationEmail(String to, String subject) {
         log.info("[start] EmailService - sendVerificationEmail");
@@ -43,7 +43,7 @@ public class EmailService {
         String token = tokenService.generateToken(new UserAccountVerificationPayloadDto(to, verificationCode));
 
         Context context = new Context();
-        context.setVariable("verificationLink", baseUrl + "/authentication/verify-account/token/" + token);
+        context.setVariable("verificationLink", applicationUrl + "/authentication/verify-account/token/" + token);
         context.setVariable("verificationCode", verificationCode);
 
         String body = templateEngine.process("email_verification", context);
