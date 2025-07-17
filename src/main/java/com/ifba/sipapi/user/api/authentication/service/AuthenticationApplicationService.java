@@ -42,8 +42,7 @@ public class AuthenticationApplicationService implements AuthenticationService {
         log.info("[start] AuthenticationApplicationService - createNewUser");
         generatePasswordHash(userCommomRegisterDto);
         handleNewUserValidations(userCommomRegisterDto);
-        userRepository.save(new User(userCommomRegisterDto));
-        sendVerificationEmail(userCommomRegisterDto.getEmail());
+        sendVerificationEmail(userRepository.save(new User(userCommomRegisterDto)).getEmail());
         log.debug("[finish] AuthenticationApplicationService - createNewUser");
     }
 
