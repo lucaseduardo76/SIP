@@ -1,8 +1,8 @@
 package com.ifba.sipapi.mail.infra;
 
-import com.ifba.sipapi.mail.domain.EmailVerificationDTO;
+import com.ifba.sipapi.mail.domain.EmailSender;
 
 public interface KafkaEmailProducer {
 
-    void publishEmailVerification(EmailVerificationDTO payload);
+    void publishEmail(EmailSender EmailSender);
 }

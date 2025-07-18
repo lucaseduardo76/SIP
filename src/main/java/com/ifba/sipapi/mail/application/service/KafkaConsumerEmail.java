@@ -1,7 +1,7 @@
 package com.ifba.sipapi.mail.application.service;
 
-import com.ifba.sipapi.mail.domain.EmailVerificationDTO;
+import com.ifba.sipapi.mail.domain.EmailSender;
 
 public interface KafkaConsumerEmail {
-    void listen(EmailVerificationDTO payload);
+    void listener(EmailSender payload);
 }

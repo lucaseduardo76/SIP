@@ -1,8 +1,9 @@
 package com.ifba.sipapi.config.kafka;
 
+import com.ifba.sipapi.mail.domain.EmailSender;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
-import com.ifba.sipapi.mail.domain.EmailVerificationDTO;
+// Line removed as it is unused.
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -20,7 +21,7 @@ public class KafkaProducerConfig {
     private String bootstrapServers;
 
     @Bean
-    public ProducerFactory<String, EmailVerificationDTO> producerFactory() {
+    public ProducerFactory<String, EmailSender> producerFactory() {
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
@@ -29,7 +30,7 @@ public class KafkaProducerConfig {
     }
 
     @Bean
-    public KafkaTemplate<String, EmailVerificationDTO> kafkaTemplate() {
+    public KafkaTemplate<String, EmailSender> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
     }
 }
