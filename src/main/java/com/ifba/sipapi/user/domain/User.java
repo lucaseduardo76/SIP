@@ -1,6 +1,7 @@
 package com.ifba.sipapi.user.domain;
 
 import com.ifba.sipapi.Auditable;
+import com.ifba.sipapi.config.handler.APIException;
 import com.ifba.sipapi.item.domain.item.Item;
 import com.ifba.sipapi.user.api.authentication.service.LoginType;
 import com.ifba.sipapi.user.dto.UserCommomRegisterDto;
@@ -9,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -121,7 +123,25 @@ public class User extends Auditable implements UserDetails {
         }
     }
 
-    public void setAsVerified() {
+    public void checkVerification(String verificationCode) {
+        if (!verificationCode.equals(this.accountVerificationCode)) {
+            throw APIException.build(HttpStatus.BAD_REQUEST, "Token Inválido ou malformado.");
+        }
+        setAsVerified();
+    }
+
+    public void checkIfUserIsAlreadyActive(){
+        if(this.getStatusMember() == StatusMember.ACTIVE)
+            throw APIException.build(HttpStatus.BAD_REQUEST, "Usuário já está ativado.");
+
+        this.updateVerificationCode(GenerateNumber.generateVerificationCode());
+    }
+
+    private void updateVerificationCode(String code) {
+        this.accountVerificationCode = code;
+    }
+
+    private void setAsVerified() {
         this.statusMember = StatusMember.ACTIVE;
     }
 

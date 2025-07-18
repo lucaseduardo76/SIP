@@ -30,11 +30,10 @@ import java.time.LocalDateTime;
 @Log4j2
 public class AuthenticationApplicationService implements AuthenticationService {
     private final UserRepository userRepository;
-    private final TokenService tokenService;
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
-    private final ObjectMapper objectMapper;
     private final KafkaApplicationEmailProducer kafkaApplicationEmailProducer;
+    private final TokenService tokenService;
 
     @Value("${security.token.jwt.expiration}")
     private Long expiration;
@@ -49,37 +48,13 @@ public class AuthenticationApplicationService implements AuthenticationService {
         log.debug("[finish] AuthenticationApplicationService - createNewUser");
     }
 
-    @Override
-    public void verifyAccountWithToken(String token) {
-        log.info("[start] AuthenticationApplicationService - verifyAccountWithToken");
-        String json = tokenService.validateToken(token);
-
-        UserAccountVerificationPayloadDto payload;
-        try {
-            payload = objectMapper.readValue(json, UserAccountVerificationPayloadDto.class);
-        } catch (Exception e) {
-            throw APIException.build(HttpStatus.BAD_REQUEST, "Token Inválido ou malformado.");
-        }
-        this.verifyAccount(payload);
-        log.debug("[finish] AuthenticationApplicationService - verifyAccountWithToken");
+    private void sendEmail(String userEmail, EmailType emailType){
+        log.info("[start] AuthenticationApplicationService - sendEmail");
+        EmailSender payload = new EmailSender(userEmail, emailType);
+        kafkaApplicationEmailProducer.publishEmail(payload);
+        log.debug("[finish] AuthenticationApplicationService - sendEmail");
     }
 
-    @Override
-    public void verifyAccount(UserAccountVerificationPayloadDto userAccountVerificationPayloadDto) {
-        log.info("[start] AuthenticationApplicationService - verifyAccount");
-
-        User user = userRepository.findByEmail(userAccountVerificationPayloadDto.getEmail())
-                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado."));
-
-        if (!userAccountVerificationPayloadDto.getVerificationCode().equals(user.getAccountVerificationCode())) {
-            throw APIException.build(HttpStatus.BAD_REQUEST, "Token Inválido ou malformado.");
-        }
-
-        user.setAsVerified();
-        userRepository.save(user);
-
-        log.debug("[finish] AuthenticationApplicationService - verifyAccount");
-    }
 
     private void handleNewUserValidations(UserCommomRegisterDto dto) {
         if (userRepository.existsByEmail(dto.getEmail())) {
@@ -118,27 +93,6 @@ public class AuthenticationApplicationService implements AuthenticationService {
         return userRepository.findByEmail(username)
                 .map(this::buildErrorMessageForUser)
                 .orElse("Usuário não encontrado. Verifique e tente novamente.");
-    }
-
-    @Override
-    public void resendVerificationEmail(String email) {
-        log.info("[start] AuthenticationApplicationService - resendVerificationEmail");
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado."));
-
-        if(user.getStatusMember() != StatusMember.NOT_VERIFIED)
-            throw APIException.build(HttpStatus.BAD_REQUEST, "Usuário já está ativado.");
-
-        userRepository.updateVerificationCodeByEmail(email, GenerateNumber.generateVerificationCode());
-        sendEmail(email, EmailType.VERIFICATION);
-        log.debug("[finish] AuthenticationApplicationService - resendVerificationEmail");
-    }
-
-    private void sendEmail(String userEmail, EmailType emailType){
-        log.info("[start] AuthenticationApplicationService - sendEmail");
-        EmailSender payload = new EmailSender(userEmail, emailType);
-        kafkaApplicationEmailProducer.publishEmail(payload);
-        log.debug("[finish] AuthenticationApplicationService - sendEmail");
     }
 
     private String buildErrorMessageForUser(User user) {

@@ -8,7 +8,4 @@ import com.ifba.sipapi.user.dto.UserLoginDto;
 public interface AuthenticationService {
     void createNewUser(UserCommomRegisterDto userCommomRegisterDto);
     AuthenticationResponseDto login(UserLoginDto userLoginDto);
-    void verifyAccountWithToken(String token);
-    void verifyAccount(UserAccountVerificationPayloadDto userAccountVerificationPayloadDto);
-    void resendVerificationEmail(String email);
 }

@@ -45,24 +45,4 @@ public class AuthenticationApplicationApi implements AuthenticationApi {
         return Map.of("message", message);
     }
 
-    @Override
-    public void verifyWithToken(String token) {
-        log.info("[start] AuthenticationApplicationApi - verifyWithToken");
-        authenticationService.verifyAccountWithToken(token);
-        log.debug("[finish] AuthenticationApplicationApi - verifyWithToken");
-    }
-
-    @Override
-    public void verify(UserAccountVerificationPayloadDto userAccountVerificationPayloadDto){
-        log.info("[start] AuthenticationApplicationApi - verify");
-        authenticationService.verifyAccount(userAccountVerificationPayloadDto);
-        log.debug("[finish] AuthenticationApplicationApi - verify");
-    }
-
-    @Override
-    public void resendVerification(String email){
-        log.info("[start] AuthenticationApplicationApi - resendVerification");
-        authenticationService.resendVerificationEmail(email);
-        log.debug("[finish] AuthenticationApplicationApi - resendVerification");
-    }
 }
