@@ -140,8 +140,19 @@ public class User extends Auditable implements UserDetails {
         this.updateVerificationCode(GenerateNumber.generateCode());
     }
 
-    public void passwordRecoveryCode() {
+    public void updatePasswordRecoveryCode() {
         this.passwordRecoveryCode = GenerateNumber.generateCode();
+    }
+
+    public void resetPassword(String code, String password) {
+        if(!code.equals(this.passwordRecoveryCode))
+            throw APIException.build(HttpStatus.BAD_REQUEST, "Token Inválido ou malformado.");
+
+        this.changePassword(password);
+    }
+
+    private void changePassword(String password) {
+        this.password = password;
     }
 
     private void updateVerificationCode(String code) {

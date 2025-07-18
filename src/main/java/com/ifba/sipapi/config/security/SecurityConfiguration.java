@@ -39,7 +39,8 @@ public class SecurityConfiguration {
                                 "user/verify-account/**",
                                 "user/verify-account",
                                 "user/resend-verify-account",
-                                "user/password-recovery"
+                                "user/password-recovery",
+                                "user/password-reset"
                         ).permitAll()
                         .requestMatchers(HttpMethod.POST, "authentication/**").permitAll()
                         .anyRequest().authenticated()

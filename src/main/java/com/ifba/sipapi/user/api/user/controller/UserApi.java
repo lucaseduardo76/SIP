@@ -2,7 +2,9 @@ package com.ifba.sipapi.user.api.user.controller;
 
 import com.ifba.sipapi.docs.swagger.AuthenticationAPIDocs;
 import com.ifba.sipapi.docs.swagger.UserAPIDocs;
+import com.ifba.sipapi.mail.domain.EmailData;
 import com.ifba.sipapi.user.dto.UserAccountVerificationPayloadDto;
+import com.ifba.sipapi.user.dto.UserPasswordRecoveryDto;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -19,16 +21,16 @@ public interface UserApi {
     void verifyWithToken(@PathVariable String token);
 
     @UserAPIDocs.VerifyAccount
-    @PostMapping("/verify-account")
-    @ResponseStatus(HttpStatus.OK)
-    void verify(@RequestBody @Valid UserAccountVerificationPayloadDto userAccountVerificationPayloadDto);
-
-    @UserAPIDocs.VerifyAccount
     @PostMapping("/resend-verify-account")
     @ResponseStatus(HttpStatus.OK)
     void resendVerification(@RequestBody String email);
 
-    @UserAPIDocs.VerifyAccount
+    @UserAPIDocs.RecoverPassword
+    @PostMapping("/password-reset")
+    @ResponseStatus(HttpStatus.OK)
+    void resetPassword(@RequestBody UserPasswordRecoveryDto userPasswordRecoveryDto);
+
+    @UserAPIDocs.RecoverPassword
     @PostMapping("/password-recovery")
     @ResponseStatus(HttpStatus.OK)
     void recoverPassword(@RequestBody String email);

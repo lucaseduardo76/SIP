@@ -9,6 +9,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ifba.sipapi.config.handler.APIException;
+import com.ifba.sipapi.mail.domain.EmailData;
 import com.ifba.sipapi.user.domain.User;
 import com.ifba.sipapi.user.dto.UserAccountVerificationPayloadDto;
 import com.ifba.sipapi.user.infra.UserRepository;
@@ -34,8 +35,6 @@ public class TokenService {
     @Value("${security.token.jwt.expiration}")
     private Long expiration;
 
-    private final UserRepository userRepository;
-
     public String generateToken(User user) {
         try{
             Algorithm algorithm = Algorithm.HMAC256(secret);
@@ -49,8 +48,8 @@ public class TokenService {
         }
     }
 
-    public String generateToken(UserAccountVerificationPayloadDto payload) {
-        try{
+    public String generateToken(Object payload) {
+        try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
             String subjectJson = objectMapper.writeValueAsString(payload);
             return JWT.create()
@@ -58,8 +57,8 @@ public class TokenService {
                     .withSubject(subjectJson)
                     .withExpiresAt(generateExpirationTime())
                     .sign(algorithm);
-        }catch (JWTCreationException | JsonProcessingException exception) {
-            throw APIException.build(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao gerar token" + exception.getMessage());
+        } catch (JWTCreationException | JsonProcessingException exception) {
+            throw APIException.build(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao gerar token: " + exception.getMessage());
         }
     }
 

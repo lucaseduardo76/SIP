@@ -2,8 +2,11 @@ package com.ifba.sipapi.mail.application.service;
 
 import com.ifba.sipapi.config.handler.APIException;
 import com.ifba.sipapi.config.security.TokenService;
+import com.ifba.sipapi.mail.domain.EmailData;
+import com.ifba.sipapi.mail.domain.EmailSender;
 import com.ifba.sipapi.user.domain.User;
 import com.ifba.sipapi.user.dto.UserAccountVerificationPayloadDto;
+import com.ifba.sipapi.user.dto.UserPasswordRecoveryDto;
 import com.ifba.sipapi.user.infra.UserRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -42,8 +45,10 @@ public class EmailService {
                 "Verificação de Email - SIP",
                 "email",
                 "/user/verify-account/",
-                User::getAccountVerificationCode
+                User::getAccountVerificationCode,
+                user -> new EmailData(user.getEmail(), user.getAccountVerificationCode())
         );
+
     }
 
     public void sendPasswordRecoveryEmail(String to) {
@@ -52,18 +57,28 @@ public class EmailService {
                 "Recuperação de Senha - SIP",
                 "email",
                 "/user/recover-password/",
-                User::getPasswordRecoveryCode
+                User::getPasswordRecoveryCode,
+                user -> new EmailData(user.getEmail(), user.getPasswordRecoveryCode())
         );
+
     }
 
-    private void sendEmailWithCode(String to, String subject, String template, String route, Function<User, String> codeProvider) {
+    private <T> void sendEmailWithCode(
+            String to,
+            String subject,
+            String template,
+            String route,
+            Function<User, String> codeProvider,
+            Function<User, T> dtoMapper
+    ) {
         log.info("[start] EmailService - sendEmailWithCode | to={}", to);
 
         User user = userRepository.findByEmail(to)
                 .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
 
         String code = codeProvider.apply(user);
-        String token = tokenService.generateToken(new UserAccountVerificationPayloadDto(to, code));
+        T dto = dtoMapper.apply(user);
+        String token = tokenService.generateToken(dto);
 
         Context context = new Context();
         context.setVariable("applicationLink", applicationUrl + route + token);
