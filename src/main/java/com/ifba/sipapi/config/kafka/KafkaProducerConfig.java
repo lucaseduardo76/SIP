@@ -3,7 +3,7 @@ package com.ifba.sipapi.config.kafka;
 import com.ifba.sipapi.mail.domain.EmailSender;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
-import com.ifba.sipapi.mail.domain.EmailVerificationDTO;
+// Line removed as it is unused.
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
