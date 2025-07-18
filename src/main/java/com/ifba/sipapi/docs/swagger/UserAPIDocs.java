@@ -17,7 +17,7 @@ public @interface UserAPIDocs {
     @Retention(RetentionPolicy.RUNTIME)
     @Operation(summary = "Verifica a conta após Registro", description = "Metodo quando bem sucedido retorna códgio 200 e habilita a conta do usuário")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Veirificação feita com sucesso."),
+            @ApiResponse(responseCode = "200", description = "Verificação feita com sucesso."),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"message\": \"mensagem qualquer.\" }"))),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"description\": \"INTERNAL SERVER ERROR!\", \"message\": \"POR FAVOR INFORME AO ADMINISTRADOR DO SISTEMA!\" }")))})
     public @interface VerifyAccount {
