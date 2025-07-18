@@ -1,6 +1,6 @@
 package com.ifba.sipapi.mail.infra;
 
-import com.ifba.sipapi.mail.domain.EmailVerificationDTO;
+import com.ifba.sipapi.mail.domain.EmailSender;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,14 +12,14 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class KafkaApplicationEmailProducer implements KafkaEmailProducer{
 
-    private final KafkaTemplate<String, EmailVerificationDTO> kafkaTemplate;
+    private final KafkaTemplate<String, EmailSender> kafkaTemplate;
 
-    @Value("${spring.kafka.consumer.email-verification.topic}")
+    @Value("${spring.kafka.consumer.email.topic}")
     private String TOPIC;
 
-    public void publishEmailVerification(EmailVerificationDTO payload) {
+    public void publishEmail(EmailSender payload) {
         log.info("[start] KafkaEmailProducer - publishEmailVerification");
-        kafkaTemplate.send(TOPIC, payload.getTo(), payload);
+        kafkaTemplate.send(TOPIC, payload.getSendTo(), payload);
         log.debug("[finish] KafkaEmailProducer - publishEmailVerification");
     }
 }

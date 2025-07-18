@@ -1,5 +1,6 @@
 package com.ifba.sipapi.mail.application.service;
 
+import com.ifba.sipapi.config.handler.APIException;
 import com.ifba.sipapi.config.security.TokenService;
 import com.ifba.sipapi.user.domain.User;
 import com.ifba.sipapi.user.dto.UserAccountVerificationPayloadDto;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -33,11 +35,11 @@ public class EmailService {
     @Value("${spring.application.applicationUrl}")
     private String applicationUrl;
 
-    public void sendVerificationEmail(String to, String subject) {
+    public void sendVerificationEmail(String to) {
         log.info("[start] EmailService - sendVerificationEmail");
 
         User user = userRepository.findByEmail(to)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
 
         String verificationCode = user.getAccountVerificationCode();
         String token = tokenService.generateToken(new UserAccountVerificationPayloadDto(to, verificationCode));
@@ -48,7 +50,7 @@ public class EmailService {
 
         String body = templateEngine.process("email_verification", context);
 
-        sendHtmlEmail(to, subject, body);
+        sendHtmlEmail(to, "Verificação de Email - SIP", body);
 
         log.debug("[finish] EmailService - sendVerificationEmail");
     }

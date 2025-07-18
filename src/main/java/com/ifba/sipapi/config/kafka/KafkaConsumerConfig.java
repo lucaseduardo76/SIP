@@ -2,7 +2,7 @@ package com.ifba.sipapi.config.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-import com.ifba.sipapi.mail.domain.EmailVerificationDTO;
+import com.ifba.sipapi.mail.domain.EmailSender;
 import org.springframework.beans.factory.annotation.Value;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -24,16 +24,16 @@ public class KafkaConsumerConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
 
-    @Value("${spring.kafka.consumer.email-verification.group-id}")
+    @Value("${spring.kafka.consumer.email.group-id}")
     private String groupId;
 
     @Bean
-    public ConsumerFactory<String, EmailVerificationDTO> emailVerificationConsumerFactory() {
+    public ConsumerFactory<String, EmailSender> emailConsumerFactory() {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new ParameterNamesModule());
 
-        JsonDeserializer<EmailVerificationDTO> deserializer =
-                new JsonDeserializer<>(EmailVerificationDTO.class, objectMapper);
+        JsonDeserializer<EmailSender> deserializer =
+                new JsonDeserializer<>(EmailSender.class, objectMapper);
         deserializer.setRemoveTypeHeaders(false);
         deserializer.addTrustedPackages("com.ifba.sipapi.mail.domain");
         deserializer.setUseTypeMapperForKey(false);
@@ -48,9 +48,9 @@ public class KafkaConsumerConfig {
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, EmailVerificationDTO> emailVerificationKafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, EmailVerificationDTO> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(emailVerificationConsumerFactory());
+    public ConcurrentKafkaListenerContainerFactory<String, EmailSender> emailKafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, EmailSender> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(emailConsumerFactory());
         return factory;
     }
 }

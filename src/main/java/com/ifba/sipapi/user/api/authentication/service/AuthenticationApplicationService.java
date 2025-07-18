@@ -3,7 +3,8 @@ package com.ifba.sipapi.user.api.authentication.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ifba.sipapi.config.handler.APIException;
 import com.ifba.sipapi.config.security.TokenService;
-import com.ifba.sipapi.mail.domain.EmailVerificationDTO;
+import com.ifba.sipapi.mail.domain.EmailSender;
+import com.ifba.sipapi.mail.domain.EmailType;
 import com.ifba.sipapi.mail.infra.KafkaApplicationEmailProducer;
 import com.ifba.sipapi.user.api.authentication.controller.AuthenticationResponseDto;
 import com.ifba.sipapi.user.api.authentication.controller.TokenType;
@@ -43,7 +44,8 @@ public class AuthenticationApplicationService implements AuthenticationService {
         log.info("[start] AuthenticationApplicationService - createNewUser");
         generatePasswordHash(userCommomRegisterDto);
         handleNewUserValidations(userCommomRegisterDto);
-        sendVerificationEmail(userRepository.save(new User(userCommomRegisterDto)).getEmail());
+        User user = userRepository.save(new User(userCommomRegisterDto));
+        sendEmail(user.getEmail(), EmailType.VERIFICATION);
         log.debug("[finish] AuthenticationApplicationService - createNewUser");
     }
 
@@ -128,16 +130,14 @@ public class AuthenticationApplicationService implements AuthenticationService {
             throw APIException.build(HttpStatus.BAD_REQUEST, "Usuário já está ativado.");
 
         userRepository.updateVerificationCodeByEmail(email, GenerateNumber.generateVerificationCode());
-        sendVerificationEmail(email);
+        sendEmail(email, EmailType.VERIFICATION);
         log.debug("[finish] AuthenticationApplicationService - resendVerificationEmail");
     }
 
-    private void sendVerificationEmail(String userEmail){
+    private void sendEmail(String userEmail, EmailType emailType){
         log.info("[start] AuthenticationApplicationService - sendEmail");
-        EmailVerificationDTO payload = EmailVerificationDTO.builder()
-                .to(userEmail)
-                .build();
-        kafkaApplicationEmailProducer.publishEmailVerification(payload);
+        EmailSender payload = new EmailSender(userEmail, emailType);
+        kafkaApplicationEmailProducer.publishEmail(payload);
         log.debug("[finish] AuthenticationApplicationService - sendEmail");
     }
 

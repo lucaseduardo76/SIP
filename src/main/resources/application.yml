@@ -24,7 +24,7 @@ spring:
   kafka:
     bootstrap-servers: localhost:9092
     consumer:
-      email-verification:
+      email:
         group-id: email-verification-sender
         topic: email-verification
         factory: emailVerificationKafkaListenerContainerFactory
