@@ -25,7 +25,7 @@ public @interface UserAPIDocs {
 
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
-    @Operation(summary = "Testa se token", description = "Método criado para o front-end validade de token")
+    @Operation(summary = "Testa se token", description = "Método criado para o front-end validação de token")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Token valido"),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"message\": \"mensagem qualquer.\" }"))),
