@@ -9,20 +9,20 @@ import org.springframework.stereotype.Service;
 @Service
 @Log4j2
 @RequiredArgsConstructor
-public class KafkaConsumerEmailVerificationService implements KafkaConsumerEmail {
+public class KafkaConsumerEmailService implements KafkaConsumerEmail {
 
-    private final EmailService emailService;
+    private final EmailStrategy emailStrategy;
 
     @KafkaListener(
         topics  = "${spring.kafka.consumer.email.topic}",
         groupId = "${spring.kafka.consumer.email.group-id}",
         containerFactory = "${spring.kafka.consumer.email.factory}"
     )
-    public void listen(EmailSender payload) {
-        log.info("[start] KafkaConsumerEmailVerification - listen");
-        emailService.sendVerificationEmail(payload.getSendTo());
+    public void listener(EmailSender payload) {
+        log.info("[start] KafkaConsumerEmailVerification - listener");
+        emailStrategy.emailProcess(payload);
         log.debug("[email-send] E-Mail sent to - {}", payload.getSendTo());
-        log.debug("[finish] KafkaConsumerEmailVerification - listen");
+        log.debug("[finish] KafkaConsumerEmailVerification - listener");
     }
 }
 

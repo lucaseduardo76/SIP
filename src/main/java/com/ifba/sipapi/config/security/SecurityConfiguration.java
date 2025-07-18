@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -34,7 +35,10 @@ public class SecurityConfiguration {
                                 "swagger-ui/**",
                                 "swagger-ui.html",
                                 "v3/api-docs/swagger-config",
-                                "v3/api-docs"
+                                "v3/api-docs",
+                                "user/verify-account/**",
+                                "user/verify-account",
+                                "user/resend-verify-account"
                         ).permitAll()
                         .requestMatchers(HttpMethod.POST, "authentication/**").permitAll()
                         .anyRequest().authenticated()

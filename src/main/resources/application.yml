@@ -25,9 +25,9 @@ spring:
     bootstrap-servers: localhost:9092
     consumer:
       email:
-        group-id: email-verification-sender
-        topic: email-verification
-        factory: emailVerificationKafkaListenerContainerFactory
+        group-id: email-sender
+        topic: email
+        factory: emailKafkaListenerContainerFactory
 
   mail:
     host: smtp.gmail.com
@@ -40,7 +40,11 @@ spring:
           auth: true
           starttls:
             enable: true
+            required: true
+          ssl:
+            trust: "*"
     default-encoding: UTF-8
+
 
 security:
   token:
