@@ -57,6 +57,8 @@ public class User extends Auditable implements UserDetails {
 
     private String accountVerificationCode;
 
+    private String passwordRecoveryCode;
+
     @OneToMany(mappedBy = "owner")
     private List<Item> items;
 
@@ -69,7 +71,7 @@ public class User extends Auditable implements UserDetails {
         this.role = Role.COMMOM;
         this.statusMember = StatusMember.NOT_VERIFIED;
         this.failedLoginAttempts = 0;
-        this.accountVerificationCode = GenerateNumber.generateVerificationCode();
+        this.accountVerificationCode = GenerateNumber.generateCode();
     }
 
     @Override
@@ -128,13 +130,18 @@ public class User extends Auditable implements UserDetails {
             throw APIException.build(HttpStatus.BAD_REQUEST, "Token Inválido ou malformado.");
         }
         setAsVerified();
+        this.accountVerificationCode = null;
     }
 
     public void checkIfUserIsAlreadyActive(){
         if(this.getStatusMember() == StatusMember.ACTIVE)
             throw APIException.build(HttpStatus.BAD_REQUEST, "Usuário já está ativado.");
 
-        this.updateVerificationCode(GenerateNumber.generateVerificationCode());
+        this.updateVerificationCode(GenerateNumber.generateCode());
+    }
+
+    public void passwordRecoveryCode() {
+        this.passwordRecoveryCode = GenerateNumber.generateCode();
     }
 
     private void updateVerificationCode(String code) {

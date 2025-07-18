@@ -6,4 +6,5 @@ public interface UserService {
     void verifyAccountWithToken(String token);
     void verifyAccount(UserAccountVerificationPayloadDto userAccountVerificationPayloadDto);
     void resendVerificationEmail(String email);
+    void recoverPassword(String email);
 }

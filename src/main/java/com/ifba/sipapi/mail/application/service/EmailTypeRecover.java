@@ -15,7 +15,9 @@ public class EmailTypeRecover implements EmailProcess{
 
     @Override
     public void sendEmail(EmailSender payload) {
-        // Aguardando implementação
+        log.info("[start] EmailTypeRecover - sendEmail");
+        emailService.sendPasswordRecoveryEmail(payload.getSendTo());
+        log.debug("[finish] EmailTypeRecover - sendEmail");
     }
 
     @Override

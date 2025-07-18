@@ -62,6 +62,16 @@ public class UserApplicationService implements UserService {
         log.debug("[finish] AuthenticationApplicationService - resendVerificationEmail");
     }
 
+    @Override
+    public void recoverPassword(String email) {
+        log.info("[start] UserApplicationService - recoverPassword");
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado."));
+        user.passwordRecoveryCode();
+        this.sendEmail(email, EmailType.RECOVER_PASSWORD);
+        log.debug("[finish] UserApplicationService - recoverPassword");
+    }
+
     private void sendEmail(String userEmail, EmailType emailType) {
         log.info("[start] AuthenticationApplicationService - sendEmail");
         EmailSender payload = new EmailSender(userEmail, emailType);

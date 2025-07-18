@@ -21,6 +21,7 @@ import org.thymeleaf.context.Context;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Optional;
+import java.util.function.Function;
 
 @Service
 @Log4j2
@@ -36,24 +37,44 @@ public class EmailService {
     private String applicationUrl;
 
     public void sendVerificationEmail(String to) {
-        log.info("[start] EmailService - sendVerificationEmail");
+        sendEmailWithCode(
+                to,
+                "Verificação de Email - SIP",
+                "email",
+                "/user/verify-account/",
+                User::getAccountVerificationCode
+        );
+    }
+
+    public void sendPasswordRecoveryEmail(String to) {
+        sendEmailWithCode(
+                to,
+                "Recuperação de Senha - SIP",
+                "email",
+                "/user/recover-password/",
+                User::getPasswordRecoveryCode
+        );
+    }
+
+    private void sendEmailWithCode(String to, String subject, String template, String route, Function<User, String> codeProvider) {
+        log.info("[start] EmailService - sendEmailWithCode | to={}", to);
 
         User user = userRepository.findByEmail(to)
                 .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
 
-        String verificationCode = user.getAccountVerificationCode();
-        String token = tokenService.generateToken(new UserAccountVerificationPayloadDto(to, verificationCode));
+        String code = codeProvider.apply(user);
+        String token = tokenService.generateToken(new UserAccountVerificationPayloadDto(to, code));
 
         Context context = new Context();
-        context.setVariable("verificationLink", applicationUrl + "/authentication/verify-account/token/" + token);
-        context.setVariable("verificationCode", verificationCode);
+        context.setVariable("applicationLink", applicationUrl + route + token);
+        context.setVariable("verificationCode", code);
 
-        String body = templateEngine.process("email_verification", context);
+        String body = templateEngine.process(template, context);
+        sendHtmlEmail(to, subject, body);
 
-        sendHtmlEmail(to, "Verificação de Email - SIP", body);
-
-        log.debug("[finish] EmailService - sendVerificationEmail");
+        log.debug("[finish] EmailService - sendEmailWithCode | to={}", to);
     }
+
 
     private void sendHtmlEmail(String to, String subject, String htmlContent) {
         log.info("[start] EmailService - sendHtmlEmail");
