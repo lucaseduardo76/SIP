@@ -62,6 +62,16 @@ public class UserApplicationService implements UserService {
         log.debug("[finish] AuthenticationApplicationService - resendVerificationEmail");
     }
 
+    @Override
+    public void checkAndSendEmail(String email) {
+        log.info("[start] AuthenticationApplicationService - checkAndSendEmail");
+        User user = userRepository.findByEmail(email).orElseThrow(
+                () -> APIException.build(HttpStatus.BAD_REQUEST, "Email não encontrado!")
+        );
+        sendEmail(user.getEmail(), EmailType.REACTIVATE);
+        log.debug("[finish] AuthenticationApplicationService - checkAndSendEmail");
+    }
+
     private void sendEmail(String userEmail, EmailType emailType) {
         log.info("[start] AuthenticationApplicationService - sendEmail");
         EmailSender payload = new EmailSender(userEmail, emailType);

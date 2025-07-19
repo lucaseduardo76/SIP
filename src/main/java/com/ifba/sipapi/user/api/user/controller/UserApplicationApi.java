@@ -34,4 +34,11 @@ public class UserApplicationApi implements  UserApi{
         log.debug("[finish] AuthenticationApplicationApi - resendVerification");
     }
 
+    @Override
+    public void recoverAccount(String email) {
+        log.info("[start] AuthenticationApplicationApi - recoverAccount");
+        userService.checkAndSendEmail(email);
+        log.debug("[finish] AuthenticationApplicationApi - recoverAccount");
+    }
+
 }

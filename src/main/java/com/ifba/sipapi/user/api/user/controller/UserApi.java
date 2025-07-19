@@ -27,4 +27,9 @@ public interface UserApi {
     @PostMapping("/resend-verify-account")
     @ResponseStatus(HttpStatus.OK)
     void resendVerification(@RequestBody String email);
+
+    @UserAPIDocs.RecoverAccount
+    @PostMapping("/recover-account/{email}")
+    @ResponseStatus(HttpStatus.OK)
+    void recoverAccount(@PathVariable String email);
 }

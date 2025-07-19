@@ -18,10 +18,6 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
-import java.time.Instant;
-import java.util.Date;
-import java.util.Optional;
-
 @Service
 @Log4j2
 @RequiredArgsConstructor
@@ -55,6 +51,25 @@ public class EmailService {
         log.debug("[finish] EmailService - sendVerificationEmail");
     }
 
+    public void sendReactivationEmail(String sendTo) {
+        log.info("[start] EmailService - sendReactivationEmail");
+
+        User user = userRepository.findByEmail(sendTo)
+                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
+
+        String code = user.getAccountVerificationCode();
+        String token = tokenService.generateToken(new UserAccountVerificationPayloadDto(sendTo, code));
+
+        Context context = new Context();
+        context.setVariable("verificationLink", applicationUrl + "/authentication/reactivate/token/" + token);
+        context.setVariable("verificationCode", code);
+
+        String body = templateEngine.process("email_verification", context);
+
+        sendHtmlEmail(sendTo, "Reativação de conta - SIP", body);
+        log.debug("[finish] EmailService - sendReactivationEmail");
+    }
+
     private void sendHtmlEmail(String to, String subject, String htmlContent) {
         log.info("[start] EmailService - sendHtmlEmail");
         try {
@@ -74,5 +89,6 @@ public class EmailService {
         }
         log.debug("[finish] EmailService - sendHtmlEmail");
     }
+
 
 }
