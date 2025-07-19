@@ -64,7 +64,7 @@ public class EmailService {
         context.setVariable("verificationLink", applicationUrl + "/authentication/reactivate/token/" + token);
         context.setVariable("verificationCode", code);
 
-        String body = templateEngine.process("email_verification", context);
+        String body = templateEngine.process("email_reactivation", context);
 
         sendHtmlEmail(sendTo, "Reativação de conta - SIP", body);
         log.debug("[finish] EmailService - sendReactivationEmail");
