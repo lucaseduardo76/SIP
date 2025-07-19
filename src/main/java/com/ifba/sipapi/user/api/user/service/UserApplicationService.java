@@ -65,12 +65,15 @@ public class UserApplicationService implements UserService {
     @Override
     public void checkAndSendEmail(String email) {
         log.info("[start] AuthenticationApplicationService - checkAndSendEmail");
-        User user = userRepository.findByEmail(email).orElseThrow(
-                () -> APIException.build(HttpStatus.BAD_REQUEST, "Email não encontrado!")
-        );
+
+        User user = userRepository.findByEmail(email)
+                .filter(u -> u.getStatusMember().equals(StatusMember.BLOCKED))
+                .orElseThrow(() -> APIException.build(HttpStatus.BAD_REQUEST, "Usuário não está bloqueado ou email não encontrado!"));
+
         sendEmail(user.getEmail(), EmailType.REACTIVATE);
         log.debug("[finish] AuthenticationApplicationService - checkAndSendEmail");
     }
+
 
     private void sendEmail(String userEmail, EmailType emailType) {
         log.info("[start] AuthenticationApplicationService - sendEmail");
