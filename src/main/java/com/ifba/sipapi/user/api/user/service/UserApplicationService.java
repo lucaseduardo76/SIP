@@ -65,7 +65,7 @@ public class UserApplicationService implements UserService {
     public void accountReactivation(String token) {
         log.info("[start] UserApplicationService - accountReactivation");
         UserAccountVerificationPayloadDto userAccountVerificationPayloadDto = extractPayloadFromToken(token);
-        User user = userRepository.findByEmail(userAccountVerificationPayloadDto.getEmail()).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuario não encontrado"));
+        User user = userRepository.findByEmail(userAccountVerificationPayloadDto.getEmail()).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
         user.handleAccountReactivation(userAccountVerificationPayloadDto.getVerificationCode());
         userRepository.save(user);
         log.debug("[finish] UserApplicationService - accountReactivation");

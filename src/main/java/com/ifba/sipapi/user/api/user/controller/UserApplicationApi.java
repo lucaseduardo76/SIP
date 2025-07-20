@@ -15,30 +15,30 @@ public class UserApplicationApi implements  UserApi{
 
     @Override
     public void verifyWithToken(String token) {
-        log.info("[start] AuthenticationApplicationApi - verifyWithToken");
+        log.info("[start] UserApplicationApi - verifyWithToken");
         userService.verifyAccountWithToken(token);
-        log.debug("[finish] AuthenticationApplicationApi - verifyWithToken");
+        log.debug("[finish] UserApplicationApi - verifyWithToken");
     }
 
     @Override
     public void verify(UserAccountVerificationPayloadDto userAccountVerificationPayloadDto){
-        log.info("[start] AuthenticationApplicationApi - verify");
+        log.info("[start] UserApplicationApi - verify");
         userService.verifyAccount(userAccountVerificationPayloadDto);
-        log.debug("[finish] AuthenticationApplicationApi - verify");
+        log.debug("[finish] UserApplicationApi - verify");
     }
 
     @Override
     public void resendVerification(String email){
-        log.info("[start] AuthenticationApplicationApi - resendVerification");
+        log.info("[start] UserApplicationApi - resendVerification");
         userService.resendVerificationEmail(email);
-        log.debug("[finish] AuthenticationApplicationApi - resendVerification");
+        log.debug("[finish] UserApplicationApi - resendVerification");
     }
 
     @Override
     public void requestReactivation(String email) {
-        log.info("[start] AuthenticationApplicationApi - recoverAccount");
+        log.info("[start] UserApplicationApi - requestReactivation");
         userService.checkAndSendEmail(email);
-        log.debug("[finish] AuthenticationApplicationApi - recoverAccount");
+        log.debug("[finish] UserApplicationApi - requestReactivation");
     }
 
     @Override
