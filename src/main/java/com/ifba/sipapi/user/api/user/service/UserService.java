@@ -7,5 +7,6 @@ public interface UserService {
     void verifyAccount(UserAccountVerificationPayloadDto userAccountVerificationPayloadDto);
     void resendVerificationEmail(String email);
     void checkAndSendEmail(String email);
+    void accountReactivation(String token);
 
 }

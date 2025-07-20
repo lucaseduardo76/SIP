@@ -10,7 +10,6 @@ import com.ifba.sipapi.user.domain.StatusMember;
 import com.ifba.sipapi.user.domain.User;
 import com.ifba.sipapi.user.dto.UserAccountVerificationPayloadDto;
 import com.ifba.sipapi.user.infra.UserRepository;
-import com.ifba.sipapi.util.GenerateNumber;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
@@ -27,37 +26,27 @@ public class UserApplicationService implements UserService {
 
     @Override
     public void verifyAccountWithToken(String token) {
-        log.info("[start] AuthenticationApplicationService - verifyAccountWithToken");
-        String json = tokenService.validateToken(token);
-        UserAccountVerificationPayloadDto payload;
-        try {
-            payload = objectMapper.readValue(json, UserAccountVerificationPayloadDto.class);
-        } catch (Exception e) {
-            throw APIException.build(HttpStatus.BAD_REQUEST, "Token Inválido ou malformado.");
-        }
-        this.verifyAccount(payload);
-        log.debug("[finish] AuthenticationApplicationService - verifyAccountWithToken");
+        log.info("[start] verifyAccountWithToken");
+        UserAccountVerificationPayloadDto userAccountVerificationPayloadDto = extractPayloadFromToken(token);
+        verifyAccount(userAccountVerificationPayloadDto);
+        log.debug("[finish] verifyAccountWithToken");
     }
-
 
     @Override
     public void verifyAccount(UserAccountVerificationPayloadDto userAccountVerificationPayloadDto) {
-        log.info("[start] AuthenticationApplicationService - verifyAccount");
-        User user = userRepository.findByEmail(userAccountVerificationPayloadDto.getEmail())
-                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado."));
-
-        user.checkVerification(userAccountVerificationPayloadDto.getVerificationCode());
+        log.info("[start] verifyAccount");
+        User user = userRepository.findByEmail(userAccountVerificationPayloadDto.getEmail()).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado."));
+        user.handleAccountVerification(userAccountVerificationPayloadDto.getVerificationCode());
         userRepository.save(user);
-        log.debug("[finish] AuthenticationApplicationService - verifyAccount");
+        log.debug("[finish] verifyAccount");
     }
 
     @Override
     public void resendVerificationEmail(String email) {
         log.info("[start] AuthenticationApplicationService - resendVerificationEmail");
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado."));
-
-        user.checkIfUserIsAlreadyActive();
+                .filter(u -> u.getStatusMember().equals(StatusMember.NOT_VERIFIED))
+                .orElseThrow(() -> APIException.build(HttpStatus.BAD_REQUEST, "Usuário ja foi verificado ou email não encontrado!"));
         sendEmail(email, EmailType.VERIFICATION);
         log.debug("[finish] AuthenticationApplicationService - resendVerificationEmail");
     }
@@ -65,13 +54,21 @@ public class UserApplicationService implements UserService {
     @Override
     public void checkAndSendEmail(String email) {
         log.info("[start] AuthenticationApplicationService - checkAndSendEmail");
-
         User user = userRepository.findByEmail(email)
                 .filter(u -> u.getStatusMember().equals(StatusMember.BLOCKED))
                 .orElseThrow(() -> APIException.build(HttpStatus.BAD_REQUEST, "Usuário não está bloqueado ou email não encontrado!"));
-
         sendEmail(user.getEmail(), EmailType.REACTIVATE);
         log.debug("[finish] AuthenticationApplicationService - checkAndSendEmail");
+    }
+
+    @Override
+    public void accountReactivation(String token) {
+        log.info("[start] UserApplicationService - accountReactivation");
+        UserAccountVerificationPayloadDto userAccountVerificationPayloadDto = extractPayloadFromToken(token);
+        User user = userRepository.findByEmail(userAccountVerificationPayloadDto.getEmail()).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuario não encontrado"));
+        user.handleAccountReactivation(userAccountVerificationPayloadDto.getVerificationCode());
+        userRepository.save(user);
+        log.debug("[finish] UserApplicationService - accountReactivation");
     }
 
 
@@ -80,5 +77,15 @@ public class UserApplicationService implements UserService {
         EmailSender payload = new EmailSender(userEmail, emailType);
         kafkaApplicationEmailProducer.publishEmail(payload);
         log.debug("[finish] AuthenticationApplicationService - sendEmail");
+    }
+
+    private UserAccountVerificationPayloadDto extractPayloadFromToken(String token) {
+        String json;
+        try {
+            json = tokenService.validateToken(token);
+            return objectMapper.readValue(json, UserAccountVerificationPayloadDto.class);
+        } catch (Exception e) {
+            throw APIException.build(HttpStatus.BAD_REQUEST, "Erro ao processar o token, verifique a validade e tente novamente.");
+        }
     }
 }

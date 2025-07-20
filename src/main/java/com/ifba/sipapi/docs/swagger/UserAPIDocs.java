@@ -35,11 +35,21 @@ public @interface UserAPIDocs {
 
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
-    @Operation(summary = "Reativa Conta", description = "Metodo envia email de reativação de conta para email")
+    @Operation(summary = "Solicita Reativação de Conta", description = "Metodo envia email de reativação de conta para email")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Email com codigo de reativação sera enviado para email"),
             @ApiResponse(responseCode = "400", description = "Email não existe", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"message\": \"mensagem qualquer.\" }"))),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"description\": \"INTERNAL SERVER ERROR!\", \"message\": \"POR FAVOR INFORME AO ADMINISTRADOR DO SISTEMA!\" }")))})
-    public @interface RecoverAccount {
+    public @interface RequestAccountReactivation {
+    }
+
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @Operation(summary = "Reativa Conta", description = "Metodo recebe token com codigo de autorização e reativa conta")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Conta reativada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Token inválido ou expirado", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"message\": \"mensagem qualquer.\" }"))),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"description\": \"INTERNAL SERVER ERROR!\", \"message\": \"POR FAVOR INFORME AO ADMINISTRADOR DO SISTEMA!\" }")))})
+    public @interface ReactivateAccount {
     }
 }

@@ -35,10 +35,17 @@ public class UserApplicationApi implements  UserApi{
     }
 
     @Override
-    public void recoverAccount(String email) {
+    public void requestReactivation(String email) {
         log.info("[start] AuthenticationApplicationApi - recoverAccount");
         userService.checkAndSendEmail(email);
         log.debug("[finish] AuthenticationApplicationApi - recoverAccount");
+    }
+
+    @Override
+    public void reactivateAccount(String token) {
+        log.info("[start] UserApplicationApi - reactivateAccount");
+        userService.accountReactivation(token);
+        log.debug("[finish] UserApplicationApi - reactivateAccount");
     }
 
 }

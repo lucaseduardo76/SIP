@@ -123,26 +123,26 @@ public class User extends Auditable implements UserDetails {
         }
     }
 
-    public void checkVerification(String verificationCode) {
-        if (!verificationCode.equals(this.accountVerificationCode)) {
-            throw APIException.build(HttpStatus.BAD_REQUEST, "Token Inválido ou malformado.");
-        }
-        setAsVerified();
-    }
-
-    public void checkIfUserIsAlreadyActive(){
-        if(this.getStatusMember() == StatusMember.ACTIVE)
-            throw APIException.build(HttpStatus.BAD_REQUEST, "Usuário já está ativado.");
-
-        this.updateVerificationCode(GenerateNumber.generateVerificationCode());
-    }
-
-    private void updateVerificationCode(String code) {
-        this.accountVerificationCode = code;
-    }
-
-    private void setAsVerified() {
+    public void handleAccountVerification(String verificationCode) {
+        checkCode(verificationCode);
         this.statusMember = StatusMember.ACTIVE;
+        updateVerificationCode();
+    }
+
+    public void handleAccountReactivation(String verificationCode) {
+        checkCode(verificationCode);
+        this.statusMember = StatusMember.ACTIVE;
+        updateVerificationCode();
+    }
+
+    private void checkCode(String verificationCode) {
+        if (!verificationCode.equals(this.accountVerificationCode)) {
+            throw APIException.build(HttpStatus.BAD_REQUEST, "Token Inválido ou expirado!");
+        }
+    }
+
+    private void updateVerificationCode() {
+        this.accountVerificationCode = GenerateNumber.generateVerificationCode();
     }
 
     private void incrementFailedLoginAttempts() {
@@ -160,5 +160,6 @@ public class User extends Auditable implements UserDetails {
     private void blockUser() {
         this.statusMember = StatusMember.BLOCKED;
     }
+
 
 }
