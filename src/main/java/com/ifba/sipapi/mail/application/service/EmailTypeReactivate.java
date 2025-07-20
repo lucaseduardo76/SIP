@@ -15,9 +15,9 @@ public class EmailTypeReactivate implements EmailProcess{
 
     @Override
     public void sendEmail(EmailSender payload) {
-        log.info("[start] EmailTypeVerify - sendEmail");
+        log.info("[start] EmailTypeReactivate - sendEmail");
         emailService.sendReactivationEmail(payload.getSendTo());
-        log.debug("[finish] EmailTypeVerify - sendEmail");
+        log.debug("[finish] EmailTypeReactivate - sendEmail");
     }
 
     @Override
