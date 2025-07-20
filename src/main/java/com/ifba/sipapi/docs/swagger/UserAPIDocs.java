@@ -23,15 +23,6 @@ public @interface UserAPIDocs {
     public @interface VerifyAccount {
     }
 
-    @Target(ElementType.METHOD)
-    @Retention(RetentionPolicy.RUNTIME)
-    @Operation(summary = "Testa token", description = "Método criado para o front-end validação de token")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Token valido"),
-            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"message\": \"mensagem qualquer.\" }"))),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"description\": \"INTERNAL SERVER ERROR!\", \"message\": \"POR FAVOR INFORME AO ADMINISTRADOR DO SISTEMA!\" }")))})
-    public @interface tokenTeste {
-    }
 
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
