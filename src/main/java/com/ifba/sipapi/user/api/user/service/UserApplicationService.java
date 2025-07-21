@@ -9,6 +9,7 @@ import com.ifba.sipapi.mail.infra.KafkaApplicationEmailProducer;
 import com.ifba.sipapi.user.domain.StatusMember;
 import com.ifba.sipapi.user.domain.User;
 import com.ifba.sipapi.user.dto.UserAccountVerificationPayloadDto;
+import com.ifba.sipapi.user.dto.UserUpdateDto;
 import com.ifba.sipapi.user.infra.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -71,6 +72,21 @@ public class UserApplicationService implements UserService {
         log.debug("[finish] UserApplicationService - accountReactivation");
     }
 
+    @Override
+    public void updateUser(UserUpdateDto userUpdateDto, String email, String token) {
+        log.info("[start] UserApplicationService - updateUser");
+        User user = userRepository.findByEmail(tokenService.getSubject(token)).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
+        assertEmailBelongsToUser(user, email);
+        user.updateUser(userUpdateDto);
+        userRepository.save(user);
+        log.debug("[finish] UserApplicationService - updateUser");
+    }
+
+    private void assertEmailBelongsToUser(User user, String email) {
+        if(!user.getEmail().equals(email)){
+            throw APIException.build(HttpStatus.UNAUTHORIZED, "Token não corresponde ao email enviado");
+        }
+    }
 
     private void sendEmail(String userEmail, EmailType emailType) {
         log.info("[start] AuthenticationApplicationService - sendEmail");

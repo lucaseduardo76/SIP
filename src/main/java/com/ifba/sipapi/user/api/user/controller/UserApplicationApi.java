@@ -2,6 +2,7 @@ package com.ifba.sipapi.user.api.user.controller;
 
 import com.ifba.sipapi.user.api.user.service.UserApplicationService;
 import com.ifba.sipapi.user.dto.UserAccountVerificationPayloadDto;
+import com.ifba.sipapi.user.dto.UserUpdateDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,5 +48,14 @@ public class UserApplicationApi implements  UserApi{
         userService.accountReactivation(token);
         log.debug("[finish] UserApplicationApi - reactivateAccount");
     }
+
+    @Override
+    public void update(String token, String email, UserUpdateDto userUpdateDto) {
+        log.info("[start] UserApplicationApi - update");
+        userService.updateUser(userUpdateDto, email, token);
+        log.debug("[finish] UserApplicationApi - update");
+    }
+
+
 
 }

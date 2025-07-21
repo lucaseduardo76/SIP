@@ -1,12 +1,10 @@
 package com.ifba.sipapi.user.api.authentication.controller;
 
 import com.ifba.sipapi.docs.swagger.AuthenticationAPIDocs;
-import com.ifba.sipapi.user.dto.UserAccountVerificationPayloadDto;
 import com.ifba.sipapi.user.dto.UserLoginDto;
 import com.ifba.sipapi.user.dto.UserCommomRegisterDto;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,7 +25,7 @@ public interface AuthenticationApi {
     @ResponseStatus(HttpStatus.OK)
     AuthenticationResponseDto login(@RequestBody @Valid UserLoginDto userLoginDto);
 
-    @AuthenticationAPIDocs.tokenTeste
+    @AuthenticationAPIDocs.TokenTeste
     @GetMapping("/token-teste")
     @ResponseStatus(code = HttpStatus.OK)
     public Map<String, String> tokenTeste();

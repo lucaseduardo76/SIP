@@ -2,6 +2,7 @@ package com.ifba.sipapi.user.api.user.controller;
 
 import com.ifba.sipapi.docs.swagger.UserAPIDocs;
 import com.ifba.sipapi.user.dto.UserAccountVerificationPayloadDto;
+import com.ifba.sipapi.user.dto.UserUpdateDto;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -36,4 +37,12 @@ public interface UserApi {
     @PostMapping("/account/reactivate/{token}")
     @ResponseStatus(HttpStatus.OK)
     void reactivateAccount(@PathVariable String token);
+
+    @UserAPIDocs.Update
+    @PutMapping("/update/{email}")
+    @ResponseStatus(HttpStatus.OK)
+    void update(@RequestHeader(name = "Authorization", required = true) String token,
+            @PathVariable String email,
+            @RequestBody @Valid UserUpdateDto userUpdateDto);
+
 }
