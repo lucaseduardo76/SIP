@@ -23,14 +23,35 @@ public @interface UserAPIDocs {
     public @interface VerifyAccount {
     }
 
+
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
-    @Operation(summary = "Testa se token", description = "Método criado para o front-end validação de token")
+    @Operation(summary = "Solicita Reativação de Conta", description = "Método envia email de reativação de conta para email")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Token valido"),
-            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"message\": \"mensagem qualquer.\" }"))),
+            @ApiResponse(responseCode = "200", description = "Email com código de reativação será enviado para email"),
+            @ApiResponse(responseCode = "400", description = "Email não existe", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"message\": \"mensagem qualquer.\" }"))),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"description\": \"INTERNAL SERVER ERROR!\", \"message\": \"POR FAVOR INFORME AO ADMINISTRADOR DO SISTEMA!\" }")))})
-    public @interface tokenTeste {
+    public @interface RequestAccountReactivation {
+    }
+
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @Operation(summary = "Reativa Conta", description = "Método recebe token com código de autorização e reativa conta")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Conta reativada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Token inválido ou expirado", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"message\": \"mensagem qualquer.\" }"))),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"description\": \"INTERNAL SERVER ERROR!\", \"message\": \"POR FAVOR INFORME AO ADMINISTRADOR DO SISTEMA!\" }")))})
+    public @interface ReactivateAccount {
+    }
+
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @Operation(summary = "Edição de Telefone e Nome", description = "Método permite a edição de nome e telefone")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Dados alterados com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Verifique os dados e tente novamente", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"message\": \"mensagem qualquer.\" }"))),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"description\": \"INTERNAL SERVER ERROR!\", \"message\": \"POR FAVOR INFORME AO ADMINISTRADOR DO SISTEMA!\" }")))})
+    public @interface Update {
     }
 
     @Target(ElementType.METHOD)

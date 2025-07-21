@@ -5,6 +5,7 @@ import com.ifba.sipapi.config.handler.APIException;
 import com.ifba.sipapi.item.domain.item.Item;
 import com.ifba.sipapi.user.api.authentication.service.LoginType;
 import com.ifba.sipapi.user.dto.UserCommomRegisterDto;
+import com.ifba.sipapi.user.dto.UserUpdateDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -123,12 +124,15 @@ public class User extends Auditable implements UserDetails {
         }
     }
 
-    public void checkVerification(String verificationCode) {
-        if (!verificationCode.equals(this.accountCode)) {
-            throw APIException.build(HttpStatus.BAD_REQUEST, "Token Inválido ou malformado.");
-        }
-        setAsVerified();
-        this.updateCode(null);
+    public void handleAccountVerification(String verificationCode) {
+        checkCode(verificationCode);
+        this.statusMember = StatusMember.ACTIVE;
+        updateVerificationCode();
+    }
+    public void handleAccountReactivation(String verificationCode) {
+        checkCode(verificationCode);
+        this.statusMember = StatusMember.ACTIVE;
+        updateVerificationCode();
     }
 
     public void checkIfUserIsAlreadyActive(){
@@ -160,6 +164,30 @@ public class User extends Auditable implements UserDetails {
 
     private void setAsVerified() {
         this.statusMember = StatusMember.ACTIVE;
+        updateVerificationCode();
+    }
+
+    public void updateUser(UserUpdateDto dto) {
+        this.name = applyIfFilled(dto.getName(), this.name);
+        this.phone = applyIfFilled(dto.getPhone(), this.phone);
+    }
+
+    private String applyIfFilled(String newValue, String currentValue) {
+        return isFilled(newValue) ? newValue : currentValue;
+    }
+
+    private boolean isFilled(String value) {
+        return value != null && !value.trim().isEmpty();
+    }
+
+    private void checkCode(String verificationCode) {
+        if (!verificationCode.equals(this.accountCode)) {
+            throw APIException.build(HttpStatus.BAD_REQUEST, "Token Inválido ou expirado!");
+        }
+    }
+
+    private void updateVerificationCode() {
+        this.updateCode(GenerateNumber.generateCode());
     }
 
     private void incrementFailedLoginAttempts() {

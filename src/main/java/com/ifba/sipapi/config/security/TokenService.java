@@ -39,7 +39,7 @@ public class TokenService {
         try{
             Algorithm algorithm = Algorithm.HMAC256(secret);
             return JWT.create()
-                    .withIssuer("wakanda-ai")
+                    .withIssuer("SIP")
                     .withSubject(user.getUsername())
                     .withExpiresAt(generateExpirationTime())
                     .sign(algorithm);
@@ -53,7 +53,7 @@ public class TokenService {
             Algorithm algorithm = Algorithm.HMAC256(secret);
             String subjectJson = objectMapper.writeValueAsString(payload);
             return JWT.create()
-                    .withIssuer("wakanda-ai")
+                    .withIssuer("SIP")
                     .withSubject(subjectJson)
                     .withExpiresAt(generateExpirationTime())
                     .sign(algorithm);
@@ -66,18 +66,22 @@ public class TokenService {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
             return JWT.require(algorithm)
-                    .withIssuer("wakanda-ai")
+                    .withIssuer("SIP")
                     .build()
                     .verify(token)
                     .getSubject();
         }catch (JWTVerificationException exception){
-            log.error("Erro ao validar token: " + exception.getMessage());
+            log.error("Erro ao validar token: {}",  exception.getMessage());
             return null;
         }
     }
 
     private Instant generateExpirationTime() {
         return LocalDateTime.now().plusHours(expiration).toInstant(ZoneOffset.of("-03:00"));
+    }
+
+    public String getSubject(String token) {
+        return validateToken(token.replace("Bearer ", ""));
     }
 
 }

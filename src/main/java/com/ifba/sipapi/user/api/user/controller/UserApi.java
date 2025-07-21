@@ -1,10 +1,10 @@
 package com.ifba.sipapi.user.api.user.controller;
 
-import com.ifba.sipapi.docs.swagger.AuthenticationAPIDocs;
 import com.ifba.sipapi.docs.swagger.UserAPIDocs;
 import com.ifba.sipapi.mail.domain.EmailData;
 import com.ifba.sipapi.user.dto.UserAccountVerificationPayloadDto;
 import com.ifba.sipapi.user.dto.UserPasswordRecoveryDto;
+import com.ifba.sipapi.user.dto.UserUpdateDto;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -16,22 +16,45 @@ import org.springframework.web.bind.annotation.*;
 public interface UserApi {
 
     @UserAPIDocs.VerifyAccount
-    @PostMapping("/verify-account/{token}")
+    @PostMapping("/account/verify/{token}")
     @ResponseStatus(HttpStatus.OK)
     void verifyWithToken(@PathVariable String token);
 
     @UserAPIDocs.VerifyAccount
-    @PostMapping("/resend-verify-account")
+    @PostMapping("/account/verify")
+    @ResponseStatus(HttpStatus.OK)
+    void verify(@RequestBody @Valid UserAccountVerificationPayloadDto userAccountVerificationPayloadDto);
+
+    @UserAPIDocs.VerifyAccount
+    @PostMapping("/account/resend-verify-account")
     @ResponseStatus(HttpStatus.OK)
     void resendVerification(@RequestBody String email);
 
+    @UserAPIDocs.RequestAccountReactivation
+    @PostMapping("/account/request-reactivation/{email}")
+    @ResponseStatus(HttpStatus.OK)
+    void requestReactivation(@PathVariable String email);
+
+    @UserAPIDocs.ReactivateAccount
+    @PostMapping("/account/reactivate/{token}")
+    @ResponseStatus(HttpStatus.OK)
+    void reactivateAccount(@PathVariable String token);
+
+    @UserAPIDocs.Update
+    @PutMapping("/update/{email}")
+    @ResponseStatus(HttpStatus.OK)
+    void update(@RequestHeader(name = "Authorization", required = true) String token,
+            @PathVariable String email,
+            @RequestBody @Valid UserUpdateDto userUpdateDto);
+
+
     @UserAPIDocs.RecoverPassword
-    @PostMapping("/password-reset")
+    @PostMapping("/account/password-reset")
     @ResponseStatus(HttpStatus.OK)
     void resetPassword(@RequestBody UserPasswordRecoveryDto userPasswordRecoveryDto);
 
     @UserAPIDocs.RecoverPassword
-    @PostMapping("/password-recovery")
+    @PostMapping("/account/password-recovery")
     @ResponseStatus(HttpStatus.OK)
     void recoverPassword(@RequestBody String email);
 }

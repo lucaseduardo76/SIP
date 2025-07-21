@@ -36,11 +36,7 @@ public class SecurityConfiguration {
                                 "swagger-ui.html",
                                 "v3/api-docs/swagger-config",
                                 "v3/api-docs",
-                                "user/verify-account/**",
-                                "user/verify-account",
-                                "user/resend-verify-account",
-                                "user/password-recovery",
-                                "user/password-reset"
+                                "user/account/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.POST, "authentication/**").permitAll()
                         .anyRequest().authenticated()

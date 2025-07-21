@@ -4,7 +4,9 @@ import com.ifba.sipapi.config.handler.APIException;
 import com.ifba.sipapi.config.security.TokenService;
 import com.ifba.sipapi.mail.domain.EmailData;
 import com.ifba.sipapi.mail.domain.EmailPayloadDto;
+import com.ifba.sipapi.user.domain.StatusMember;
 import com.ifba.sipapi.user.domain.User;
+import com.ifba.sipapi.user.dto.UserAccountVerificationPayloadDto;
 import com.ifba.sipapi.user.infra.UserRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -34,7 +36,7 @@ public class EmailService {
     @Value("${spring.application.applicationUrl}")
     private String applicationUrl;
 
-    public <T> void sendEmailWithCode(
+    public void sendEmailWithCode(
             EmailPayloadDto emailPayloadDto
     ) {
         log.info("[start] EmailService - sendEmailWithCode | to={}", emailPayloadDto.getTo());
@@ -55,6 +57,25 @@ public class EmailService {
     }
 
 
+    public void sendReactivationEmail(String sendTo) {
+        log.info("[start] EmailService - sendReactivationEmail");
+
+        User user = userRepository.findByEmail(sendTo)
+                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
+
+        String code = user.getAccountCode();
+        String token = tokenService.generateToken(new UserAccountVerificationPayloadDto(sendTo, code));
+
+        Context context = new Context();
+        context.setVariable("verificationLink", applicationUrl + "/authentication/reactivate/token/" + token);
+        context.setVariable("verificationCode", code);
+
+        String body = templateEngine.process("email_reactivation", context);
+
+        sendHtmlEmail(sendTo, "Reativação de conta - SIP", body);
+        log.debug("[finish] EmailService - sendReactivationEmail");
+    }
+
     private void sendHtmlEmail(String to, String subject, String htmlContent) {
         log.info("[start] EmailService - sendHtmlEmail");
         try {
@@ -74,5 +95,6 @@ public class EmailService {
         }
         log.debug("[finish] EmailService - sendHtmlEmail");
     }
+
 
 }
