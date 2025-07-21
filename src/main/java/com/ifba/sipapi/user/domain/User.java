@@ -5,6 +5,7 @@ import com.ifba.sipapi.config.handler.APIException;
 import com.ifba.sipapi.item.domain.item.Item;
 import com.ifba.sipapi.user.api.authentication.service.LoginType;
 import com.ifba.sipapi.user.dto.UserCommomRegisterDto;
+import com.ifba.sipapi.user.dto.UserUpdateDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -135,6 +136,19 @@ public class User extends Auditable implements UserDetails {
         updateVerificationCode();
     }
 
+    public void updateUser(UserUpdateDto dto, String email) {
+        this.name = applyIfFilled(dto.getName(), this.name);
+        this.phone = applyIfFilled(dto.getPhone(), this.phone);
+    }
+
+    private String applyIfFilled(String newValue, String currentValue) {
+        return isFilled(newValue) ? newValue : currentValue;
+    }
+
+    private boolean isFilled(String value) {
+        return value != null && !value.trim().isEmpty();
+    }
+
     private void checkCode(String verificationCode) {
         if (!verificationCode.equals(this.accountVerificationCode)) {
             throw APIException.build(HttpStatus.BAD_REQUEST, "Token Inválido ou expirado!");
@@ -160,6 +174,5 @@ public class User extends Auditable implements UserDetails {
     private void blockUser() {
         this.statusMember = StatusMember.BLOCKED;
     }
-
 
 }

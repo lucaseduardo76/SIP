@@ -43,4 +43,14 @@ public @interface UserAPIDocs {
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"description\": \"INTERNAL SERVER ERROR!\", \"message\": \"POR FAVOR INFORME AO ADMINISTRADOR DO SISTEMA!\" }")))})
     public @interface ReactivateAccount {
     }
+
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @Operation(summary = "Edição de Telefone e Nome", description = "Método permite a edição de nome e telefone")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Dados alterados com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Verifique os dados e tente novamente", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"message\": \"mensagem qualquer.\" }"))),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"description\": \"INTERNAL SERVER ERROR!\", \"message\": \"POR FAVOR INFORME AO ADMINISTRADOR DO SISTEMA!\" }")))})
+    public @interface Update {
+    }
 }

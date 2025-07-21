@@ -81,4 +81,8 @@ public class TokenService {
         return LocalDateTime.now().plusHours(expiration).toInstant(ZoneOffset.of("-03:00"));
     }
 
+    public String getSubject(String token) {
+        return validateToken(token.replace("Bearer ", ""));
+    }
+
 }
