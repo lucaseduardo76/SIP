@@ -55,9 +55,7 @@ public class User extends Auditable implements UserDetails {
     @Column(nullable = false)
     private String phone;
 
-    private String accountVerificationCode;
-
-    private String passwordRecoveryCode;
+    private String accountCode;
 
     @OneToMany(mappedBy = "owner")
     private List<Item> items;
@@ -71,7 +69,7 @@ public class User extends Auditable implements UserDetails {
         this.role = Role.COMMOM;
         this.statusMember = StatusMember.NOT_VERIFIED;
         this.failedLoginAttempts = 0;
-        this.accountVerificationCode = GenerateNumber.generateCode();
+        this.accountCode = GenerateNumber.generateCode();
     }
 
     @Override
@@ -126,38 +124,38 @@ public class User extends Auditable implements UserDetails {
     }
 
     public void checkVerification(String verificationCode) {
-        if (!verificationCode.equals(this.accountVerificationCode)) {
+        if (!verificationCode.equals(this.accountCode)) {
             throw APIException.build(HttpStatus.BAD_REQUEST, "Token Inválido ou malformado.");
         }
         setAsVerified();
-        this.accountVerificationCode = null;
+        this.accountCode = null;
     }
 
     public void checkIfUserIsAlreadyActive(){
         if(this.getStatusMember() == StatusMember.ACTIVE)
             throw APIException.build(HttpStatus.BAD_REQUEST, "Usuário já está ativado.");
 
-        this.updateVerificationCode(GenerateNumber.generateCode());
+        this.updateCode(GenerateNumber.generateCode());
     }
 
     public void updatePasswordRecoveryCode() {
-        this.passwordRecoveryCode = GenerateNumber.generateCode();
+        this.accountCode = GenerateNumber.generateCode();
     }
 
     public void resetPassword(String code, String password) {
-        if(!code.equals(this.passwordRecoveryCode))
+        if(!code.equals(this.accountCode))
             throw APIException.build(HttpStatus.BAD_REQUEST, "Token Inválido ou malformado.");
 
         this.changePassword(password);
-        this.passwordRecoveryCode = null;
+        this.accountCode = null;
     }
 
     private void changePassword(String password) {
         this.password = password;
     }
 
-    private void updateVerificationCode(String code) {
-        this.accountVerificationCode = code;
+    private void updateCode(String code) {
+        this.accountCode = code;
     }
 
     private void setAsVerified() {

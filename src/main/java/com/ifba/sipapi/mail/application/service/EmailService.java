@@ -3,10 +3,8 @@ package com.ifba.sipapi.mail.application.service;
 import com.ifba.sipapi.config.handler.APIException;
 import com.ifba.sipapi.config.security.TokenService;
 import com.ifba.sipapi.mail.domain.EmailData;
-import com.ifba.sipapi.mail.domain.EmailSender;
+import com.ifba.sipapi.mail.domain.EmailPayloadDto;
 import com.ifba.sipapi.user.domain.User;
-import com.ifba.sipapi.user.dto.UserAccountVerificationPayloadDto;
-import com.ifba.sipapi.user.dto.UserPasswordRecoveryDto;
 import com.ifba.sipapi.user.infra.UserRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -21,9 +19,6 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
-import java.time.Instant;
-import java.util.Date;
-import java.util.Optional;
 import java.util.function.Function;
 
 @Service
@@ -39,55 +34,24 @@ public class EmailService {
     @Value("${spring.application.applicationUrl}")
     private String applicationUrl;
 
-    public void sendVerificationEmail(String to) {
-        sendEmailWithCode(
-                to,
-                "Verificação de Email - SIP",
-                "email",
-                "/user/verify-account/",
-                User::getAccountVerificationCode,
-                user -> new EmailData(user.getEmail(), user.getAccountVerificationCode())
-        );
-
-    }
-
-    public void sendPasswordRecoveryEmail(String to) {
-        sendEmailWithCode(
-                to,
-                "Recuperação de Senha - SIP",
-                "email",
-                "/user/recover-password/",
-                User::getPasswordRecoveryCode,
-                user -> new EmailData(user.getEmail(), user.getPasswordRecoveryCode())
-        );
-
-    }
-
-    private <T> void sendEmailWithCode(
-            String to,
-            String subject,
-            String template,
-            String route,
-            Function<User, String> codeProvider,
-            Function<User, T> dtoMapper
+    public <T> void sendEmailWithCode(
+            EmailPayloadDto emailPayloadDto
     ) {
-        log.info("[start] EmailService - sendEmailWithCode | to={}", to);
+        log.info("[start] EmailService - sendEmailWithCode | to={}", emailPayloadDto.getTo());
 
-        User user = userRepository.findByEmail(to)
+        User user = userRepository.findByEmail(emailPayloadDto.getTo())
                 .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
 
-        String code = codeProvider.apply(user);
-        T dto = dtoMapper.apply(user);
-        String token = tokenService.generateToken(dto);
+        String token = tokenService.generateToken(new EmailData(user.getEmail(), user.getAccountCode()));
 
         Context context = new Context();
-        context.setVariable("applicationLink", applicationUrl + route + token);
-        context.setVariable("verificationCode", code);
+        context.setVariable("applicationLink", applicationUrl + emailPayloadDto.getRoute() + token);
+        context.setVariable("verificationCode", user.getAccountCode());
 
-        String body = templateEngine.process(template, context);
-        sendHtmlEmail(to, subject, body);
+        String body = templateEngine.process("email", context);
+        sendHtmlEmail(emailPayloadDto.getTo(), emailPayloadDto.getSubject(), body);
 
-        log.debug("[finish] EmailService - sendEmailWithCode | to={}", to);
+        log.debug("[finish] EmailService - sendEmailWithCode | to={}", emailPayloadDto.getTo());
     }
 
 

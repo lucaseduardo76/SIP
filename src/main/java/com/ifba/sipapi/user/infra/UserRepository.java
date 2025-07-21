@@ -22,6 +22,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     @Transactional
     @Modifying
-    @Query("UPDATE User u SET u.accountVerificationCode = :code WHERE u.email = :email")
+    @Query("UPDATE User u SET u.accountCode = :code WHERE u.email = :email")
     void updateVerificationCodeByEmail(@Param("email") String email, @Param("code") String code);
 }
