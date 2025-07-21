@@ -128,7 +128,7 @@ public class User extends Auditable implements UserDetails {
             throw APIException.build(HttpStatus.BAD_REQUEST, "Token Inválido ou malformado.");
         }
         setAsVerified();
-        this.accountCode = null;
+        this.updateCode(null);
     }
 
     public void checkIfUserIsAlreadyActive(){
@@ -147,7 +147,7 @@ public class User extends Auditable implements UserDetails {
             throw APIException.build(HttpStatus.BAD_REQUEST, "Token Inválido ou malformado.");
 
         this.changePassword(password);
-        this.accountCode = null;
+        this.updateCode(null);
     }
 
     private void changePassword(String password) {
