@@ -9,8 +9,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Getter
 @EqualsAndHashCode
-public class EmailPayloadDto {
+public class EmailDetailsDto {
     private String to;
     private String subject;
     private String route;
+    private String template;
 }

@@ -7,12 +7,11 @@ import com.ifba.sipapi.user.dto.UserUpdateDto;
 
 public interface UserService {
     void verifyAccountWithToken(String token);
-    void verifyAccount(UserAccountVerificationPayloadDto userAccountVerificationPayloadDto);
+    void verifyAccount(EmailData emailData);
     void resendVerificationEmail(String email);
     void recoverPassword(String email);
     void resetPassword(UserPasswordRecoveryDto userPasswordRecoveryDto);
     void checkAndSendEmail(String email);
     void accountReactivation(String token);
     void updateUser(UserUpdateDto userUpdateDto, String email, String token);
-
 }

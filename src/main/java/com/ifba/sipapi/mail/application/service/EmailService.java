@@ -3,10 +3,8 @@ package com.ifba.sipapi.mail.application.service;
 import com.ifba.sipapi.config.handler.APIException;
 import com.ifba.sipapi.config.security.TokenService;
 import com.ifba.sipapi.mail.domain.EmailData;
-import com.ifba.sipapi.mail.domain.EmailPayloadDto;
-import com.ifba.sipapi.user.domain.StatusMember;
+import com.ifba.sipapi.mail.domain.EmailDetailsDto;
 import com.ifba.sipapi.user.domain.User;
-import com.ifba.sipapi.user.dto.UserAccountVerificationPayloadDto;
 import com.ifba.sipapi.user.infra.UserRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -20,8 +18,6 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
-
-import java.util.function.Function;
 
 @Service
 @Log4j2
@@ -37,43 +33,23 @@ public class EmailService {
     private String applicationUrl;
 
     public void sendEmailWithCode(
-            EmailPayloadDto emailPayloadDto
+            EmailDetailsDto emailDetailsDto
     ) {
-        log.info("[start] EmailService - sendEmailWithCode | to={}", emailPayloadDto.getTo());
+        log.info("[start] EmailService - sendEmailWithCode | to={}", emailDetailsDto.getTo());
 
-        User user = userRepository.findByEmail(emailPayloadDto.getTo())
+        User user = userRepository.findByEmail(emailDetailsDto.getTo())
                 .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
 
         String token = tokenService.generateToken(new EmailData(user.getEmail(), user.getAccountCode()));
 
         Context context = new Context();
-        context.setVariable("applicationLink", applicationUrl + emailPayloadDto.getRoute() + token);
+        context.setVariable("applicationLink", applicationUrl + emailDetailsDto.getRoute() + token);
         context.setVariable("verificationCode", user.getAccountCode());
 
-        String body = templateEngine.process("email", context);
-        sendHtmlEmail(emailPayloadDto.getTo(), emailPayloadDto.getSubject(), body);
+        String body = templateEngine.process(emailDetailsDto.getTemplate(), context);
+        sendHtmlEmail(emailDetailsDto.getTo(), emailDetailsDto.getSubject(), body);
 
-        log.debug("[finish] EmailService - sendEmailWithCode | to={}", emailPayloadDto.getTo());
-    }
-
-
-    public void sendReactivationEmail(String sendTo) {
-        log.info("[start] EmailService - sendReactivationEmail");
-
-        User user = userRepository.findByEmail(sendTo)
-                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
-
-        String code = user.getAccountCode();
-        String token = tokenService.generateToken(new UserAccountVerificationPayloadDto(sendTo, code));
-
-        Context context = new Context();
-        context.setVariable("verificationLink", applicationUrl + "/authentication/reactivate/token/" + token);
-        context.setVariable("verificationCode", code);
-
-        String body = templateEngine.process("email_reactivation", context);
-
-        sendHtmlEmail(sendTo, "Reativação de conta - SIP", body);
-        log.debug("[finish] EmailService - sendReactivationEmail");
+        log.debug("[finish] EmailService - sendEmailWithCode | to={}", emailDetailsDto.getTo());
     }
 
     private void sendHtmlEmail(String to, String subject, String htmlContent) {

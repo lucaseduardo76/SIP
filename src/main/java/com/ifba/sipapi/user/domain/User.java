@@ -129,22 +129,16 @@ public class User extends Auditable implements UserDetails {
         this.statusMember = StatusMember.ACTIVE;
         updateVerificationCode();
     }
+
     public void handleAccountReactivation(String verificationCode) {
         checkCode(verificationCode);
         this.statusMember = StatusMember.ACTIVE;
         updateVerificationCode();
     }
 
-    public void checkIfUserIsAlreadyActive(){
-        if(this.getStatusMember() == StatusMember.ACTIVE)
-            throw APIException.build(HttpStatus.BAD_REQUEST, "Usuário já está ativado.");
+    public void updatePasswordRecoveryCode() { this.updateCode(GenerateNumber.generateCode()); }
 
-        this.updateCode(GenerateNumber.generateCode());
-    }
-
-    public void updatePasswordRecoveryCode() {
-        this.updateCode(GenerateNumber.generateCode());
-    }
+    public void updateAccountReactivationCode() { this.updateCode(GenerateNumber.generateCode()); }
 
     public void resetPassword(String code, String password) {
         if(!code.equals(this.accountCode))
@@ -154,30 +148,9 @@ public class User extends Auditable implements UserDetails {
         this.updateCode(null);
     }
 
-    private void changePassword(String password) {
-        this.password = password;
-    }
-
-    private void updateCode(String code) {
-        this.accountCode = code;
-    }
-
-    private void setAsVerified() {
-        this.statusMember = StatusMember.ACTIVE;
-        updateVerificationCode();
-    }
-
     public void updateUser(UserUpdateDto dto) {
         this.name = applyIfFilled(dto.getName(), this.name);
         this.phone = applyIfFilled(dto.getPhone(), this.phone);
-    }
-
-    private String applyIfFilled(String newValue, String currentValue) {
-        return isFilled(newValue) ? newValue : currentValue;
-    }
-
-    private boolean isFilled(String value) {
-        return value != null && !value.trim().isEmpty();
     }
 
     private void checkCode(String verificationCode) {
@@ -186,9 +159,15 @@ public class User extends Auditable implements UserDetails {
         }
     }
 
-    private void updateVerificationCode() {
-        this.updateCode(GenerateNumber.generateCode());
-    }
+    private String applyIfFilled(String newValue, String currentValue) { return isFilled(newValue) ? newValue : currentValue; }
+
+    private boolean isFilled(String value) { return value != null && !value.trim().isEmpty(); }
+
+    private void changePassword(String password) { this.password = password; }
+
+    private void updateCode(String code) { this.accountCode = code; }
+
+    private void updateVerificationCode() { this.updateCode(GenerateNumber.generateCode()); }
 
     private void incrementFailedLoginAttempts() {
         this.failedLoginAttempts++;

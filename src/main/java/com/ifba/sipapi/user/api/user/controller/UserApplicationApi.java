@@ -24,13 +24,6 @@ public class UserApplicationApi implements  UserApi{
     }
 
     @Override
-    public void verify(UserAccountVerificationPayloadDto userAccountVerificationPayloadDto){
-        log.info("[start] UserApplicationApi - verify");
-        userService.verifyAccount(userAccountVerificationPayloadDto);
-        log.debug("[finish] UserApplicationApi - verify");
-    }
-
-    @Override
     public void resendVerification(String email){
         log.info("[start] UserApplicationApi - resendVerification");
         userService.resendVerificationEmail(email);

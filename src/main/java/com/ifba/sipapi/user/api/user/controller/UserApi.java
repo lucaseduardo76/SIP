@@ -21,11 +21,6 @@ public interface UserApi {
     void verifyWithToken(@PathVariable String token);
 
     @UserAPIDocs.VerifyAccount
-    @PostMapping("/account/verify")
-    @ResponseStatus(HttpStatus.OK)
-    void verify(@RequestBody @Valid UserAccountVerificationPayloadDto userAccountVerificationPayloadDto);
-
-    @UserAPIDocs.VerifyAccount
     @PostMapping("/account/resend-verify-account")
     @ResponseStatus(HttpStatus.OK)
     void resendVerification(@RequestBody String email);
@@ -46,7 +41,6 @@ public interface UserApi {
     void update(@RequestHeader(name = "Authorization", required = true) String token,
             @PathVariable String email,
             @RequestBody @Valid UserUpdateDto userUpdateDto);
-
 
     @UserAPIDocs.RecoverPassword
     @PostMapping("/account/password-reset")
