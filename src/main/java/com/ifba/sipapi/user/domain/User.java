@@ -136,7 +136,7 @@ public class User extends Auditable implements UserDetails {
         updateVerificationCode();
     }
 
-    public void updateUser(UserUpdateDto dto, String email) {
+    public void updateUser(UserUpdateDto dto) {
         this.name = applyIfFilled(dto.getName(), this.name);
         this.phone = applyIfFilled(dto.getPhone(), this.phone);
     }

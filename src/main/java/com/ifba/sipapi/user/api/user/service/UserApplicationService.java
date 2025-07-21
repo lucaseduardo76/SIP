@@ -77,13 +77,13 @@ public class UserApplicationService implements UserService {
         log.info("[start] UserApplicationService - updateUser");
         User user = userRepository.findByEmail(tokenService.getSubject(token)).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
         assertEmailBelongsToUser(user, email);
-        user.updateUser(userUpdateDto, email);
+        user.updateUser(userUpdateDto);
         userRepository.save(user);
         log.debug("[finish] UserApplicationService - updateUser");
     }
 
     private void assertEmailBelongsToUser(User user, String email) {
-        if(!email.equals(user.getEmail())){
+        if(!user.getEmail().equals(email)){
             throw APIException.build(HttpStatus.UNAUTHORIZED, "Token não corresponde ao email enviado");
         }
     }
