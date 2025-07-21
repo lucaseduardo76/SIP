@@ -139,7 +139,7 @@ public class User extends Auditable implements UserDetails {
     }
 
     public void updatePasswordRecoveryCode() {
-        this.accountCode = GenerateNumber.generateCode();
+        this.updateCode(GenerateNumber.generateCode());
     }
 
     public void resetPassword(String code, String password) {
