@@ -20,9 +20,4 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findById(String id);
     boolean existsByEmail(@NotBlank(message = "O e-mail é obrigatório") @Email(message = "E-mail inválido") String email);
     boolean existsByCpf(@NotBlank(message = "O CPF é obrigatório") @CPF String cpf);
-
-    @Transactional
-    @Modifying
-    @Query("UPDATE User u SET u.accountCode = :code WHERE u.email = :email")
-    void updateVerificationCodeByEmail(@Param("email") String email, @Param("code") String code);
 }
