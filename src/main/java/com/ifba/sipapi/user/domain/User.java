@@ -56,7 +56,7 @@ public class User extends Auditable implements UserDetails {
     @Column(nullable = false)
     private String phone;
 
-    private String accountVerificationCode;
+    private String accountCode;
 
     @OneToMany(mappedBy = "owner")
     private List<Item> items;
@@ -70,7 +70,7 @@ public class User extends Auditable implements UserDetails {
         this.role = Role.COMMOM;
         this.statusMember = StatusMember.NOT_VERIFIED;
         this.failedLoginAttempts = 0;
-        this.accountVerificationCode = GenerateNumber.generateVerificationCode();
+        this.accountCode = GenerateNumber.generateCode();
     }
 
     @Override
@@ -136,28 +136,38 @@ public class User extends Auditable implements UserDetails {
         updateVerificationCode();
     }
 
+    public void updatePasswordRecoveryCode() { this.updateCode(GenerateNumber.generateCode()); }
+
+    public void updateAccountReactivationCode() { this.updateCode(GenerateNumber.generateCode()); }
+
+    public void resetPassword(String code, String password) {
+        if(!code.equals(this.accountCode))
+            throw APIException.build(HttpStatus.BAD_REQUEST, "Token Inválido ou malformado.");
+
+        this.changePassword(password);
+        this.updateCode(null);
+    }
+
     public void updateUser(UserUpdateDto dto) {
         this.name = applyIfFilled(dto.getName(), this.name);
         this.phone = applyIfFilled(dto.getPhone(), this.phone);
     }
 
-    private String applyIfFilled(String newValue, String currentValue) {
-        return isFilled(newValue) ? newValue : currentValue;
-    }
-
-    private boolean isFilled(String value) {
-        return value != null && !value.trim().isEmpty();
-    }
-
     private void checkCode(String verificationCode) {
-        if (!verificationCode.equals(this.accountVerificationCode)) {
+        if (!verificationCode.equals(this.accountCode)) {
             throw APIException.build(HttpStatus.BAD_REQUEST, "Token Inválido ou expirado!");
         }
     }
 
-    private void updateVerificationCode() {
-        this.accountVerificationCode = GenerateNumber.generateVerificationCode();
-    }
+    private String applyIfFilled(String newValue, String currentValue) { return isFilled(newValue) ? newValue : currentValue; }
+
+    private boolean isFilled(String value) { return value != null && !value.trim().isEmpty(); }
+
+    private void changePassword(String password) { this.password = password; }
+
+    private void updateCode(String code) { this.accountCode = code; }
+
+    private void updateVerificationCode() { this.updateCode(GenerateNumber.generateCode()); }
 
     private void incrementFailedLoginAttempts() {
         this.failedLoginAttempts++;

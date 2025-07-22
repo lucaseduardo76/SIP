@@ -2,9 +2,9 @@ package com.ifba.sipapi.mail.application.service;
 
 import com.ifba.sipapi.config.handler.APIException;
 import com.ifba.sipapi.config.security.TokenService;
-import com.ifba.sipapi.user.domain.StatusMember;
+import com.ifba.sipapi.mail.domain.EmailData;
+import com.ifba.sipapi.mail.domain.EmailDetailsDto;
 import com.ifba.sipapi.user.domain.User;
-import com.ifba.sipapi.user.dto.UserAccountVerificationPayloadDto;
 import com.ifba.sipapi.user.infra.UserRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -32,43 +32,24 @@ public class EmailService {
     @Value("${spring.application.applicationUrl}")
     private String applicationUrl;
 
-    public void sendVerificationEmail(String to) {
-        log.info("[start] EmailService - sendVerificationEmail");
+    public void sendEmailWithCode(
+            EmailDetailsDto emailDetailsDto
+    ) {
+        log.info("[start] EmailService - sendEmailWithCode | to={}", emailDetailsDto.getTo());
 
-        User user = userRepository.findByEmail(to)
+        User user = userRepository.findByEmail(emailDetailsDto.getTo())
                 .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
 
-        String verificationCode = user.getAccountVerificationCode();
-        String token = tokenService.generateToken(new UserAccountVerificationPayloadDto(to, verificationCode));
+        String token = tokenService.generateTokenToEmail(new EmailData(user.getEmail(), user.getAccountCode()));
 
         Context context = new Context();
-        context.setVariable("verificationLink", applicationUrl + "/authentication/verify-account/token/" + token);
-        context.setVariable("verificationCode", verificationCode);
+        context.setVariable("applicationLink", applicationUrl + emailDetailsDto.getRoute() + token);
+        context.setVariable("verificationCode", user.getAccountCode());
 
-        String body = templateEngine.process("email_verification", context);
+        String body = templateEngine.process(emailDetailsDto.getTemplate(), context);
+        sendHtmlEmail(emailDetailsDto.getTo(), emailDetailsDto.getSubject(), body);
 
-        sendHtmlEmail(to, "Verificação de Email - SIP", body);
-
-        log.debug("[finish] EmailService - sendVerificationEmail");
-    }
-
-    public void sendReactivationEmail(String sendTo) {
-        log.info("[start] EmailService - sendReactivationEmail");
-
-        User user = userRepository.findByEmail(sendTo)
-                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
-
-        String code = user.getAccountVerificationCode();
-        String token = tokenService.generateToken(new UserAccountVerificationPayloadDto(sendTo, code));
-
-        Context context = new Context();
-        context.setVariable("verificationLink", applicationUrl + "/authentication/reactivate/token/" + token);
-        context.setVariable("verificationCode", code);
-
-        String body = templateEngine.process("email_reactivation", context);
-
-        sendHtmlEmail(sendTo, "Reativação de conta - SIP", body);
-        log.debug("[finish] EmailService - sendReactivationEmail");
+        log.debug("[finish] EmailService - sendEmailWithCode | to={}", emailDetailsDto.getTo());
     }
 
     private void sendHtmlEmail(String to, String subject, String htmlContent) {

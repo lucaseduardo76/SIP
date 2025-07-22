@@ -1,7 +1,9 @@
 package com.ifba.sipapi.user.api.user.controller;
 
 import com.ifba.sipapi.docs.swagger.UserAPIDocs;
+import com.ifba.sipapi.mail.domain.EmailData;
 import com.ifba.sipapi.user.dto.UserAccountVerificationPayloadDto;
+import com.ifba.sipapi.user.dto.UserPasswordRecoveryDto;
 import com.ifba.sipapi.user.dto.UserUpdateDto;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -19,12 +21,7 @@ public interface UserApi {
     void verifyWithToken(@PathVariable String token);
 
     @UserAPIDocs.VerifyAccount
-    @PostMapping("/account/verify")
-    @ResponseStatus(HttpStatus.OK)
-    void verify(@RequestBody @Valid UserAccountVerificationPayloadDto userAccountVerificationPayloadDto);
-
-    @UserAPIDocs.VerifyAccount
-    @PostMapping("/account/resend-verification")
+    @PostMapping("/account/resend-verify-account")
     @ResponseStatus(HttpStatus.OK)
     void resendVerification(@RequestBody String email);
 
@@ -45,4 +42,13 @@ public interface UserApi {
             @PathVariable String email,
             @RequestBody @Valid UserUpdateDto userUpdateDto);
 
+    @UserAPIDocs.RecoverPassword
+    @PostMapping("/account/password-reset")
+    @ResponseStatus(HttpStatus.OK)
+    void resetPassword(@RequestBody UserPasswordRecoveryDto userPasswordRecoveryDto);
+
+    @UserAPIDocs.RecoverPassword
+    @PostMapping("/account/password-recovery")
+    @ResponseStatus(HttpStatus.OK)
+    void recoverPassword(@RequestBody String email);
 }

@@ -1,6 +1,5 @@
 package com.ifba.sipapi.user.api.authentication.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ifba.sipapi.config.handler.APIException;
 import com.ifba.sipapi.config.security.TokenService;
 import com.ifba.sipapi.mail.domain.EmailSender;
@@ -10,11 +9,9 @@ import com.ifba.sipapi.user.api.authentication.controller.AuthenticationResponse
 import com.ifba.sipapi.user.api.authentication.controller.TokenType;
 import com.ifba.sipapi.user.domain.StatusMember;
 import com.ifba.sipapi.user.domain.User;
-import com.ifba.sipapi.user.dto.UserAccountVerificationPayloadDto;
 import com.ifba.sipapi.user.dto.UserCommomRegisterDto;
 import com.ifba.sipapi.user.dto.UserLoginDto;
 import com.ifba.sipapi.user.infra.UserRepository;
-import com.ifba.sipapi.util.GenerateNumber;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
@@ -78,7 +75,7 @@ public class AuthenticationApplicationService implements AuthenticationService {
         var usernamePassword = new UsernamePasswordAuthenticationToken(userLoginDto.getEmail().toLowerCase(), userLoginDto.getPassword());
         try {
             var auth = this.authenticationManager.authenticate(usernamePassword);
-            var token = tokenService.generateToken((User) auth.getPrincipal());
+            var token = tokenService.generateTokenUser((User) auth.getPrincipal());
             checkLoginAttempts(LoginType.SUCCESS, userLoginDto.getEmail());
             log.debug("[finish] AuthenticationApplicationService - authenticate");
             return new AuthenticationResponseDto(TokenType.BEARER, LocalDateTime.now().plusHours(expiration), token);

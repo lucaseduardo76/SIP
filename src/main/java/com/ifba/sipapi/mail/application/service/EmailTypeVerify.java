@@ -1,5 +1,6 @@
 package com.ifba.sipapi.mail.application.service;
 
+import com.ifba.sipapi.mail.domain.EmailDetailsDto;
 import com.ifba.sipapi.mail.domain.EmailSender;
 import com.ifba.sipapi.mail.domain.EmailType;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +17,12 @@ public class EmailTypeVerify implements EmailProcess{
     @Override
     public void sendEmail(EmailSender payload) {
         log.info("[start] EmailTypeVerify - sendEmail");
-        emailService.sendVerificationEmail(payload.getSendTo());
+        emailService.sendEmailWithCode(new EmailDetailsDto(
+                payload.getSendTo(),
+                "Verificação de conta - SIP",
+                "user/account/verify-account/",
+                "email"
+        ));
         log.debug("[finish] EmailTypeVerify - sendEmail");
     }
 

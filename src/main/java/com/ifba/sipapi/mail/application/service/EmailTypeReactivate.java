@@ -1,5 +1,6 @@
 package com.ifba.sipapi.mail.application.service;
 
+import com.ifba.sipapi.mail.domain.EmailDetailsDto;
 import com.ifba.sipapi.mail.domain.EmailSender;
 import com.ifba.sipapi.mail.domain.EmailType;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +17,12 @@ public class EmailTypeReactivate implements EmailProcess{
     @Override
     public void sendEmail(EmailSender payload) {
         log.info("[start] EmailTypeReactivate - sendEmail");
-        emailService.sendReactivationEmail(payload.getSendTo());
+        emailService.sendEmailWithCode(new EmailDetailsDto(
+                payload.getSendTo(),
+                "Reativação de conta - SIP",
+                "/authentication/reactivate/token/",
+                "email_reactivation"
+        ));
         log.debug("[finish] EmailTypeReactivate - sendEmail");
     }
 

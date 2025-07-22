@@ -1,5 +1,6 @@
 package com.ifba.sipapi.mail.application.service;
 
+import com.ifba.sipapi.mail.domain.EmailDetailsDto;
 import com.ifba.sipapi.mail.domain.EmailSender;
 import com.ifba.sipapi.mail.domain.EmailType;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +16,14 @@ public class EmailTypeRecover implements EmailProcess{
 
     @Override
     public void sendEmail(EmailSender payload) {
-        // Aguardando implementação
+        log.info("[start] EmailTypeRecover - sendEmail");
+        emailService.sendEmailWithCode(new EmailDetailsDto(
+                payload.getSendTo(),
+                "Recuperação de senha - SIP",
+                "user/account/reset-password/token/",
+                "email"
+        ));
+        log.debug("[finish] EmailTypeRecover - sendEmail");
     }
 
     @Override

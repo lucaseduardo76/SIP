@@ -1,7 +1,9 @@
 package com.ifba.sipapi.user.api.user.controller;
 
+import com.ifba.sipapi.mail.domain.EmailData;
 import com.ifba.sipapi.user.api.user.service.UserApplicationService;
 import com.ifba.sipapi.user.dto.UserAccountVerificationPayloadDto;
+import com.ifba.sipapi.user.dto.UserPasswordRecoveryDto;
 import com.ifba.sipapi.user.dto.UserUpdateDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -19,13 +21,6 @@ public class UserApplicationApi implements  UserApi{
         log.info("[start] UserApplicationApi - verifyWithToken");
         userService.verifyAccountWithToken(token);
         log.debug("[finish] UserApplicationApi - verifyWithToken");
-    }
-
-    @Override
-    public void verify(UserAccountVerificationPayloadDto userAccountVerificationPayloadDto){
-        log.info("[start] UserApplicationApi - verify");
-        userService.verifyAccount(userAccountVerificationPayloadDto);
-        log.debug("[finish] UserApplicationApi - verify");
     }
 
     @Override
@@ -56,6 +51,17 @@ public class UserApplicationApi implements  UserApi{
         log.debug("[finish] UserApplicationApi - update");
     }
 
+    @Override
+    public void resetPassword(UserPasswordRecoveryDto userPasswordRecoveryDto) {
+        log.info("[start] UserApplicationApi - resetPassword");
+        userService.resetPassword(userPasswordRecoveryDto);
+        log.debug("[finish] UserApplicationApi - resetPassword");
+    }
 
-
+    @Override
+    public void recoverPassword(String email) {
+        log.info("[start] UserApplicationApi - recoverPassword");
+        userService.recoverPassword(email);
+        log.debug("[finish] UserApplicationApi - recoverPassword");
+    }
 }

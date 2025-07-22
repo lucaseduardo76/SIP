@@ -3,17 +3,22 @@ package com.ifba.sipapi.user.api.user.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ifba.sipapi.config.handler.APIException;
 import com.ifba.sipapi.config.security.TokenService;
+import com.ifba.sipapi.mail.domain.EmailData;
 import com.ifba.sipapi.mail.domain.EmailSender;
 import com.ifba.sipapi.mail.domain.EmailType;
 import com.ifba.sipapi.mail.infra.KafkaApplicationEmailProducer;
 import com.ifba.sipapi.user.domain.StatusMember;
 import com.ifba.sipapi.user.domain.User;
 import com.ifba.sipapi.user.dto.UserAccountVerificationPayloadDto;
+import com.ifba.sipapi.user.dto.UserCommomRegisterDto;
+import com.ifba.sipapi.user.dto.UserPasswordRecoveryDto;
 import com.ifba.sipapi.user.dto.UserUpdateDto;
 import com.ifba.sipapi.user.infra.UserRepository;
+import com.ifba.sipapi.util.GenerateNumber;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,21 +28,24 @@ public class UserApplicationService implements UserService {
     private final TokenService tokenService;
     private final ObjectMapper objectMapper;
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
     private final KafkaApplicationEmailProducer kafkaApplicationEmailProducer;
 
     @Override
     public void verifyAccountWithToken(String token) {
         log.info("[start] verifyAccountWithToken");
-        UserAccountVerificationPayloadDto userAccountVerificationPayloadDto = extractPayloadFromToken(token);
-        verifyAccount(userAccountVerificationPayloadDto);
+        EmailData emailData = extractPayloadFromToken(token);
+        log.info(emailData.to());
+        verifyAccount(emailData);
         log.debug("[finish] verifyAccountWithToken");
     }
 
     @Override
-    public void verifyAccount(UserAccountVerificationPayloadDto userAccountVerificationPayloadDto) {
+    public void verifyAccount(EmailData emailData) {
         log.info("[start] verifyAccount");
-        User user = userRepository.findByEmail(userAccountVerificationPayloadDto.getEmail()).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado."));
-        user.handleAccountVerification(userAccountVerificationPayloadDto.getVerificationCode());
+        User user = userRepository.findByEmail(emailData.to())
+                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado."));
+        user.handleAccountVerification(emailData.code());
         userRepository.save(user);
         log.debug("[finish] verifyAccount");
     }
@@ -48,8 +56,30 @@ public class UserApplicationService implements UserService {
         User user = userRepository.findByEmail(email)
                 .filter(u -> u.getStatusMember().equals(StatusMember.NOT_VERIFIED))
                 .orElseThrow(() -> APIException.build(HttpStatus.BAD_REQUEST, "Usuário ja foi verificado ou email não encontrado!"));
-        sendEmail(email, EmailType.VERIFICATION);
+        sendEmail(user.getEmail(), EmailType.VERIFICATION);
         log.debug("[finish] AuthenticationApplicationService - resendVerificationEmail");
+    }
+
+    @Override
+    public void recoverPassword(String email) {
+        log.info("[start] UserApplicationService - recoverPassword");
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado."));
+        user.updatePasswordRecoveryCode();
+        userRepository.save(user);
+        this.sendEmail(email, EmailType.RECOVER_PASSWORD);
+        log.debug("[finish] UserApplicationService - recoverPassword");
+    }
+
+    @Override
+    public void resetPassword(UserPasswordRecoveryDto userPasswordRecoveryDto) {
+        log.info("[start] UserApplicationService - resetPassword");
+        EmailData payload = extractPayloadFromToken(userPasswordRecoveryDto.getToken());
+        User user = userRepository.findByEmail(payload.to())
+                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado."));
+        user.resetPassword(payload.code(), passwordEncoder.encode(userPasswordRecoveryDto.getPassword()));
+        userRepository.save(user);
+        log.debug("[finish] UserApplicationService - resetPassword");
     }
 
     @Override
@@ -59,15 +89,19 @@ public class UserApplicationService implements UserService {
                 .filter(u -> u.getStatusMember().equals(StatusMember.BLOCKED))
                 .orElseThrow(() -> APIException.build(HttpStatus.BAD_REQUEST, "Usuário não está bloqueado ou email não encontrado!"));
         sendEmail(user.getEmail(), EmailType.REACTIVATE);
+        user.updateAccountReactivationCode();
+        userRepository.save(user);
         log.debug("[finish] AuthenticationApplicationService - checkAndSendEmail");
     }
 
     @Override
     public void accountReactivation(String token) {
         log.info("[start] UserApplicationService - accountReactivation");
-        UserAccountVerificationPayloadDto userAccountVerificationPayloadDto = extractPayloadFromToken(token);
-        User user = userRepository.findByEmail(userAccountVerificationPayloadDto.getEmail()).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
-        user.handleAccountReactivation(userAccountVerificationPayloadDto.getVerificationCode());
+        EmailData emailData = extractPayloadFromToken(token);
+        User user = userRepository.findByEmail(emailData.to())
+                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
+        log.info(emailData.code());
+        user.handleAccountReactivation(emailData.code());
         userRepository.save(user);
         log.debug("[finish] UserApplicationService - accountReactivation");
     }
@@ -95,11 +129,11 @@ public class UserApplicationService implements UserService {
         log.debug("[finish] AuthenticationApplicationService - sendEmail");
     }
 
-    private UserAccountVerificationPayloadDto extractPayloadFromToken(String token) {
+    private EmailData extractPayloadFromToken(String token) {
         String json;
         try {
             json = tokenService.validateToken(token);
-            return objectMapper.readValue(json, UserAccountVerificationPayloadDto.class);
+            return objectMapper.readValue(json, EmailData.class);
         } catch (Exception e) {
             throw APIException.build(HttpStatus.BAD_REQUEST, "Erro ao processar o token, verifique a validade e tente novamente.");
         }
