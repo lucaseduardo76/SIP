@@ -40,7 +40,7 @@ public class EmailService {
         User user = userRepository.findByEmail(emailDetailsDto.getTo())
                 .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
 
-        String token = tokenService.generateToken(new EmailData(user.getEmail(), user.getAccountCode()));
+        String token = tokenService.generateTokenToEmail(new EmailData(user.getEmail(), user.getAccountCode()));
 
         Context context = new Context();
         context.setVariable("applicationLink", applicationUrl + emailDetailsDto.getRoute() + token);

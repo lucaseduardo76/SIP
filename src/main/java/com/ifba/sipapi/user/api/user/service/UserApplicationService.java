@@ -56,7 +56,7 @@ public class UserApplicationService implements UserService {
         User user = userRepository.findByEmail(email)
                 .filter(u -> u.getStatusMember().equals(StatusMember.NOT_VERIFIED))
                 .orElseThrow(() -> APIException.build(HttpStatus.BAD_REQUEST, "Usuário ja foi verificado ou email não encontrado!"));
-        sendEmail(email, EmailType.VERIFICATION);
+        sendEmail(user.getEmail(), EmailType.VERIFICATION);
         log.debug("[finish] AuthenticationApplicationService - resendVerificationEmail");
     }
 
@@ -74,16 +74,9 @@ public class UserApplicationService implements UserService {
     @Override
     public void resetPassword(UserPasswordRecoveryDto userPasswordRecoveryDto) {
         log.info("[start] UserApplicationService - resetPassword");
-        String json = tokenService.validateToken(userPasswordRecoveryDto.getToken());
-        EmailData payload;
-        try {
-            payload = objectMapper.readValue(json, EmailData.class);
-        } catch (Exception e) {
-            throw APIException.build(HttpStatus.BAD_REQUEST, "Token Inválido ou malformado.");
-        }
+        EmailData payload = extractPayloadFromToken(userPasswordRecoveryDto.getToken());
         User user = userRepository.findByEmail(payload.to())
                 .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado."));
-
         user.resetPassword(payload.code(), passwordEncoder.encode(userPasswordRecoveryDto.getPassword()));
         userRepository.save(user);
         log.debug("[finish] UserApplicationService - resetPassword");
