@@ -155,8 +155,6 @@ public class User extends Auditable implements UserDetails {
     }
 
     public void updatePassword(UserPasswordUpdateDto userPasswordUpdateDto, PasswordEncoder passwordEncoder) {
-        System.out.println("Stored hash: " + this.password);
-        System.out.println("Raw input: " + userPasswordUpdateDto.getPassword());
         if (!passwordEncoder.matches(userPasswordUpdateDto.getPassword(), this.password))
             throw APIException.build(HttpStatus.BAD_REQUEST, "Senha atual informada inválida.");
 

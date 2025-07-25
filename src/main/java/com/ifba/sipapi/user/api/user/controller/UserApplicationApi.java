@@ -65,9 +65,9 @@ public class UserApplicationApi implements  UserApi{
     }
 
     @Override
-    public void updatePassword(String userId, UserPasswordUpdateDto userPasswordUpdateDto){
+    public void updatePassword(String token, String email, UserPasswordUpdateDto userPasswordUpdateDto){
         log.info("[start] UserApplicationApi - updatePassword");
-        userService.updatePassword(userId, userPasswordUpdateDto);
+        userService.updatePassword(email, userPasswordUpdateDto, token);
         log.debug("[finish] UserApplicationApi - updatePassword");
     }
 }

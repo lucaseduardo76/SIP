@@ -119,12 +119,12 @@ public class UserApplicationService implements UserService {
         log.debug("[finish] UserApplicationService - updateUser");
     }
 
-    public void updatePassword(String userId, UserPasswordUpdateDto userPasswordUpdateDto) {
+    public void updatePassword(String email, UserPasswordUpdateDto userPasswordUpdateDto, String token) {
         log.info("[start] UserApplicationService - updatePassword");
-        generatePasswordHash(userPasswordUpdateDto);
-        User user = userRepository.findById(UUID.fromString(userId))
+        User user = userRepository.findByEmail(tokenService.getSubject(token))
                 .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
-        log.info(user.toString());
+        assertEmailBelongsToUser(user, email);
+        generatePasswordHash(userPasswordUpdateDto);
         user.updatePassword(userPasswordUpdateDto, passwordEncoder);
         userRepository.save(user);
         log.debug("[finish] UserApplicationService - updatePassword");
