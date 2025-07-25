@@ -20,6 +20,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 @Log4j2
 @RequiredArgsConstructor
@@ -120,8 +122,9 @@ public class UserApplicationService implements UserService {
     public void updatePassword(String userId, UserPasswordUpdateDto userPasswordUpdateDto) {
         log.info("[start] UserApplicationService - updatePassword");
         generatePasswordHash(userPasswordUpdateDto);
-        User user = userRepository.findById(userId)
+        User user = userRepository.findById(UUID.fromString(userId))
                 .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
+        log.info(user.toString());
         user.updatePassword(userPasswordUpdateDto, passwordEncoder);
         userRepository.save(user);
         log.debug("[finish] UserApplicationService - updatePassword");

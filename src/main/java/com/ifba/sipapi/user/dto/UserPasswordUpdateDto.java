@@ -19,6 +19,6 @@ public class UserPasswordUpdateDto {
     private String newPassword;
 
     public void updateHashedPassword(String hashedPassword) {
-        this.password = hashedPassword;
+        this.newPassword = hashedPassword;
     }
 }

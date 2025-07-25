@@ -8,10 +8,7 @@ import com.ifba.sipapi.user.dto.UserCommomRegisterDto;
 import com.ifba.sipapi.user.dto.UserPasswordUpdateDto;
 import com.ifba.sipapi.user.dto.UserUpdateDto;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.apache.kafka.common.config.types.Password;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.GrantedAuthority;
@@ -27,6 +24,7 @@ import java.util.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@ToString
 @Table(name = "tb_user")
 public class User extends Auditable implements UserDetails {
     @Id
@@ -157,6 +155,8 @@ public class User extends Auditable implements UserDetails {
     }
 
     public void updatePassword(UserPasswordUpdateDto userPasswordUpdateDto, PasswordEncoder passwordEncoder) {
+        System.out.println("Stored hash: " + this.password);
+        System.out.println("Raw input: " + userPasswordUpdateDto.getPassword());
         if (!passwordEncoder.matches(userPasswordUpdateDto.getPassword(), this.password))
             throw APIException.build(HttpStatus.BAD_REQUEST, "Senha atual informada inválida.");
 

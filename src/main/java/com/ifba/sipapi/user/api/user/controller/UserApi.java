@@ -54,7 +54,7 @@ public interface UserApi {
             @PathVariable String email,
             @RequestBody @Valid UserUpdateDto userUpdateDto);
 
-    @UserAPIDocs.Update
+    @UserAPIDocs.UpdatePassword
     @PutMapping("/update-password/{userId}")
     @ResponseStatus(HttpStatus.OK)
     void updatePassword(@PathVariable String userId, @RequestBody @Valid UserPasswordUpdateDto userPasswordUpdateDto);
