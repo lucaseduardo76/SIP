@@ -9,17 +9,18 @@ import com.ifba.sipapi.mail.domain.EmailType;
 import com.ifba.sipapi.mail.infra.KafkaApplicationEmailProducer;
 import com.ifba.sipapi.user.domain.StatusMember;
 import com.ifba.sipapi.user.domain.User;
-import com.ifba.sipapi.user.dto.UserAccountVerificationPayloadDto;
-import com.ifba.sipapi.user.dto.UserCommomRegisterDto;
-import com.ifba.sipapi.user.dto.UserPasswordRecoveryDto;
-import com.ifba.sipapi.user.dto.UserUpdateDto;
+import com.ifba.sipapi.user.dto.*;
 import com.ifba.sipapi.user.infra.UserRepository;
-import com.ifba.sipapi.util.GenerateNumber;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
+import org.springframework.kafka.support.LogIfLevelEnabled;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 @Service
 @Log4j2
@@ -29,6 +30,7 @@ public class UserApplicationService implements UserService {
     private final ObjectMapper objectMapper;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
     private final KafkaApplicationEmailProducer kafkaApplicationEmailProducer;
 
     @Override
@@ -109,11 +111,23 @@ public class UserApplicationService implements UserService {
     @Override
     public void updateUser(UserUpdateDto userUpdateDto, String email, String token) {
         log.info("[start] UserApplicationService - updateUser");
-        User user = userRepository.findByEmail(tokenService.getSubject(token)).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
+        User user = userRepository.findByEmail(tokenService.getSubject(token))
+                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
         assertEmailBelongsToUser(user, email);
         user.updateUser(userUpdateDto);
         userRepository.save(user);
         log.debug("[finish] UserApplicationService - updateUser");
+    }
+
+    public void updatePassword(String email, UserPasswordUpdateDto userPasswordUpdateDto, String token) {
+        log.info("[start] UserApplicationService - updatePassword");
+        User user = userRepository.findByEmail(tokenService.getSubject(token))
+                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
+        assertEmailBelongsToUser(user, email);
+        generatePasswordHash(userPasswordUpdateDto);
+        user.updatePassword(userPasswordUpdateDto, passwordEncoder);
+        userRepository.save(user);
+        log.debug("[finish] UserApplicationService - updatePassword");
     }
 
     private void assertEmailBelongsToUser(User user, String email) {
@@ -137,5 +151,11 @@ public class UserApplicationService implements UserService {
         } catch (Exception e) {
             throw APIException.build(HttpStatus.BAD_REQUEST, "Erro ao processar o token, verifique a validade e tente novamente.");
         }
+    }
+
+    private void generatePasswordHash(UserPasswordUpdateDto userPasswordUpdateDto) {
+        log.info("[start] UserApplicationService - generatePasswordHash");
+        userPasswordUpdateDto.updateHashedPassword(passwordEncoder.encode(userPasswordUpdateDto.getNewPassword()));
+        log.debug("[finish] UserApplicationService - generatePasswordHash");
     }
 }

@@ -4,6 +4,7 @@ import com.ifba.sipapi.docs.swagger.UserAPIDocs;
 import com.ifba.sipapi.mail.domain.EmailData;
 import com.ifba.sipapi.user.dto.UserAccountVerificationPayloadDto;
 import com.ifba.sipapi.user.dto.UserPasswordRecoveryDto;
+import com.ifba.sipapi.user.dto.UserPasswordUpdateDto;
 import com.ifba.sipapi.user.dto.UserUpdateDto;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -35,13 +36,6 @@ public interface UserApi {
     @ResponseStatus(HttpStatus.OK)
     void reactivateAccount(@PathVariable String token);
 
-    @UserAPIDocs.Update
-    @PutMapping("/update/{email}")
-    @ResponseStatus(HttpStatus.OK)
-    void update(@RequestHeader(name = "Authorization", required = true) String token,
-            @PathVariable String email,
-            @RequestBody @Valid UserUpdateDto userUpdateDto);
-
     @UserAPIDocs.RecoverPassword
     @PostMapping("/account/password-reset")
     @ResponseStatus(HttpStatus.OK)
@@ -51,4 +45,20 @@ public interface UserApi {
     @PostMapping("/account/password-recovery")
     @ResponseStatus(HttpStatus.OK)
     void recoverPassword(@RequestBody String email);
+
+    @UserAPIDocs.Update
+    @PutMapping("/update/{email}")
+    @ResponseStatus(HttpStatus.OK)
+    void update(
+            @RequestHeader(name = "Authorization", required = true) String token,
+            @PathVariable String email,
+            @RequestBody @Valid UserUpdateDto userUpdateDto);
+
+    @UserAPIDocs.UpdatePassword
+    @PutMapping("/update-password/{email}")
+    @ResponseStatus(HttpStatus.OK)
+    void updatePassword(
+            @RequestHeader(name = "Authorization", required = true) String token,
+            @PathVariable String email,
+            @RequestBody @Valid UserPasswordUpdateDto userPasswordUpdateDto);
 }

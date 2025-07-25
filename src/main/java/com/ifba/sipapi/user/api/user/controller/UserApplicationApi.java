@@ -1,9 +1,8 @@
 package com.ifba.sipapi.user.api.user.controller;
 
-import com.ifba.sipapi.mail.domain.EmailData;
 import com.ifba.sipapi.user.api.user.service.UserApplicationService;
-import com.ifba.sipapi.user.dto.UserAccountVerificationPayloadDto;
 import com.ifba.sipapi.user.dto.UserPasswordRecoveryDto;
+import com.ifba.sipapi.user.dto.UserPasswordUpdateDto;
 import com.ifba.sipapi.user.dto.UserUpdateDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -63,5 +62,12 @@ public class UserApplicationApi implements  UserApi{
         log.info("[start] UserApplicationApi - recoverPassword");
         userService.recoverPassword(email);
         log.debug("[finish] UserApplicationApi - recoverPassword");
+    }
+
+    @Override
+    public void updatePassword(String token, String email, UserPasswordUpdateDto userPasswordUpdateDto){
+        log.info("[start] UserApplicationApi - updatePassword");
+        userService.updatePassword(email, userPasswordUpdateDto, token);
+        log.debug("[finish] UserApplicationApi - updatePassword");
     }
 }
