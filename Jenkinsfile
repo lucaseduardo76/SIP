@@ -12,7 +12,7 @@ pipeline {
             steps {
                 script {
                     sh 'docker-compose down || true'  // derruba containers antigos, se existirem
-                    sh 'docker-compose up -d'         // sobe os containers em segundo plano
+                    sh 'docker-compose up -d'
                 }
             }
         }
