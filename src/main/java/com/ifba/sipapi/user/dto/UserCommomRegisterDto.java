@@ -21,7 +21,11 @@ public class  UserCommomRegisterDto {
 
     @NotBlank(message = "O e-mail é obrigatório")
     @Email(message = "E-mail inválido")
-    @Schema(example = "joao.silva@example.com")
+    @Pattern(
+            regexp = "^[a-zA-Z0-9._%+-]+@ifba\\.edu\\.br$",
+            message = "O e-mail deve pertencer ao domínio @ifba.edu.br"
+    )
+    @Schema(example = "999999999999@ifba.edu.br")
     private String email;
 
     @NotBlank(message = "A senha é obrigatória")
