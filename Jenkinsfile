@@ -11,7 +11,7 @@ pipeline {
         stage('Subir containers com Docker Compose') {
             steps {
                 script {
-                    sh 'docker-compose down || true'  // derruba containers antigos, se existirem
+                    sh 'docker-compose down || true'
                     sh 'docker-compose up -d'
                 }
             }
