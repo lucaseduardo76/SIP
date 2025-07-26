@@ -19,7 +19,7 @@ pipeline {
 
         stage('Verificar containers') {
             steps {
-                sh 'docker ps'  // lista os containers em execução
+                sh 'docker ps'
             }
         }
     }
