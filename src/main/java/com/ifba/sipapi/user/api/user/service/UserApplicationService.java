@@ -14,13 +14,9 @@ import com.ifba.sipapi.user.infra.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
-import org.springframework.kafka.support.LogIfLevelEnabled;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.UUID;
 
 @Service
 @Log4j2
@@ -128,6 +124,16 @@ public class UserApplicationService implements UserService {
         user.updatePassword(userPasswordUpdateDto, passwordEncoder);
         userRepository.save(user);
         log.debug("[finish] UserApplicationService - updatePassword");
+    }
+
+    public UserDetailsResponseDto getUserDetails(String email, String token) {
+        log.info("[start] UserApplicationService - getUserDetails");
+        User user = userRepository.findByEmail(tokenService.getSubject(token))
+                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
+        assertEmailBelongsToUser(user, email);
+        UserDetailsResponseDto userDetailsResponse = new UserDetailsResponseDto(user);
+        log.debug("[finish] UserApplicationService - getUserDetails");
+        return userDetailsResponse;
     }
 
     private void assertEmailBelongsToUser(User user, String email) {

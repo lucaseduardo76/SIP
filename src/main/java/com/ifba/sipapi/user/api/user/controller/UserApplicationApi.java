@@ -1,6 +1,7 @@
 package com.ifba.sipapi.user.api.user.controller;
 
 import com.ifba.sipapi.user.api.user.service.UserApplicationService;
+import com.ifba.sipapi.user.dto.UserDetailsResponseDto;
 import com.ifba.sipapi.user.dto.UserPasswordRecoveryDto;
 import com.ifba.sipapi.user.dto.UserPasswordUpdateDto;
 import com.ifba.sipapi.user.dto.UserUpdateDto;
@@ -70,4 +71,12 @@ public class UserApplicationApi implements  UserApi{
         userService.updatePassword(email, userPasswordUpdateDto, token);
         log.debug("[finish] UserApplicationApi - updatePassword");
     }
+
+    @Override
+    public UserDetailsResponseDto userDetails(String token, String email) {
+        log.info("[start] UserApplicationApi - userDetails");
+        UserDetailsResponseDto userDetailsResponse = userService.getUserDetails(email, token);
+        log.debug("[finish] UserApplicationApi - userDetails");
+        return userDetailsResponse;
+    };
 }
