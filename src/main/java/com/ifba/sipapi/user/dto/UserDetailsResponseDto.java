@@ -16,6 +16,7 @@ public class UserDetailsResponseDto {
     private Role role;
     private StatusMember statusMember;
     private String phone;
+    private String profileImageUrl;
 
     public UserDetailsResponseDto(User user) {
         this.name = user.getName();
@@ -24,5 +25,6 @@ public class UserDetailsResponseDto {
         this.role = user.getRole();
         this.statusMember = user.getStatusMember();
         this.phone = user.getPhone();
+        this.profileImageUrl = user.getProfileImageUrl();
     }
 }
