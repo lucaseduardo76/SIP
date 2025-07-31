@@ -20,8 +20,7 @@ public @interface UserAPIDocs {
             @ApiResponse(responseCode = "200", description = "Verificação feita com sucesso."),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"message\": \"mensagem qualquer.\" }"))),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"description\": \"INTERNAL SERVER ERROR!\", \"message\": \"POR FAVOR INFORME AO ADMINISTRADOR DO SISTEMA!\" }")))})
-    public @interface VerifyAccount {
-    }
+    public @interface VerifyAccount { }
 
 
     @Target(ElementType.METHOD)
@@ -31,8 +30,7 @@ public @interface UserAPIDocs {
             @ApiResponse(responseCode = "200", description = "Email com código de reativação será enviado para email"),
             @ApiResponse(responseCode = "400", description = "Email não existe", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"message\": \"mensagem qualquer.\" }"))),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"description\": \"INTERNAL SERVER ERROR!\", \"message\": \"POR FAVOR INFORME AO ADMINISTRADOR DO SISTEMA!\" }")))})
-    public @interface RequestAccountReactivation {
-    }
+    public @interface RequestAccountReactivation { }
 
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
@@ -41,8 +39,7 @@ public @interface UserAPIDocs {
             @ApiResponse(responseCode = "200", description = "Conta reativada com sucesso"),
             @ApiResponse(responseCode = "400", description = "Token inválido ou expirado", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"message\": \"mensagem qualquer.\" }"))),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"description\": \"INTERNAL SERVER ERROR!\", \"message\": \"POR FAVOR INFORME AO ADMINISTRADOR DO SISTEMA!\" }")))})
-    public @interface ReactivateAccount {
-    }
+    public @interface ReactivateAccount { }
 
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
@@ -51,8 +48,7 @@ public @interface UserAPIDocs {
             @ApiResponse(responseCode = "200", description = "Dados alterados com sucesso"),
             @ApiResponse(responseCode = "400", description = "Verifique os dados e tente novamente", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"message\": \"mensagem qualquer.\" }"))),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"description\": \"INTERNAL SERVER ERROR!\", \"message\": \"POR FAVOR INFORME AO ADMINISTRADOR DO SISTEMA!\" }")))})
-    public @interface Update {
-    }
+    public @interface Update { }
 
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
@@ -61,8 +57,7 @@ public @interface UserAPIDocs {
             @ApiResponse(responseCode = "200", description = "Dados alterados com sucesso"),
             @ApiResponse(responseCode = "400", description = "Verifique os dados e tente novamente", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"message\": \"mensagem qualquer.\" }"))),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"description\": \"INTERNAL SERVER ERROR!\", \"message\": \"POR FAVOR INFORME AO ADMINISTRADOR DO SISTEMA!\" }")))})
-    public @interface UpdatePassword {
-    }
+    public @interface UpdatePassword { }
 
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
@@ -71,7 +66,16 @@ public @interface UserAPIDocs {
             @ApiResponse(responseCode = "200", description = "Email enviado"),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"message\": \"mensagem qualquer.\" }"))),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"description\": \"INTERNAL SERVER ERROR!\", \"message\": \"POR FAVOR INFORME AO ADMINISTRADOR DO SISTEMA!\" }")))})
-    public @interface RecoverPassword {
+    public @interface RecoverPassword { }
+
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @Operation(summary = "Retorna os dados cadastrais do usuário", description = "Método criado para o front-end ter acesso aos dados cadastrais do usuário autenticado")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Email enviado"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"message\": \"mensagem qualquer.\" }"))),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"description\": \"INTERNAL SERVER ERROR!\", \"message\": \"POR FAVOR INFORME AO ADMINISTRADOR DO SISTEMA!\" }")))})
+    public @interface UserDetails {
     }
 
     @Target(ElementType.METHOD)

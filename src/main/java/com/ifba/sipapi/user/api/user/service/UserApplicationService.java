@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -138,7 +139,6 @@ public class UserApplicationService implements UserService {
     @Override
     public void updateProfileImage(MultipartFile profileImage, String token, String email) {
         log.info("[start] UserApplicationService - updateProfileImage");
-
         User user = assertEmailBelongsToAndReturnUser(token, email);
         ensureBucketExists();
 
@@ -148,13 +148,19 @@ public class UserApplicationService implements UserService {
         String imageUrl = buildPublicImageUrl(filename);
         user.updateProfileImage(imageUrl);
         userRepository.save(user);
-
         log.debug("[finish] UserApplicationService - updateProfileImage");
     }
 
+    public UserDetailsResponseDto getUserDetails(String email, String token) {
+        log.info("[start] UserApplicationService - getUserDetails");
+        User user = assertEmailBelongsToAndReturnUser(token, email);
+        UserDetailsResponseDto userDetailsResponse = new UserDetailsResponseDto(user);
+        log.debug("[finish] UserApplicationService - getUserDetails");
+        return userDetailsResponse;
+    }
+
     private void ensureBucketExists() {
-        boolean exists = s3Client.listBuckets().buckets().stream()
-                .anyMatch(b -> b.name().equals(bucket));
+        boolean exists = s3Client.listBuckets().buckets().stream().anyMatch(b -> b.name().equals(bucket));
 
         if (!exists) {
             s3Client.createBucket(CreateBucketRequest.builder().bucket(bucket).build());
@@ -200,7 +206,6 @@ public class UserApplicationService implements UserService {
         if(!user.getEmail().equals(email)){
             throw APIException.build(HttpStatus.UNAUTHORIZED, "Token não corresponde ao email enviado");
         }
-
         return user;
     }
 

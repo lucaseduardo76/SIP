@@ -1,11 +1,7 @@
 package com.ifba.sipapi.user.api.user.controller;
 
 import com.ifba.sipapi.docs.swagger.UserAPIDocs;
-import com.ifba.sipapi.mail.domain.EmailData;
-import com.ifba.sipapi.user.dto.UserAccountVerificationPayloadDto;
-import com.ifba.sipapi.user.dto.UserPasswordRecoveryDto;
-import com.ifba.sipapi.user.dto.UserPasswordUpdateDto;
-import com.ifba.sipapi.user.dto.UserUpdateDto;
+import com.ifba.sipapi.user.dto.*;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -72,4 +68,12 @@ public interface UserApi {
             @RequestParam("profileImage") MultipartFile profileImage);
 
 
+
+    @UserAPIDocs.UserDetails
+    @GetMapping("/user-details/{email}")
+    @ResponseStatus(HttpStatus.OK)
+    UserDetailsResponseDto userDetails(
+            @RequestHeader(name = "Authorization", required = true) String token,
+            @PathVariable String email
+    );
 }
