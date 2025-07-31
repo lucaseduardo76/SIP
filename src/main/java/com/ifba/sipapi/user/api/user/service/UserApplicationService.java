@@ -13,14 +13,17 @@ import com.ifba.sipapi.user.dto.*;
 import com.ifba.sipapi.user.infra.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.kafka.support.LogIfLevelEnabled;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
-import java.util.UUID;
+import java.io.IOException;
 
 @Service
 @Log4j2
@@ -30,8 +33,14 @@ public class UserApplicationService implements UserService {
     private final ObjectMapper objectMapper;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final AuthenticationManager authenticationManager;
     private final KafkaApplicationEmailProducer kafkaApplicationEmailProducer;
+    private final S3Client s3Client;
+
+    @Value("${minio.bucketProfile}")
+    private String bucket;
+
+    @Value("${minio.endpoint}")
+    private String minioEndpoint;
 
     @Override
     public void verifyAccountWithToken(String token) {
@@ -111,9 +120,7 @@ public class UserApplicationService implements UserService {
     @Override
     public void updateUser(UserUpdateDto userUpdateDto, String email, String token) {
         log.info("[start] UserApplicationService - updateUser");
-        User user = userRepository.findByEmail(tokenService.getSubject(token))
-                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
-        assertEmailBelongsToUser(user, email);
+        User user = assertEmailBelongsToAndReturnUser(token, email);
         user.updateUser(userUpdateDto);
         userRepository.save(user);
         log.debug("[finish] UserApplicationService - updateUser");
@@ -121,19 +128,80 @@ public class UserApplicationService implements UserService {
 
     public void updatePassword(String email, UserPasswordUpdateDto userPasswordUpdateDto, String token) {
         log.info("[start] UserApplicationService - updatePassword");
-        User user = userRepository.findByEmail(tokenService.getSubject(token))
-                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
-        assertEmailBelongsToUser(user, email);
+        User user = assertEmailBelongsToAndReturnUser(token, email);
         generatePasswordHash(userPasswordUpdateDto);
         user.updatePassword(userPasswordUpdateDto, passwordEncoder);
         userRepository.save(user);
         log.debug("[finish] UserApplicationService - updatePassword");
     }
 
-    private void assertEmailBelongsToUser(User user, String email) {
+    @Override
+    public void updateProfileImage(MultipartFile profileImage, String token, String email) {
+        log.info("[start] UserApplicationService - updateProfileImage");
+
+        User user = assertEmailBelongsToAndReturnUser(token, email);
+        ensureBucketExists();
+
+        String filename = generateProfileImageFilename(user, profileImage);
+        uploadFileToBucket(profileImage, filename);
+
+        String imageUrl = buildPublicImageUrl(filename);
+        user.updateProfileImage(imageUrl);
+        userRepository.save(user);
+
+        log.debug("[finish] UserApplicationService - updateProfileImage");
+    }
+
+    private void ensureBucketExists() {
+        boolean exists = s3Client.listBuckets().buckets().stream()
+                .anyMatch(b -> b.name().equals(bucket));
+
+        if (!exists) {
+            s3Client.createBucket(CreateBucketRequest.builder().bucket(bucket).build());
+        }
+    }
+
+    private String generateProfileImageFilename(User user, MultipartFile file) {
+        String extension = extractExtension(file);
+        return user.getId() + "_profile" + extension;
+    }
+
+    private void uploadFileToBucket(MultipartFile file, String filename) {
+        try {
+            PutObjectRequest request = PutObjectRequest.builder()
+                    .bucket(bucket)
+                    .key(filename)
+                    .contentType(file.getContentType())
+                    .build();
+
+            s3Client.putObject(request, RequestBody.fromBytes(file.getBytes()));
+        } catch (IOException e) {
+            throw APIException.build(HttpStatus.BAD_REQUEST,
+                    "Unable to save the new image. Please try again.");
+        }
+    }
+
+    private String extractExtension(MultipartFile file) {
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename != null && originalFilename.contains(".")) {
+            return originalFilename.substring(originalFilename.lastIndexOf("."));
+        }
+        return "";
+    }
+
+    private String buildPublicImageUrl(String filename) {
+        return String.format("%s/%s/%s", minioEndpoint, bucket, filename);
+    }
+
+
+    private User assertEmailBelongsToAndReturnUser(String token, String email) {
+        User user = userRepository.findByEmail(tokenService.getSubject(token)).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
+
         if(!user.getEmail().equals(email)){
             throw APIException.build(HttpStatus.UNAUTHORIZED, "Token não corresponde ao email enviado");
         }
+
+        return user;
     }
 
     private void sendEmail(String userEmail, EmailType emailType) {

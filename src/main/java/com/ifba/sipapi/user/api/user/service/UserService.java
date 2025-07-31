@@ -5,6 +5,7 @@ import com.ifba.sipapi.user.dto.UserAccountVerificationPayloadDto;
 import com.ifba.sipapi.user.dto.UserPasswordRecoveryDto;
 import com.ifba.sipapi.user.dto.UserPasswordUpdateDto;
 import com.ifba.sipapi.user.dto.UserUpdateDto;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface UserService {
     void verifyAccountWithToken(String token);
@@ -16,4 +17,5 @@ public interface UserService {
     void accountReactivation(String token);
     void updateUser(UserUpdateDto userUpdateDto, String email, String token);
     void updatePassword(String email, UserPasswordUpdateDto userPasswordUpdateDto, String token);
+    void updateProfileImage(MultipartFile profileImage, String token, String email);
 }
