@@ -59,6 +59,9 @@ public class User extends Auditable implements UserDetails {
 
     private String accountCode;
 
+    @Column(nullable = false)
+    private String profileImageUrl;
+
     @OneToMany(mappedBy = "owner")
     private List<Item> items;
 
@@ -72,6 +75,7 @@ public class User extends Auditable implements UserDetails {
         this.statusMember = StatusMember.NOT_VERIFIED;
         this.failedLoginAttempts = 0;
         this.accountCode = GenerateNumber.generateCode();
+        this.profileImageUrl = "";
     }
 
     @Override
@@ -159,6 +163,11 @@ public class User extends Auditable implements UserDetails {
             throw APIException.build(HttpStatus.BAD_REQUEST, "Senha atual informada inválida.");
 
         this.changePassword(userPasswordUpdateDto.getNewPassword());
+    }
+
+    public void updateProfileImage(String imageUrl) {
+        if(!imageUrl.isEmpty())
+            this.profileImageUrl = imageUrl;
     }
 
     private void checkCode(String verificationCode) {

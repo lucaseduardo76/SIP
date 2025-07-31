@@ -7,17 +7,19 @@ import com.ifba.sipapi.mail.domain.EmailData;
 import com.ifba.sipapi.mail.domain.EmailSender;
 import com.ifba.sipapi.mail.domain.EmailType;
 import com.ifba.sipapi.mail.infra.KafkaApplicationEmailProducer;
+import com.ifba.sipapi.minio.application.service.MinioClient;
 import com.ifba.sipapi.user.domain.StatusMember;
 import com.ifba.sipapi.user.domain.User;
 import com.ifba.sipapi.user.dto.*;
 import com.ifba.sipapi.user.infra.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
+import org.springframework.web.multipart.MultipartFile;
 @Service
 @Log4j2
 @RequiredArgsConstructor
@@ -26,8 +28,8 @@ public class UserApplicationService implements UserService {
     private final ObjectMapper objectMapper;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final AuthenticationManager authenticationManager;
     private final KafkaApplicationEmailProducer kafkaApplicationEmailProducer;
+    private final MinioClient minioClient;
 
     @Override
     public void verifyAccountWithToken(String token) {
@@ -107,9 +109,7 @@ public class UserApplicationService implements UserService {
     @Override
     public void updateUser(UserUpdateDto userUpdateDto, String email, String token) {
         log.info("[start] UserApplicationService - updateUser");
-        User user = userRepository.findByEmail(tokenService.getSubject(token))
-                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
-        assertEmailBelongsToUser(user, email);
+        User user = assertEmailBelongsToAndReturnUser(token, email);
         user.updateUser(userUpdateDto);
         userRepository.save(user);
         log.debug("[finish] UserApplicationService - updateUser");
@@ -117,29 +117,37 @@ public class UserApplicationService implements UserService {
 
     public void updatePassword(String email, UserPasswordUpdateDto userPasswordUpdateDto, String token) {
         log.info("[start] UserApplicationService - updatePassword");
-        User user = userRepository.findByEmail(tokenService.getSubject(token))
-                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
-        assertEmailBelongsToUser(user, email);
+        User user = assertEmailBelongsToAndReturnUser(token, email);
         generatePasswordHash(userPasswordUpdateDto);
         user.updatePassword(userPasswordUpdateDto, passwordEncoder);
         userRepository.save(user);
         log.debug("[finish] UserApplicationService - updatePassword");
     }
 
+    @Override
+    public void updateProfileImage(MultipartFile profileImage, String token, String email) {
+        log.info("[start] UserApplicationService - updateProfileImage");
+        User user = assertEmailBelongsToAndReturnUser(token, email);
+        user.updateProfileImage(minioClient.uploadUserProfileImage(profileImage, user));
+        userRepository.save(user);
+        log.debug("[finish] UserApplicationService - updateProfileImage");
+    }
+
     public UserDetailsResponseDto getUserDetails(String email, String token) {
         log.info("[start] UserApplicationService - getUserDetails");
-        User user = userRepository.findByEmail(tokenService.getSubject(token))
-                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
-        assertEmailBelongsToUser(user, email);
+        User user = assertEmailBelongsToAndReturnUser(token, email);
         UserDetailsResponseDto userDetailsResponse = new UserDetailsResponseDto(user);
         log.debug("[finish] UserApplicationService - getUserDetails");
         return userDetailsResponse;
     }
 
-    private void assertEmailBelongsToUser(User user, String email) {
+    private User assertEmailBelongsToAndReturnUser(String token, String email) {
+        User user = userRepository.findByEmail(tokenService.getSubject(token)).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
+
         if(!user.getEmail().equals(email)){
             throw APIException.build(HttpStatus.UNAUTHORIZED, "Token não corresponde ao email enviado");
         }
+        return user;
     }
 
     private void sendEmail(String userEmail, EmailType emailType) {
