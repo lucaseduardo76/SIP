@@ -7,10 +7,13 @@ import com.ifba.sipapi.mail.domain.EmailType;
 import com.ifba.sipapi.mail.infra.KafkaApplicationEmailProducer;
 import com.ifba.sipapi.user.api.authentication.controller.AuthenticationResponseDto;
 import com.ifba.sipapi.user.api.authentication.controller.TokenType;
+import com.ifba.sipapi.user.domain.Role;
 import com.ifba.sipapi.user.domain.StatusMember;
 import com.ifba.sipapi.user.domain.User;
+import com.ifba.sipapi.user.dto.UserAdminRegisterDto;
 import com.ifba.sipapi.user.dto.UserCommomRegisterDto;
 import com.ifba.sipapi.user.dto.UserLoginDto;
+import com.ifba.sipapi.user.dto.UserRegisterDto;
 import com.ifba.sipapi.user.infra.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -38,11 +41,21 @@ public class AuthenticationApplicationService implements AuthenticationService {
     @Override
     public void createNewUser(UserCommomRegisterDto userCommomRegisterDto) {
         log.info("[start] AuthenticationApplicationService - createNewUser");
-        generatePasswordHash(userCommomRegisterDto);
         handleNewUserValidations(userCommomRegisterDto);
-        User user = userRepository.save(new User(userCommomRegisterDto));
+        generatePasswordHash(userCommomRegisterDto);
+        User user = userRepository.save(new User(userCommomRegisterDto, Role.COMMOM));
         sendEmail(user.getEmail(), EmailType.VERIFICATION);
         log.debug("[finish] AuthenticationApplicationService - createNewUser");
+    }
+
+    @Override
+    public void createNewAdminUser(UserAdminRegisterDto userAdminRegisterDto) {
+        log.info("[start] AuthenticationApplicationService - createNewAdminUser");
+        handleNewUserValidations(userAdminRegisterDto);
+        generatePasswordHash(userAdminRegisterDto);
+        User user = userRepository.save(new User(userAdminRegisterDto, Role.ADMIN));
+        sendEmail(user.getEmail(), EmailType.VERIFICATION);
+        log.debug("[finish] AuthenticationApplicationService - createNewAdminUser");
     }
 
     private void sendEmail(String userEmail, EmailType emailType){
@@ -53,7 +66,7 @@ public class AuthenticationApplicationService implements AuthenticationService {
     }
 
 
-    private void handleNewUserValidations(UserCommomRegisterDto dto) {
+    private void handleNewUserValidations(UserRegisterDto dto) {
         if (userRepository.existsByEmail(dto.getEmail())) {
             throw APIException.build(HttpStatus.BAD_REQUEST, "E-mail já está em uso. Por favor, utilize outro.");
         }
@@ -63,9 +76,9 @@ public class AuthenticationApplicationService implements AuthenticationService {
         }
     }
 
-    private void generatePasswordHash(UserCommomRegisterDto userCommomRegisterDto) {
+    private void generatePasswordHash(UserRegisterDto userRegisterDto) {
         log.info("[start] AuthenticationApplicationService - generatePasswordHash");
-        userCommomRegisterDto.updateHasedPassword(passwordEncoder.encode(userCommomRegisterDto.getPassword()));
+        userRegisterDto.updateHashedPassword(passwordEncoder.encode(userRegisterDto.getPassword()));
         log.debug("[finish] AuthenticationApplicationService - generatePasswordHash");
     }
 

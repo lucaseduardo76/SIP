@@ -1,6 +1,12 @@
+sip:
+  root:
+    email: ${ROOT_EMAIL:root@sip.com}
+    password: ${ROOT_PASS:SenhaSegura@123}
+    name: ${ROOT_NAME:Root Admin}
+    phone: ${ROOT_PHONE:71999998888}
+    cpf: ${ROOT_CPF:00000000000}
+
 spring:
-
-
   profiles:
     active: ${APP_PROFILE:local}
   application:
