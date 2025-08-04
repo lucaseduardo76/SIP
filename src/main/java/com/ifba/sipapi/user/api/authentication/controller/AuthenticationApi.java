@@ -23,7 +23,7 @@ public interface AuthenticationApi {
     void register(@RequestBody @Valid UserCommomRegisterDto userCommomRegisterDto);
 
     @AuthenticationAPIDocs.RegisterAdmin
-    @PostMapping("/register-admin/")
+    @PostMapping("/register-admin")
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ROOT')")
     void registerAdmin(@RequestBody @Valid UserAdminRegisterDto userAdminRegisterDto);

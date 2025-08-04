@@ -68,4 +68,27 @@ public class RestResponseEntityExceptionHandler {
 				.message("O RECURSO SOLICITADO NÃO FOI ENCONTRADO!").build());
 	}
 
+	@ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+	@ResponseStatus(HttpStatus.FORBIDDEN)
+	public ResponseEntity<ErrorApiResponse> handleAccessDeniedException(org.springframework.security.access.AccessDeniedException ex) {
+		log.warn("AccessDeniedException: {}", ex.getMessage());
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+				ErrorApiResponse.builder()
+						.message("Você não tem permissão para acessar este recurso.")
+						.description("Access Denied")
+						.build()
+		);
+	}
+
+	@ExceptionHandler(org.springframework.security.core.AuthenticationException.class)
+	@ResponseStatus(HttpStatus.UNAUTHORIZED)
+	public ResponseEntity<ErrorApiResponse> handleAuthenticationException(org.springframework.security.core.AuthenticationException ex) {
+		log.warn("AuthenticationException: {}", ex.getMessage());
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+				ErrorApiResponse.builder()
+						.message("Você precisa estar autenticado para acessar este recurso.")
+						.description("Unauthorized")
+						.build()
+		);
+	}
 }
