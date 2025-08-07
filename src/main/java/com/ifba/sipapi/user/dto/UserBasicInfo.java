@@ -1,5 +1,6 @@
 package com.ifba.sipapi.user.dto;
 
+import com.ifba.sipapi.user.domain.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -40,5 +41,9 @@ public class UserBasicInfo {
                 userRootRegisterDto.getPassword(),
                 userRootRegisterDto.getPhone()
         );
+    }
+
+    public void updateHashedPassword(String hashedPassword) {
+        this.password = hashedPassword;
     }
 }

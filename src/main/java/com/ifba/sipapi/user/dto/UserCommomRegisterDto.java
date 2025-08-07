@@ -43,7 +43,7 @@ public class  UserCommomRegisterDto{
     @Schema(example = "71999998888")
     private String phone;
 
-    public void updateHashedPassword(UserRegisterDto userRegisterDto) {
-        this.password = userRegisterDto.getPassword();
+    public void updateHashedPassword(UserBasicInfo userBasicInfo) {
+        this.password = userBasicInfo.getPassword();
     }
 }
