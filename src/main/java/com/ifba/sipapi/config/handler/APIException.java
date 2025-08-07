@@ -54,7 +54,6 @@ public class APIException extends RuntimeException {
 	}
 
 
-
 	public ResponseEntity<ErrorApiResponse> buildErrorResponseEntity() {
 		return ResponseEntity
 				.status(statusException)

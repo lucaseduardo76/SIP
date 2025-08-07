@@ -12,7 +12,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.Assert;
 
-import java.util.UUID;
 
 @Configuration
 @RequiredArgsConstructor
@@ -40,16 +39,10 @@ public class RootUserInitializer {
             if (!rootEmailExists || rootCount > 1) {
                 log.warn("Inconsistent ROOT user state detected (rootCount = {}, emailExists = {}). Resetting ROOT user...", rootCount, rootEmailExists);
                 userRepository.deleteAllByRole(Role.ROOT);
-                UserRootRegisterDto dto = new UserRootRegisterDto(
-                        rootProps.getName(),
-                        rootProps.getCpf(),
-                        rootProps.getEmail(),
-                        rootProps.getPassword(),
-                        rootProps.getPhone()
-                );
+                UserRootRegisterDto userRootRegisterDto = new UserRootRegisterDto(rootProps);
 
-                dto.updateHashedPassword(passwordEncoder.encode(dto.getPassword()));
-                User rootUser = new User(dto, Role.ROOT);
+                userRootRegisterDto.updateHashedPassword(passwordEncoder.encode(userRootRegisterDto.getPassword()));
+                User rootUser = new User(userRootRegisterDto);
                 userRepository.save(rootUser);
             }
             log.debug("[finish] RootUserInitializer - initRootUser");

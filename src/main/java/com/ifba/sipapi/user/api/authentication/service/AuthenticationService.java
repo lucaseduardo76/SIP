@@ -9,5 +9,5 @@ import com.ifba.sipapi.user.dto.UserLoginDto;
 public interface AuthenticationService {
     void createNewUser(UserCommomRegisterDto userCommomRegisterDto);
     AuthenticationResponseDto login(UserLoginDto userLoginDto);
-    void createNewAdminUser(UserAdminRegisterDto userAdminRegisterDto);
+    void createNewUser(UserAdminRegisterDto userAdminRegisterDto);
 }

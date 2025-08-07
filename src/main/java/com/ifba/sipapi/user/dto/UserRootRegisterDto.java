@@ -1,5 +1,6 @@
 package com.ifba.sipapi.user.dto;
 
+import com.ifba.sipapi.config.root.RootProperties;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -11,7 +12,7 @@ import org.hibernate.validator.constraints.br.CPF;
 
 @AllArgsConstructor
 @Getter
-public class UserRootRegisterDto implements UserRegisterDto {
+public class UserRootRegisterDto {
     @NotBlank(message = "O nome é obrigatório")
     @Size(min = 2, max = 100, message = "O nome deve ter entre 2 e 100 caracteres")
     @Schema(example = "João da Silva")
@@ -48,5 +49,15 @@ public class UserRootRegisterDto implements UserRegisterDto {
 
     public void updateHashedPassword(String hashedPassword) {
         this.password = hashedPassword;
+    }
+
+    public UserRootRegisterDto(RootProperties rootProps) {
+        this(
+                rootProps.getName(),
+                rootProps.getCpf(),
+                rootProps.getEmail(),
+                rootProps.getPassword(),
+                rootProps.getPhone()
+        );
     }
 }

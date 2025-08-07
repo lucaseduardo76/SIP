@@ -9,7 +9,7 @@ import lombok.Getter;
 import org.hibernate.validator.constraints.br.CPF;
 
 @Getter
-public class UserAdminRegisterDto implements UserRegisterDto {
+public class UserAdminRegisterDto {
     @NotBlank(message = "O nome é obrigatório")
     @Size(min = 2, max = 100, message = "O nome deve ter entre 2 e 100 caracteres")
     @Schema(example = "João da Silva")
@@ -22,10 +22,6 @@ public class UserAdminRegisterDto implements UserRegisterDto {
 
     @NotBlank(message = "O e-mail é obrigatório")
     @Email(message = "E-mail inválido")
-    @Pattern(
-            regexp = "^[a-zA-Z0-9._%+-]+@ifba\\.edu\\.br$",
-            message = "O e-mail deve pertencer ao domínio @ifba.edu.br"
-    )
     @Schema(example = "9999999@ifba.edu.br")
     private String email;
 
@@ -44,7 +40,7 @@ public class UserAdminRegisterDto implements UserRegisterDto {
     @Schema(example = "71999998888")
     private String phone;
 
-    public void updateHashedPassword(String hashedPassword) {
-        this.password = hashedPassword;
+    public void updateHashedPassword(UserRegisterDto userRegisterDto) {
+        this.password = userRegisterDto.getPassword();
     }
 }

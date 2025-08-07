@@ -25,7 +25,6 @@ public interface AuthenticationApi {
     @AuthenticationAPIDocs.RegisterAdmin
     @PostMapping("/register-admin")
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasRole('ROOT')")
     void registerAdmin(@RequestBody @Valid UserAdminRegisterDto userAdminRegisterDto);
 
     @AuthenticationAPIDocs.Login

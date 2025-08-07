@@ -41,21 +41,29 @@ public class AuthenticationApplicationService implements AuthenticationService {
     @Override
     public void createNewUser(UserCommomRegisterDto userCommomRegisterDto) {
         log.info("[start] AuthenticationApplicationService - createNewUser");
-        handleNewUserValidations(userCommomRegisterDto);
-        generatePasswordHash(userCommomRegisterDto);
-        User user = userRepository.save(new User(userCommomRegisterDto, Role.COMMOM));
+        UserRegisterDto userRegisterDto = verifyUserInternal(new UserRegisterDto(userCommomRegisterDto));
+        userCommomRegisterDto.updateHashedPassword(userRegisterDto);
+        User user = userRepository.save(new User(userCommomRegisterDto));
         sendEmail(user.getEmail(), EmailType.VERIFICATION);
         log.debug("[finish] AuthenticationApplicationService - createNewUser");
     }
 
     @Override
-    public void createNewAdminUser(UserAdminRegisterDto userAdminRegisterDto) {
+    public void createNewUser(UserAdminRegisterDto userAdminRegisterDto) {
         log.info("[start] AuthenticationApplicationService - createNewAdminUser");
-        handleNewUserValidations(userAdminRegisterDto);
-        generatePasswordHash(userAdminRegisterDto);
-        User user = userRepository.save(new User(userAdminRegisterDto, Role.ADMIN));
+        UserRegisterDto userRegisterDto = verifyUserInternal(new UserRegisterDto(userAdminRegisterDto));
+        userAdminRegisterDto.updateHashedPassword(userRegisterDto);
+        User user = userRepository.save(new User(userAdminRegisterDto));
         sendEmail(user.getEmail(), EmailType.VERIFICATION);
         log.debug("[finish] AuthenticationApplicationService - createNewAdminUser");
+    }
+
+    private UserRegisterDto verifyUserInternal(UserRegisterDto userRegisterDto) {
+        log.info("[start] AuthenticationApplicationService - verifyUserInternal");
+        this.handleNewUserValidations(userRegisterDto);
+        this.generatePasswordHash(userRegisterDto);
+        log.debug("[finish] AuthenticationApplicationService - verifyUserInternal");
+        return userRegisterDto;
     }
 
     private void sendEmail(String userEmail, EmailType emailType){
@@ -64,7 +72,6 @@ public class AuthenticationApplicationService implements AuthenticationService {
         kafkaApplicationEmailProducer.publishEmail(payload);
         log.debug("[finish] AuthenticationApplicationService - sendEmail");
     }
-
 
     private void handleNewUserValidations(UserRegisterDto dto) {
         if (userRepository.existsByEmail(dto.getEmail())) {

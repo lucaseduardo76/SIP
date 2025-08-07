@@ -41,6 +41,7 @@ public class SecurityConfiguration {
                                 "user/account/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.POST, "authentication/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/register-admin").hasRole("ROOT")
                         .anyRequest().authenticated()
 
                 )

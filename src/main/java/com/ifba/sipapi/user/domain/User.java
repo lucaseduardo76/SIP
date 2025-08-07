@@ -63,16 +63,31 @@ public class User extends Auditable implements UserDetails {
     @OneToMany(mappedBy = "owner")
     private List<Item> items;
 
-    public User(UserRegisterDto dto, Role role) {
+    public User(UserCommomRegisterDto userCommomRegisterDto) {
+        this.createBasicUser(new UserBasicInfo(userCommomRegisterDto));
+        this.role = Role.COMMOM;
+    }
+
+    public User(UserRootRegisterDto userRootRegisterDto) {
+        this.createBasicUser(new UserBasicInfo(userRootRegisterDto));
+        this.role = Role.ROOT;
+        this.statusMember = StatusMember.ACTIVE;
+    }
+
+    public User(UserAdminRegisterDto userAdminRegisterDto) {
+        this.createBasicUser(new UserBasicInfo(userAdminRegisterDto));
+        this.role = Role.ADMIN;
+    }
+
+    private void createBasicUser(UserBasicInfo dto) {
         this.name = dto.getName();
         this.cpf = dto.getCpf();
         this.email = dto.getEmail();
         this.password = dto.getPassword();
         this.phone = dto.getPhone();
-        this.role = role;
-        this.statusMember = role == Role.ROOT ? StatusMember.ACTIVE : StatusMember.NOT_VERIFIED;
         this.failedLoginAttempts = 0;
         this.accountCode = GenerateNumber.generateCode();
+        this.statusMember = StatusMember.NOT_VERIFIED;
         this.profileImageUrl = "";
     }
 

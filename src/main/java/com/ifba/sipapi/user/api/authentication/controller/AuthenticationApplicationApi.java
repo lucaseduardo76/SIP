@@ -47,7 +47,7 @@ public class AuthenticationApplicationApi implements AuthenticationApi {
     @Override
     public void registerAdmin(UserAdminRegisterDto userAdminRegisterDto){
         log.info("[start] AuthenticationApplicationApi - registerAdmin");
-        authenticationService.createNewAdminUser(userAdminRegisterDto);
+        authenticationService.createNewUser(userAdminRegisterDto);
         log.debug("[finish] AuthenticationApplicationApi - registerAdmin");
     }
 
