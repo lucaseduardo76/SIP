@@ -20,7 +20,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfiguration {
 
     private final SecurityFilter securityFilter;
@@ -40,8 +39,8 @@ public class SecurityConfiguration {
                                 "v3/api-docs",
                                 "user/account/**"
                         ).permitAll()
+                        .requestMatchers(HttpMethod.POST, "authentication/register-admin").hasRole("ROOT")
                         .requestMatchers(HttpMethod.POST, "authentication/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/register-admin").hasRole("ROOT")
                         .anyRequest().authenticated()
 
                 )
