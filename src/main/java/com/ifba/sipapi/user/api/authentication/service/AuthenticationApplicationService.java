@@ -60,6 +60,7 @@ public class AuthenticationApplicationService implements AuthenticationService {
         this.handleNewUserValidations(userBasicInfo);
         this.generatePasswordHash(userBasicInfo);
         log.debug("[finish] AuthenticationApplicationService - verifyUserInternal");
+        log.info(userBasicInfo.getPassword());
         return userBasicInfo;
     }
 
@@ -82,7 +83,10 @@ public class AuthenticationApplicationService implements AuthenticationService {
 
     private void generatePasswordHash(UserBasicInfo userBasicInfo) {
         log.info("[start] AuthenticationApplicationService - generatePasswordHash");
-        userBasicInfo.updateHashedPassword(passwordEncoder.encode(userBasicInfo.getPassword()));
+        String passwordToHash = (userBasicInfo.getPassword() != null && !userBasicInfo.getPassword().isEmpty())
+                ? userBasicInfo.getPassword()
+                : "ifba." + userBasicInfo.getCpf();
+        userBasicInfo.updateHashedPassword(passwordEncoder.encode(passwordToHash));
         log.debug("[finish] AuthenticationApplicationService - generatePasswordHash");
     }
 
