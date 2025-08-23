@@ -28,7 +28,7 @@ public class UserBasicInfo {
                 userAdminRegisterDto.getName(),
                 userAdminRegisterDto.getCpf(),
                 userAdminRegisterDto.getEmail(),
-                userAdminRegisterDto.getPassword(),
+                null,
                 userAdminRegisterDto.getPhone()
         );
     }

@@ -67,8 +67,6 @@ public interface UserApi {
             @PathVariable String email,
             @RequestParam("profileImage") MultipartFile profileImage);
 
-
-
     @UserAPIDocs.UserDetails
     @GetMapping("/user-details/{email}")
     @ResponseStatus(HttpStatus.OK)
