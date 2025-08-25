@@ -39,9 +39,9 @@ public interface UserApi {
     void resetPassword(@RequestBody UserPasswordRecoveryDto userPasswordRecoveryDto);
 
     @UserAPIDocs.RecoverPassword
-    @PostMapping("/account/password-recovery")
+    @PostMapping("/account/password-recovery/{email}")
     @ResponseStatus(HttpStatus.OK)
-    void recoverPassword(@RequestBody String email);
+    void recoverPassword(@PathVariable String email);
 
     @UserAPIDocs.Update
     @PutMapping("/update/{email}")
