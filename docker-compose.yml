@@ -14,6 +14,20 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@sip.com
+      PGADMIN_DEFAULT_PASSWORD: sip2025
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
     container_name: zookeeper
@@ -33,8 +47,8 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,DOCKER://kafka:29092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,DOCKER:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
@@ -61,6 +75,33 @@ services:
       - ./init.sh:/init.sh
       - minio-data:/data
 
+  sip-api:
+    image: lucaseduardo76/sip-api:4.2
+    container_name: sip-api
+    restart: always
+    depends_on:
+      - postgres
+      - kafka
+      - minio
+    ports:
+      - "8080:8080"
+    environment:
+      APP_PROFILE: local
+      APPLICATION_URL: sip-api:8080
+      DATASOURCE_URL: jdbc:postgresql://postgres:5432/sip
+      DATASOURCE_USER: postgres
+      DATASOURCE_PASS: postgres
+      EMAIL_USERNAME: ${EMAIL}
+      EMAIL_PASSWORD: ${EMAIL_CODE}
+      SECURITY_JWT_SECRET: 1234567abcdeABCDE
+      SECURITY_JWT_EXPIRATION_EM_HORAS: 8
+      MINIO_ENDPOINT: http://192.168.1.9:9000
+      MINIO_ACCESS: admin
+      MINIO_SECRET: admin123
+      MINIO_BUCKET_PROFILE: profimage
+      KAFKA_URL: kafka:9092
+
 volumes:
   postgres_data:
+  pgadmin_data:
   minio-data:
