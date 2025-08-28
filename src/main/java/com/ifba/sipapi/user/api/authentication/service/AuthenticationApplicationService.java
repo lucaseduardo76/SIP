@@ -50,6 +50,7 @@ public class AuthenticationApplicationService implements AuthenticationService {
         log.info("[start] AuthenticationApplicationService - createNewAdminUser");
         UserBasicInfo userBasicInfo = verifyUserInternal(new UserBasicInfo(userAdminRegisterDto));
         userAdminRegisterDto.updateHashedPassword(userBasicInfo);
+        log.info(userAdminRegisterDto.getPassword());
         User user = userRepository.save(new User(userAdminRegisterDto));
         sendEmail(user.getEmail(), EmailType.VERIFICATION);
         log.debug("[finish] AuthenticationApplicationService - createNewAdminUser");
@@ -60,7 +61,6 @@ public class AuthenticationApplicationService implements AuthenticationService {
         this.handleNewUserValidations(userBasicInfo);
         this.generatePasswordHash(userBasicInfo);
         log.debug("[finish] AuthenticationApplicationService - verifyUserInternal");
-        log.info(userBasicInfo.getPassword());
         return userBasicInfo;
     }
 
@@ -83,7 +83,7 @@ public class AuthenticationApplicationService implements AuthenticationService {
 
     private void generatePasswordHash(UserBasicInfo userBasicInfo) {
         log.info("[start] AuthenticationApplicationService - generatePasswordHash");
-        String passwordToHash = (userBasicInfo.getPassword() != null && !userBasicInfo.getPassword().isEmpty())
+        String passwordToHash = userBasicInfo.getPassword() != null
                 ? userBasicInfo.getPassword()
                 : "ifba." + userBasicInfo.getCpf();
         userBasicInfo.updateHashedPassword(passwordEncoder.encode(passwordToHash));
