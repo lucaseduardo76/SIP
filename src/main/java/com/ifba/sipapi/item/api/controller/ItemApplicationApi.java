@@ -1,0 +1,35 @@
+package com.ifba.sipapi.item.api.controller;
+
+import com.ifba.sipapi.item.api.service.ItemService;
+import com.ifba.sipapi.item.dto.ItemRequestDto;
+import com.ifba.sipapi.item.dto.ItemResponseDto;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+import java.util.UUID;
+
+
+@RestController
+@RequiredArgsConstructor
+@Log4j2
+public class ItemApplicationApi implements ItemApi {
+
+
+    private final ItemService itemService;
+
+    @Override
+    public ItemResponseDto createItem(ItemRequestDto itemRequestDto) {
+       log.info("[start] ItemApplicationApi - createItem");
+       ItemResponseDto itemResponseDto = itemService.createItem(itemRequestDto);
+       log.debug("[finish] ItemApplicationApi - createItem");
+        return itemResponseDto;
+    }
+
+    @Override
+    public List<String> uploadImages(UUID itemId, List<MultipartFile> itemImages) {
+        return List.of();
+    }
+}
