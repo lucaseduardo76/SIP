@@ -7,10 +7,10 @@ import com.ifba.sipapi.mail.domain.EmailType;
 import com.ifba.sipapi.mail.infra.KafkaApplicationEmailProducer;
 import com.ifba.sipapi.user.api.authentication.controller.AuthenticationResponseDto;
 import com.ifba.sipapi.user.api.authentication.controller.TokenType;
+import com.ifba.sipapi.user.domain.Role;
 import com.ifba.sipapi.user.domain.StatusMember;
 import com.ifba.sipapi.user.domain.User;
-import com.ifba.sipapi.user.dto.UserCommomRegisterDto;
-import com.ifba.sipapi.user.dto.UserLoginDto;
+import com.ifba.sipapi.user.dto.*;
 import com.ifba.sipapi.user.infra.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -38,11 +38,30 @@ public class AuthenticationApplicationService implements AuthenticationService {
     @Override
     public void createNewUser(UserCommomRegisterDto userCommomRegisterDto) {
         log.info("[start] AuthenticationApplicationService - createNewUser");
-        generatePasswordHash(userCommomRegisterDto);
-        handleNewUserValidations(userCommomRegisterDto);
+        UserBasicInfo userBasicInfo = verifyUserInternal(new UserBasicInfo(userCommomRegisterDto));
+        userCommomRegisterDto.updateHashedPassword(userBasicInfo);
         User user = userRepository.save(new User(userCommomRegisterDto));
         sendEmail(user.getEmail(), EmailType.VERIFICATION);
         log.debug("[finish] AuthenticationApplicationService - createNewUser");
+    }
+
+    @Override
+    public void createNewUser(UserAdminRegisterDto userAdminRegisterDto) {
+        log.info("[start] AuthenticationApplicationService - createNewAdminUser");
+        UserBasicInfo userBasicInfo = verifyUserInternal(new UserBasicInfo(userAdminRegisterDto));
+        userAdminRegisterDto.updateHashedPassword(userBasicInfo);
+        User user = userRepository.save(new User(userAdminRegisterDto));
+        sendEmail(user.getEmail(), EmailType.VERIFICATION);
+        log.debug("[finish] AuthenticationApplicationService - createNewAdminUser");
+    }
+
+    private UserBasicInfo verifyUserInternal(UserBasicInfo userBasicInfo) {
+        log.info("[start] AuthenticationApplicationService - verifyUserInternal");
+        this.handleNewUserValidations(userBasicInfo);
+        this.generatePasswordHash(userBasicInfo);
+        log.debug("[finish] AuthenticationApplicationService - verifyUserInternal");
+        log.info(userBasicInfo.getPassword());
+        return userBasicInfo;
     }
 
     private void sendEmail(String userEmail, EmailType emailType){
@@ -52,20 +71,22 @@ public class AuthenticationApplicationService implements AuthenticationService {
         log.debug("[finish] AuthenticationApplicationService - sendEmail");
     }
 
-
-    private void handleNewUserValidations(UserCommomRegisterDto dto) {
-        if (userRepository.existsByEmail(dto.getEmail())) {
+    private void handleNewUserValidations(UserBasicInfo userBasicInfo) {
+        if (userRepository.existsByEmail(userBasicInfo.getEmail())) {
             throw APIException.build(HttpStatus.BAD_REQUEST, "E-mail já está em uso. Por favor, utilize outro.");
         }
 
-        if (userRepository.existsByCpf(dto.getCpf())) {
+        if (userRepository.existsByCpf(userBasicInfo.getCpf())) {
             throw APIException.build(HttpStatus.BAD_REQUEST, "CPF já está em uso. Por favor, verifique os dados informados.");
         }
     }
 
-    private void generatePasswordHash(UserCommomRegisterDto userCommomRegisterDto) {
+    private void generatePasswordHash(UserBasicInfo userBasicInfo) {
         log.info("[start] AuthenticationApplicationService - generatePasswordHash");
-        userCommomRegisterDto.updateHasedPassword(passwordEncoder.encode(userCommomRegisterDto.getPassword()));
+        String passwordToHash = (userBasicInfo.getPassword() != null && !userBasicInfo.getPassword().isEmpty())
+                ? userBasicInfo.getPassword()
+                : "ifba." + userBasicInfo.getCpf();
+        userBasicInfo.updateHashedPassword(passwordEncoder.encode(passwordToHash));
         log.debug("[finish] AuthenticationApplicationService - generatePasswordHash");
     }
 

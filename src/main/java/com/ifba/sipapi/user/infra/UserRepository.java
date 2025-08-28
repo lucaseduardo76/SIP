@@ -1,5 +1,6 @@
 package com.ifba.sipapi.user.infra;
 
+import com.ifba.sipapi.user.domain.Role;
 import com.ifba.sipapi.user.domain.User;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.Email;
@@ -20,4 +21,8 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findById(UUID id);
     boolean existsByEmail(@NotBlank(message = "O e-mail é obrigatório") @Email(message = "E-mail inválido") String email);
     boolean existsByCpf(@NotBlank(message = "O CPF é obrigatório") @CPF String cpf);
+
+    @Transactional
+    void deleteAllByRole(Role role);
+    long countByRole(Role role);
 }

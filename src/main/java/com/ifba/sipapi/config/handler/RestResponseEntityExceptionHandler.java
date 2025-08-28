@@ -67,5 +67,4 @@ public class RestResponseEntityExceptionHandler {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorApiResponse.builder().description("NOT FOUND!")
 				.message("O RECURSO SOLICITADO NÃO FOI ENCONTRADO!").build());
 	}
-
 }

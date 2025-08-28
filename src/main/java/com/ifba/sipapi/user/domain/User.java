@@ -4,9 +4,7 @@ import com.ifba.sipapi.Auditable;
 import com.ifba.sipapi.config.handler.APIException;
 import com.ifba.sipapi.item.domain.item.Item;
 import com.ifba.sipapi.user.api.authentication.service.LoginType;
-import com.ifba.sipapi.user.dto.UserCommomRegisterDto;
-import com.ifba.sipapi.user.dto.UserPasswordUpdateDto;
-import com.ifba.sipapi.user.dto.UserUpdateDto;
+import com.ifba.sipapi.user.dto.*;
 import jakarta.persistence.*;
 import lombok.*;
 import org.apache.kafka.common.config.types.Password;
@@ -66,15 +64,30 @@ public class User extends Auditable implements UserDetails {
     private List<Item> items;
 
     public User(UserCommomRegisterDto userCommomRegisterDto) {
-        this.name = userCommomRegisterDto.getName();
-        this.cpf = userCommomRegisterDto.getCpf();
-        this.email = userCommomRegisterDto.getEmail();
-        this.password = userCommomRegisterDto.getPassword();
-        this.phone = userCommomRegisterDto.getPhone();
+        this.createBasicUser(new UserBasicInfo(userCommomRegisterDto));
         this.role = Role.COMMOM;
-        this.statusMember = StatusMember.NOT_VERIFIED;
+    }
+
+    public User(UserRootRegisterDto userRootRegisterDto) {
+        this.createBasicUser(new UserBasicInfo(userRootRegisterDto));
+        this.role = Role.ROOT;
+        this.statusMember = StatusMember.ACTIVE;
+    }
+
+    public User(UserAdminRegisterDto userAdminRegisterDto) {
+        this.createBasicUser(new UserBasicInfo(userAdminRegisterDto));
+        this.role = Role.ADMIN;
+    }
+
+    private void createBasicUser(UserBasicInfo dto) {
+        this.name = dto.getName();
+        this.cpf = dto.getCpf();
+        this.email = dto.getEmail();
+        this.password = dto.getPassword();
+        this.phone = dto.getPhone();
         this.failedLoginAttempts = 0;
         this.accountCode = GenerateNumber.generateCode();
+        this.statusMember = StatusMember.NOT_VERIFIED;
         this.profileImageUrl = "";
     }
 

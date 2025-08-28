@@ -1,14 +1,15 @@
 package com.ifba.sipapi.user.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.*;
-import lombok.EqualsAndHashCode;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import org.hibernate.validator.constraints.br.CPF;
 
 @Getter
-@EqualsAndHashCode
-public class  UserCommomRegisterDto{
+public class UserAdminRegisterDto {
     @NotBlank(message = "O nome é obrigatório")
     @Size(min = 2, max = 100, message = "O nome deve ter entre 2 e 100 caracteres")
     @Schema(example = "João da Silva")
@@ -21,11 +22,7 @@ public class  UserCommomRegisterDto{
 
     @NotBlank(message = "O e-mail é obrigatório")
     @Email(message = "E-mail inválido")
-    @Pattern(
-            regexp = "^[a-zA-Z0-9._%+-]+@ifba\\.edu\\.br$",
-            message = "O e-mail deve pertencer ao domínio @ifba.edu.br"
-    )
-    @Schema(example = "999999999999@ifba.edu.br")
+    @Schema(example = "9999999@ifba.edu.br")
     private String email;
 
     @NotBlank(message = "A senha é obrigatória")
@@ -34,9 +31,8 @@ public class  UserCommomRegisterDto{
             regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*(),.?\":{}|<>\\[\\]\\\\/~`_+=;'\\-]).{8,}$",
             message = "A senha deve conter ao menos uma letra maiúscula, uma letra minúscula, um caractere especial e ter no mínimo 8 caracteres"
     )
-    @Schema(example = "SenhaSegura@123")
+    @Schema(hidden = true)
     private String password;
-
 
     @NotBlank(message = "O telefone é obrigatório")
     @Pattern(regexp = "\\d{10,11}", message = "O telefone deve conter 10 ou 11 dígitos numéricos")
