@@ -76,7 +76,7 @@ services:
       - minio-data:/data
 
   sip-api:
-    image: lucaseduardo76/sip-api:3.0
+    image: lucaseduardo76/sip-api:4.2
     container_name: sip-api
     restart: always
     depends_on:
@@ -91,15 +91,15 @@ services:
       DATASOURCE_URL: jdbc:postgresql://postgres:5432/sip
       DATASOURCE_USER: postgres
       DATASOURCE_PASS: postgres
-      EMAIL_USERNAME: ilucasesds@gmail.com
-      EMAIL_PASSWORD: "vque nbka fimo gyti"
+      EMAIL_USERNAME: ${EMAIL}
+      EMAIL_PASSWORD: ${EMAIL_CODE}
       SECURITY_JWT_SECRET: 1234567abcdeABCDE
       SECURITY_JWT_EXPIRATION_EM_HORAS: 8
-      MINIO_ENDPOINT: http://10.0.0.100:9000
+      MINIO_ENDPOINT: http://192.168.1.9:9000
       MINIO_ACCESS: admin
       MINIO_SECRET: admin123
       MINIO_BUCKET_PROFILE: profimage
-      KAFKA_URL: http://10.0.0.100:9092
+      KAFKA_URL: kafka:9092
 
 volumes:
   postgres_data:

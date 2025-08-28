@@ -36,6 +36,16 @@ public @interface AuthenticationAPIDocs {
 
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
+    @Operation(summary = "Realiza o registro de usuário ADMIN pelo usuário ROOT", description = "Metodo quando bem sucedido e autenticado como ROOT cria usuário ADMIN")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Usuário ADMIN criado com sucesso."),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"message\": \"mensagem qualquer.\" }"))),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"description\": \"INTERNAL SERVER ERROR!\", \"message\": \"POR FAVOR INFORME AO ADMINISTRADOR DO SISTEMA!\" }")))})
+    public @interface RegisterAdmin {
+    }
+
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
     @Operation(summary = "Testa se token", description = "Método criado para o front-end validade de token")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Token valido"),

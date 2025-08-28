@@ -8,6 +8,7 @@ import com.ifba.sipapi.user.dto.UserUpdateDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -70,6 +71,13 @@ public class UserApplicationApi implements  UserApi{
         log.info("[start] UserApplicationApi - updatePassword");
         userService.updatePassword(email, userPasswordUpdateDto, token);
         log.debug("[finish] UserApplicationApi - updatePassword");
+    }
+
+    @Override
+    public void updateProfileImage(String token, String email, MultipartFile profileImage) {
+        log.info("[start] UserApplicationApi - updateProfileImage");
+        userService.updateProfileImage(profileImage, token, email);
+        log.debug("[finish] UserApplicationApi - updateProfileImage");
     }
 
     @Override

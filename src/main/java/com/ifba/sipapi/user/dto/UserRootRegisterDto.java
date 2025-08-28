@@ -1,14 +1,18 @@
 package com.ifba.sipapi.user.dto;
 
+import com.ifba.sipapi.config.root.RootProperties;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.*;
-import lombok.EqualsAndHashCode;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hibernate.validator.constraints.br.CPF;
 
+@AllArgsConstructor
 @Getter
-@EqualsAndHashCode
-public class  UserCommomRegisterDto{
+public class UserRootRegisterDto {
     @NotBlank(message = "O nome é obrigatório")
     @Size(min = 2, max = 100, message = "O nome deve ter entre 2 e 100 caracteres")
     @Schema(example = "João da Silva")
@@ -25,7 +29,7 @@ public class  UserCommomRegisterDto{
             regexp = "^[a-zA-Z0-9._%+-]+@ifba\\.edu\\.br$",
             message = "O e-mail deve pertencer ao domínio @ifba.edu.br"
     )
-    @Schema(example = "999999999999@ifba.edu.br")
+    @Schema(example = "9999999@ifba.edu.br")
     private String email;
 
     @NotBlank(message = "A senha é obrigatória")
@@ -43,7 +47,17 @@ public class  UserCommomRegisterDto{
     @Schema(example = "71999998888")
     private String phone;
 
-    public void updateHashedPassword(UserBasicInfo userBasicInfo) {
-        this.password = userBasicInfo.getPassword();
+    public void updateHashedPassword(String hashedPassword) {
+        this.password = hashedPassword;
+    }
+
+    public UserRootRegisterDto(RootProperties rootProps) {
+        this(
+                rootProps.getName(),
+                rootProps.getCpf(),
+                rootProps.getEmail(),
+                rootProps.getPassword(),
+                rootProps.getPhone()
+        );
     }
 }

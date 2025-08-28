@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/user")
@@ -18,9 +19,9 @@ public interface UserApi {
     void verifyWithToken(@PathVariable String token);
 
     @UserAPIDocs.VerifyAccount
-    @PostMapping("/account/resend-verify-account")
+    @PostMapping("/account/resend-verify-account/{email}")
     @ResponseStatus(HttpStatus.OK)
-    void resendVerification(@RequestBody String email);
+    void resendVerification(@PathVariable String email);
 
     @UserAPIDocs.RequestAccountReactivation
     @PostMapping("/account/request-reactivation/{email}")
@@ -38,9 +39,9 @@ public interface UserApi {
     void resetPassword(@RequestBody UserPasswordRecoveryDto userPasswordRecoveryDto);
 
     @UserAPIDocs.RecoverPassword
-    @PostMapping("/account/password-recovery")
+    @PostMapping("/account/password-recovery/{email}")
     @ResponseStatus(HttpStatus.OK)
-    void recoverPassword(@RequestBody String email);
+    void recoverPassword(@PathVariable String email);
 
     @UserAPIDocs.Update
     @PutMapping("/update/{email}")
@@ -51,12 +52,20 @@ public interface UserApi {
             @RequestBody @Valid UserUpdateDto userUpdateDto);
 
     @UserAPIDocs.UpdatePassword
-    @PutMapping("/update-password/{email}")
+    @PatchMapping("/update-password/{email}")
     @ResponseStatus(HttpStatus.OK)
     void updatePassword(
             @RequestHeader(name = "Authorization", required = true) String token,
             @PathVariable String email,
             @RequestBody @Valid UserPasswordUpdateDto userPasswordUpdateDto);
+
+    @UserAPIDocs.UpdateProfileImage
+    @PatchMapping("/update-profile/{email}")
+    @ResponseStatus(HttpStatus.OK)
+    void updateProfileImage(
+            @RequestHeader(name = "Authorization", required = true) String token,
+            @PathVariable String email,
+            @RequestParam("profileImage") MultipartFile profileImage);
 
     @UserAPIDocs.UserDetails
     @GetMapping("/user-details/{email}")
