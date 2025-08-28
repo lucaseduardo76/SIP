@@ -19,13 +19,15 @@ public interface ItemApi {
 
 
     @ItemsAPIDocs.CreateItem
-    @PostMapping
+    @PostMapping("/admin/create")
     @ResponseStatus(HttpStatus.CREATED)
-    ItemResponseDto createItem(@RequestBody ItemRequestDto itemRequestDto);
+    ItemResponseDto createItem(
+            @RequestHeader(name = "Authorization", required = true) String token,
+            @RequestBody ItemRequestDto itemRequestDto);
 
 
     @ItemsAPIDocs.UpdateImagesItem
-    @PostMapping(value = "{itemId}/images")
+    @PostMapping(value = "/admin/{itemId}/images")
     @ResponseStatus(HttpStatus.OK)
     List<String> uploadImages(
             @PathVariable UUID itemId,

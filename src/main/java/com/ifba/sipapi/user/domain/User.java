@@ -182,6 +182,12 @@ public class User extends Auditable implements UserDetails {
             this.profileImageUrl = imageUrl;
     }
 
+    public void requireAdminRole() {
+        if(this.role != Role.ADMIN){
+            throw APIException.build(HttpStatus.FORBIDDEN, "Usuario não possui permissão necessária!");
+        }
+    }
+
     private void checkCode(String verificationCode) {
         if (!verificationCode.equals(this.accountCode)) {
             throw APIException.build(HttpStatus.BAD_REQUEST, "Token Inválido ou expirado!");
@@ -213,4 +219,6 @@ public class User extends Auditable implements UserDetails {
     private void blockUser() {
         this.statusMember = StatusMember.BLOCKED;
     }
+
+
 }

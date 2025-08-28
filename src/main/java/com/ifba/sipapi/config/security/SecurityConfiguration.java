@@ -40,6 +40,7 @@ public class SecurityConfiguration {
                                 "user/account/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.POST, "authentication/register-admin").hasRole("ROOT")
+                        .requestMatchers(HttpMethod.POST, "items/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "authentication/**").permitAll()
                         .anyRequest().authenticated()
                 )

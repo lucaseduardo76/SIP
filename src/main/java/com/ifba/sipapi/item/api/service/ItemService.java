@@ -12,6 +12,6 @@ import java.util.UUID;
 
 @Service
 public interface ItemService {
-    ItemResponseDto createItem(ItemRequestDto itemRequestDto);
+    ItemResponseDto createItem(ItemRequestDto itemRequestDto, String token);
     List<String> uploadImages(UUID itemId, List<MultipartFile> itemImages);
 }

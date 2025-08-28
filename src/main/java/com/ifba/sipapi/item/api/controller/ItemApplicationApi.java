@@ -21,9 +21,9 @@ public class ItemApplicationApi implements ItemApi {
     private final ItemService itemService;
 
     @Override
-    public ItemResponseDto createItem(ItemRequestDto itemRequestDto) {
+    public ItemResponseDto createItem(String token, ItemRequestDto itemRequestDto) {
        log.info("[start] ItemApplicationApi - createItem");
-       ItemResponseDto itemResponseDto = itemService.createItem(itemRequestDto);
+       ItemResponseDto itemResponseDto = itemService.createItem(itemRequestDto, token);
        log.debug("[finish] ItemApplicationApi - createItem");
         return itemResponseDto;
     }
