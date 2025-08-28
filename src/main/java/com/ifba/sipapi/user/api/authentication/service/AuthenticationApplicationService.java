@@ -50,7 +50,6 @@ public class AuthenticationApplicationService implements AuthenticationService {
         log.info("[start] AuthenticationApplicationService - createNewAdminUser");
         UserBasicInfo userBasicInfo = verifyUserInternal(new UserBasicInfo(userAdminRegisterDto));
         userAdminRegisterDto.updateHashedPassword(userBasicInfo);
-        log.info(userAdminRegisterDto.getPassword());
         User user = userRepository.save(new User(userAdminRegisterDto));
         sendEmail(user.getEmail(), EmailType.VERIFICATION);
         log.debug("[finish] AuthenticationApplicationService - createNewAdminUser");
