@@ -1,5 +1,6 @@
 package com.ifba.sipapi.item.api.controller;
 
+import com.ifba.sipapi.item.api.dto.ImageUrlResponseDto;
 import com.ifba.sipapi.item.api.service.ItemService;
 import com.ifba.sipapi.item.dto.ItemRequestDto;
 import com.ifba.sipapi.item.dto.ItemResponseDto;
@@ -29,7 +30,10 @@ public class ItemApplicationApi implements ItemApi {
     }
 
     @Override
-    public List<String> uploadImages(UUID itemId, List<MultipartFile> itemImages) {
-        return List.of();
+    public List<ImageUrlResponseDto> uploadImages(UUID itemId, List<MultipartFile> itemImages) {
+        log.info("[start] ItemApplicationApi - uploadImages");
+        List<ImageUrlResponseDto> imageList =  itemService.uploadImages(itemId, itemImages);
+        log.debug("[finish] ItemApplicationApi - uploadImages");
+        return imageList;
     }
 }

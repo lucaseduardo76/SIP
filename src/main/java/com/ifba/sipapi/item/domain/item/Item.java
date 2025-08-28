@@ -6,8 +6,10 @@ import com.ifba.sipapi.item.dto.ItemRequestDto;
 import com.ifba.sipapi.user.domain.User;
 import com.ifba.sipapi.util.HandleString;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -17,6 +19,8 @@ import java.util.UUID;
 @EqualsAndHashCode
 @Entity
 @Table(name = "item")
+@NoArgsConstructor
+@AllArgsConstructor
 public class Item extends Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

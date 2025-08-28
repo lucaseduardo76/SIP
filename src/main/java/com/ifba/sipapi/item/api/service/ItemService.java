@@ -2,6 +2,7 @@ package com.ifba.sipapi.item.api.service;
 
 
 
+import com.ifba.sipapi.item.api.dto.ImageUrlResponseDto;
 import com.ifba.sipapi.item.dto.ItemRequestDto;
 import com.ifba.sipapi.item.dto.ItemResponseDto;
 import org.springframework.stereotype.Service;
@@ -13,5 +14,5 @@ import java.util.UUID;
 @Service
 public interface ItemService {
     ItemResponseDto createItem(ItemRequestDto itemRequestDto, String token);
-    List<String> uploadImages(UUID itemId, List<MultipartFile> itemImages);
+    List<ImageUrlResponseDto> uploadImages(UUID itemId, List<MultipartFile> itemImages);
 }

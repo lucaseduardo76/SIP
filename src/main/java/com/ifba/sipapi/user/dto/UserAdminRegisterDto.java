@@ -31,7 +31,7 @@ public class UserAdminRegisterDto {
             regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*(),.?\":{}|<>\\[\\]\\\\/~`_+=;'\\-]).{8,}$",
             message = "A senha deve conter ao menos uma letra maiúscula, uma letra minúscula, um caractere especial e ter no mínimo 8 caracteres"
     )
-    @Schema(hidden = true)
+    @Schema(example = "SenhaSegura@123")
     private String password;
 
     @NotBlank(message = "O telefone é obrigatório")

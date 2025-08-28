@@ -6,14 +6,16 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
+import java.util.UUID;
+
 @Getter
 @EqualsAndHashCode
 @Entity
 @Table(name = "picture")
 public class Picture {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private UUID id;
 
     @Column(nullable = false)
     @NotBlank(message = "A url da imagem não pode ser vazia")
@@ -22,4 +24,9 @@ public class Picture {
     @ManyToOne
     @JoinColumn(name = "item_id", nullable = false)
     private Item item;
+
+    public Picture(String urlImage, Item item) {
+        this.url = urlImage;
+        this.item = item;
+    }
 }

@@ -13,8 +13,15 @@ done
 echo "MinIO está online!"
 
 mc alias set local http://minio:9000 admin admin123
+
+ Bucket profimage
 mc mb --ignore-existing local/profimage
+sleep 1
 mc anonymous set download local/profimage
 
-echo "Bucket criado e tornado público com sucesso!"
+# Bucket itemsimage
+mc mb --ignore-existing local/itemsimage
+sleep 1
+mc anonymous set download local/itemsimage
 
+echo "Buckets criados e tornados públicos com sucesso!"

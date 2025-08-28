@@ -2,11 +2,15 @@ package com.ifba.sipapi.item.api.service;
 
 import com.ifba.sipapi.config.handler.APIException;
 import com.ifba.sipapi.config.security.TokenService;
+import com.ifba.sipapi.item.api.dto.ImageUrlResponseDto;
 import com.ifba.sipapi.item.domain.item.Category;
 import com.ifba.sipapi.item.domain.item.Item;
+import com.ifba.sipapi.item.domain.picture.Picture;
 import com.ifba.sipapi.item.dto.ItemRequestDto;
 import com.ifba.sipapi.item.dto.ItemResponseDto;
 import com.ifba.sipapi.item.infra.item.ItemRepository;
+import com.ifba.sipapi.item.infra.picture.PictureRepository;
+import com.ifba.sipapi.minio.application.service.MinioClient;
 import com.ifba.sipapi.user.domain.User;
 import com.ifba.sipapi.user.infra.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -27,6 +32,8 @@ public class ItemApplicationService implements ItemService {
     private final ItemRepository itemRepository;
     private final TokenService tokenService;
     private final UserRepository userRepository;
+    private final MinioClient minioClient;
+    private final PictureRepository pictureRepository;
 
     @Override
     public ItemResponseDto createItem(ItemRequestDto itemRequestDto, String token) {
@@ -66,7 +73,15 @@ public class ItemApplicationService implements ItemService {
     }
 
     @Override
-    public List<String> uploadImages(UUID itemId, List<MultipartFile> itemImages) {
-        return List.of();
+    public List<ImageUrlResponseDto> uploadImages(UUID itemId, List<MultipartFile> itemImages) {
+        log.info("[start] ItemApplicationService - uploadImages");
+        Item item = itemRepository.findById(itemId).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Item not found"));
+        itemImages.forEach(multipartFile -> {
+            String urlImage = minioClient.uploadItemsImage(multipartFile, item);
+            Picture picture = new Picture(urlImage, item);
+            pictureRepository.save(picture);
+        });
+        log.debug("[finish] ItemApplicationService - uploadImages");
+        return pictureRepository.findByItem(item).stream().map(ImageUrlResponseDto::new).collect(Collectors.toList());
     }
 }

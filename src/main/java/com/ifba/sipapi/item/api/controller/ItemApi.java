@@ -2,6 +2,7 @@ package com.ifba.sipapi.item.api.controller;
 
 
 import com.ifba.sipapi.docs.swagger.ItemsAPIDocs;
+import com.ifba.sipapi.item.api.dto.ImageUrlResponseDto;
 import com.ifba.sipapi.item.dto.ItemRequestDto;
 import com.ifba.sipapi.item.dto.ItemResponseDto;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,7 +30,7 @@ public interface ItemApi {
     @ItemsAPIDocs.UpdateImagesItem
     @PostMapping(value = "/admin/{itemId}/images")
     @ResponseStatus(HttpStatus.OK)
-    List<String> uploadImages(
+    List<ImageUrlResponseDto> uploadImages(
             @PathVariable UUID itemId,
             @RequestPart("itemImages") List<MultipartFile> itemImages
     );
