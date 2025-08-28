@@ -7,7 +7,6 @@ import com.ifba.sipapi.user.api.authentication.service.LoginType;
 import com.ifba.sipapi.user.dto.*;
 import jakarta.persistence.*;
 import lombok.*;
-import org.apache.kafka.common.config.types.Password;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -65,7 +64,7 @@ public class User extends Auditable implements UserDetails {
 
     public User(UserCommomRegisterDto userCommomRegisterDto) {
         this.createBasicUser(new UserBasicInfo(userCommomRegisterDto));
-        this.role = Role.COMMOM;
+        this.role = Role.COMMON;
     }
 
     public User(UserRootRegisterDto userRootRegisterDto) {
@@ -96,19 +95,19 @@ public class User extends Auditable implements UserDetails {
         List<GrantedAuthority> authorities = new ArrayList<>();
 
         switch (this.role) {
-            case COMMOM:
-                authorities.add(new SimpleGrantedAuthority("ROLE_COMMOM"));
+            case COMMON:
+                authorities.add(new SimpleGrantedAuthority("ROLE_COMMON"));
                 break;
 
             case ADMIN:
                 authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-                authorities.add(new SimpleGrantedAuthority("ROLE_COMMOM"));
+                authorities.add(new SimpleGrantedAuthority("ROLE_COMMON"));
                 break;
 
             case ROOT:
                 authorities.add(new SimpleGrantedAuthority("ROLE_ROOT"));
                 authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-                authorities.add(new SimpleGrantedAuthority("ROLE_COMMOM"));
+                authorities.add(new SimpleGrantedAuthority("ROLE_COMMON"));
                 break;
         }
 

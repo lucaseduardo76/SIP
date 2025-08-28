@@ -60,7 +60,6 @@ public class AuthenticationApplicationService implements AuthenticationService {
         this.handleNewUserValidations(userBasicInfo);
         this.generatePasswordHash(userBasicInfo);
         log.debug("[finish] AuthenticationApplicationService - verifyUserInternal");
-        log.info(userBasicInfo.getPassword());
         return userBasicInfo;
     }
 
