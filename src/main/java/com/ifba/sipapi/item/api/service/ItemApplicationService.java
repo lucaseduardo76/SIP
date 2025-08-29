@@ -98,11 +98,9 @@ public class ItemApplicationService implements ItemService {
     }
 
     private void validateImages(List<MultipartFile> itemImages) {
-        System.out.println("TO AQUI");
-        if (itemImages == null || itemImages.isEmpty()) {
-            System.out.println("TO AQUI 222");
+        if (itemImages == null || itemImages.isEmpty())
             throw APIException.build(HttpStatus.BAD_REQUEST, "Nenhuma imagem enviada");
-        }
+
         if (itemImages.size() > MAX_IMAGES)
             throw APIException.build(HttpStatus.BAD_REQUEST, "Você pode enviar no máximo " + MAX_IMAGES + " imagens");
     }
