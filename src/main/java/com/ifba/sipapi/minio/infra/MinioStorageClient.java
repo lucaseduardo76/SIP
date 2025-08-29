@@ -98,8 +98,8 @@ public class MinioStorageClient implements MinioClient {
         return "";
     }
 
-    private String buildPublicImageUrl(String filename, String buket) {
-        return String.format("%s/%s/%s", minioEndpoint, buket, filename);
+    private String buildPublicImageUrl(String filename, String bucket) {
+        return String.format("%s/%s/%s", minioEndpoint, bucket, filename);
     }
 
     private void validateIsImage(MultipartFile file) {
