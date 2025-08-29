@@ -81,5 +81,7 @@ minio:
   secretKey: ${MINIO_SECRET:admin123}
   bucketProfile: ${MINIO_BUCKET_PROFILE:profimage}
   bucketItems: ${MINIO_BUCKET_ITEMS:itemsimage}
+  application:
+    max_images_item: ${MAX_IMAGE_ITEM:3}
 
 

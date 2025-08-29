@@ -13,15 +13,16 @@ import com.ifba.sipapi.item.infra.picture.PictureRepository;
 import com.ifba.sipapi.minio.application.service.MinioClient;
 import com.ifba.sipapi.user.domain.User;
 import com.ifba.sipapi.user.infra.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -34,6 +35,9 @@ public class ItemApplicationService implements ItemService {
     private final UserRepository userRepository;
     private final MinioClient minioClient;
     private final PictureRepository pictureRepository;
+
+    @Value("${minio.application.max_images_item}")
+    private Integer MAX_IMAGES;
 
     @Override
     public ItemResponseDto createItem(ItemRequestDto itemRequestDto, String token) {
@@ -73,15 +77,39 @@ public class ItemApplicationService implements ItemService {
     }
 
     @Override
+    @Transactional
     public List<ImageUrlResponseDto> uploadImages(UUID itemId, List<MultipartFile> itemImages) {
-        log.info("[start] ItemApplicationService - uploadImages");
+        log.info("[start] ItemApplicationService - uploadImages itemId={}", itemId);
         Item item = itemRepository.findById(itemId).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Item not found"));
-        itemImages.forEach(multipartFile -> {
-            String urlImage = minioClient.uploadItemsImage(multipartFile, item);
-            Picture picture = new Picture(urlImage, item);
-            pictureRepository.save(picture);
-        });
-        log.debug("[finish] ItemApplicationService - uploadImages");
-        return pictureRepository.findByItem(item).stream().map(ImageUrlResponseDto::new).collect(Collectors.toList());
+
+        validateMaxImagesPerItem(item,itemImages);
+
+        List<Picture> savedPictures = itemImages.stream().map(file -> uploadAndSave(file, item)).toList();
+        log.debug("[finish] ItemApplicationService - uploadImages itemId={}, savedImages={}", itemId, savedPictures.size());
+        return savedPictures.stream().map(ImageUrlResponseDto::new).toList();
+    }
+
+    private void validateMaxImagesPerItem(Item item, List<MultipartFile> itemImages) {
+        List<Picture> pictureList = pictureRepository.findByItem(item);
+        if(pictureList.size() + itemImages.size() > MAX_IMAGES)
+            throw APIException.build(HttpStatus.BAD_REQUEST, "Limite de imagem para um item ultrapassado");
+
+        validateImages(itemImages);
+    }
+
+    private void validateImages(List<MultipartFile> itemImages) {
+        System.out.println("TO AQUI");
+        if (itemImages == null || itemImages.isEmpty()) {
+            System.out.println("TO AQUI 222");
+            throw APIException.build(HttpStatus.BAD_REQUEST, "Nenhuma imagem enviada");
+        }
+        if (itemImages.size() > MAX_IMAGES)
+            throw APIException.build(HttpStatus.BAD_REQUEST, "Você pode enviar no máximo " + MAX_IMAGES + " imagens");
+    }
+
+    private Picture uploadAndSave(MultipartFile multipartFile, Item item) {
+        String urlImage = minioClient.uploadItemsImage(multipartFile, item);
+        Picture picture = new Picture(urlImage, item);
+        return pictureRepository.save(picture);
     }
 }

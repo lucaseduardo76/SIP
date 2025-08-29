@@ -3,8 +3,10 @@ package com.ifba.sipapi.item.domain.picture;
 import com.ifba.sipapi.item.domain.item.Item;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
@@ -12,6 +14,8 @@ import java.util.UUID;
 @EqualsAndHashCode
 @Entity
 @Table(name = "picture")
+@NoArgsConstructor
+@AllArgsConstructor
 public class Picture {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

@@ -15,6 +15,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
+import javax.imageio.ImageIO;
 import java.io.IOException;
 import java.util.Random;
 import java.util.UUID;
@@ -39,6 +40,7 @@ public class MinioStorageClient implements MinioClient {
     public String uploadItemsImage(MultipartFile profileImage, Item item) {
         log.info("[start] MinioStorageClient - uploadItemsImage");
         ensureBucketExists(itemsBucket);
+        validateIsImage(profileImage);
 
         String prefix = item.getCode() + "_" + UUID.randomUUID() + "_item";
         String filename = generateProfileImageFilename(prefix, profileImage);
@@ -51,6 +53,7 @@ public class MinioStorageClient implements MinioClient {
     public String uploadUserProfileImage(MultipartFile profileImage, User user) {
         log.info("[start] minioApplicationService - updateProfileImage");
         ensureBucketExists(profileBucket);
+        validateIsImage(profileImage);
 
         String prefix = user.getId() + "_profile";
         String filename = generateProfileImageFilename(prefix, profileImage);
@@ -98,4 +101,40 @@ public class MinioStorageClient implements MinioClient {
     private String buildPublicImageUrl(String filename, String buket) {
         return String.format("%s/%s/%s", minioEndpoint, buket, filename);
     }
+
+    private void validateIsImage(MultipartFile file) {
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw APIException.build(HttpStatus.BAD_REQUEST, "Somente arquivos de imagem são permitidos.");
+        }
+
+        validateExtension(file);
+    }
+
+    private void validateExtension(MultipartFile file) {
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null) {
+            throw APIException.build(HttpStatus.BAD_REQUEST, "Arquivo inválido.");
+        }
+
+        String lowerName = originalFilename.toLowerCase();
+        if (!(lowerName.endsWith(".png") || lowerName.endsWith(".jpg") || lowerName.endsWith(".jpeg") || lowerName.endsWith(".gif"))) {
+            throw APIException.build(HttpStatus.BAD_REQUEST, "Extensão de arquivo não suportada.");
+        }
+
+        validateImageContent(file);
+    }
+
+    private void validateImageContent(MultipartFile file) {
+        try {
+            if (ImageIO.read(file.getInputStream()) == null) {
+                throw APIException.build(HttpStatus.BAD_REQUEST, "Arquivo enviado não é uma imagem válida.");
+            }
+        } catch (IOException e) {
+            throw APIException.build(HttpStatus.BAD_REQUEST, "Não foi possível processar o arquivo de imagem.");
+        }
+    }
+
+
+
 }
