@@ -25,13 +25,13 @@ public class UserAdminRegisterDto {
     @Schema(example = "9999999@ifba.edu.br")
     private String email;
 
-    @NotBlank(message = "A senha é obrigatória")
+
     @Size(min = 8, message = "A senha deve ter no mínimo 8 caracteres")
     @Pattern(
             regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*(),.?\":{}|<>\\[\\]\\\\/~`_+=;'\\-]).{8,}$",
             message = "A senha deve conter ao menos uma letra maiúscula, uma letra minúscula, um caractere especial e ter no mínimo 8 caracteres"
     )
-    @Schema(example = "SenhaSegura@123")
+    @Schema(hidden = true)
     private String password;
 
     @NotBlank(message = "O telefone é obrigatório")
