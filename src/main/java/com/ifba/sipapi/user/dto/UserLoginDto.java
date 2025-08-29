@@ -11,7 +11,7 @@ import lombok.Getter;
 public class UserLoginDto {
 
     @NotBlank(message = "Email não pode ser nulo")
-    @Schema(example = "joao.silva@example.com")
+    @Schema(example = "999999999999@ifba.edu.br")
     private String email;
 
     @NotBlank(message = "Senha não pode ser nulo")

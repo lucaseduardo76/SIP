@@ -115,6 +115,7 @@ public class UserApplicationService implements UserService {
         log.debug("[finish] UserApplicationService - updateUser");
     }
 
+    @Override
     public void updatePassword(String email, UserPasswordUpdateDto userPasswordUpdateDto, String token) {
         log.info("[start] UserApplicationService - updatePassword");
         User user = assertEmailBelongsToAndReturnUser(token, email);
@@ -133,6 +134,7 @@ public class UserApplicationService implements UserService {
         log.debug("[finish] UserApplicationService - updateProfileImage");
     }
 
+    @Override
     public UserDetailsResponseDto getUserDetails(String email, String token) {
         log.info("[start] UserApplicationService - getUserDetails");
         User user = assertEmailBelongsToAndReturnUser(token, email);

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.HashMap;
@@ -62,9 +63,17 @@ public class RestResponseEntityExceptionHandler {
 
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	@ExceptionHandler(NoResourceFoundException.class)
-	public ResponseEntity<ErrorApiResponse> handleNoResourceFoundExceptionException(NoResourceFoundException ex) {
+	public ResponseEntity<ErrorApiResponse> handleNoResourceFoundExceptio(NoResourceFoundException ex) {
 		log.error("Exception: " + ex.getMessage());
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorApiResponse.builder().description("NOT FOUND!")
 				.message("O RECURSO SOLICITADO NÃO FOI ENCONTRADO!").build());
+	}
+
+	@ResponseStatus(HttpStatus.NOT_FOUND)
+	@ExceptionHandler(MultipartException.class)
+	public ResponseEntity<ErrorApiResponse> handleMultipartException(MultipartException ex) {
+		log.error("Exception: " + ex.getMessage());
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorApiResponse.builder().description("BAD REQUEST!")
+				.message("REVISE OS DADOS OU INFORME O ADMINISTRADOR!").build());
 	}
 }

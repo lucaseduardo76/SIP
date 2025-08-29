@@ -44,13 +44,16 @@ services:
       - zookeeper
     ports:
       - "9092:9092"
+      - "9093:9093"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
 
   minio:
     image: minio/minio
@@ -75,31 +78,31 @@ services:
       - ./init.sh:/init.sh
       - minio-data:/data
 
-  sip-api:
-    image: lucaseduardo76/sip-api:4.2
-    container_name: sip-api
-    restart: always
-    depends_on:
-      - postgres
-      - kafka
-      - minio
-    ports:
-      - "8080:8080"
-    environment:
-      APP_PROFILE: local
-      APPLICATION_URL: sip-api:8080
-      DATASOURCE_URL: jdbc:postgresql://postgres:5432/sip
-      DATASOURCE_USER: postgres
-      DATASOURCE_PASS: postgres
-      EMAIL_USERNAME: ${EMAIL}
-      EMAIL_PASSWORD: ${EMAIL_CODE}
-      SECURITY_JWT_SECRET: 1234567abcdeABCDE
-      SECURITY_JWT_EXPIRATION_EM_HORAS: 8
-      MINIO_ENDPOINT: http://192.168.1.9:9000
-      MINIO_ACCESS: admin
-      MINIO_SECRET: admin123
-      MINIO_BUCKET_PROFILE: profimage
-      KAFKA_URL: kafka:9092
+#  sip-api:
+#    image: lucaseduardo76/sip-api:4.3.1
+#    container_name: sip-api
+#    restart: always
+#    depends_on:
+#      - postgres
+#      - kafka
+#      - minio
+#    ports:
+#      - "8080:8080"
+#    environment:
+#      APP_PROFILE: local
+#      APPLICATION_URL: sip-api:8080
+#      DATASOURCE_URL: jdbc:postgresql://postgres:5432/sip
+#      DATASOURCE_USER: postgres
+#      DATASOURCE_PASS: postgres
+#      EMAIL_USERNAME: ${EMAIL}
+#      EMAIL_PASSWORD: ${EMAIL_CODE}
+#      SECURITY_JWT_SECRET: 1234567abcdeABCDE
+#      SECURITY_JWT_EXPIRATION_EM_HORAS: 8
+#      MINIO_ENDPOINT: http://192.168.1.9:9000
+#      MINIO_ACCESS: admin
+#      MINIO_SECRET: admin123
+#      MINIO_BUCKET_PROFILE: profimage
+#      KAFKA_URL: kafka:9092
 
 volumes:
   postgres_data:
