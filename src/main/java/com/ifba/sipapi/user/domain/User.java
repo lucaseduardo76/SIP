@@ -63,22 +63,22 @@ public class User extends Auditable implements UserDetails {
     private List<Item> items;
 
     public User(UserCommomRegisterDto userCommomRegisterDto) {
-        this.createBasicUser(new UserBasicInfo(userCommomRegisterDto));
+        this.createBasicUser(userCommomRegisterDto);
         this.role = Role.COMMON;
     }
 
     public User(UserRootRegisterDto userRootRegisterDto) {
-        this.createBasicUser(new UserBasicInfo(userRootRegisterDto));
+        this.createBasicUser(userRootRegisterDto);
         this.role = Role.ROOT;
         this.statusMember = StatusMember.ACTIVE;
     }
 
     public User(UserAdminRegisterDto userAdminRegisterDto) {
-        this.createBasicUser(new UserBasicInfo(userAdminRegisterDto));
+        this.createBasicUser(userAdminRegisterDto);
         this.role = Role.ADMIN;
     }
 
-    private void createBasicUser(UserBasicInfo dto) {
+    private void createBasicUser(UserRegisterDto dto) {
         this.name = dto.getName();
         this.cpf = dto.getCpf();
         this.email = dto.getEmail();
