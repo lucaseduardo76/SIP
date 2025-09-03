@@ -1,17 +1,8 @@
-sip:
-  root:
-    email: ${ROOT_EMAIL:root@sip.com}
-    password: ${ROOT_PASS:SenhaSegura@123}
-    name: ${ROOT_NAME:Root Admin}
-    phone: ${ROOT_PHONE:71999998888}
-    cpf: ${ROOT_CPF:00000000000}
-
 spring:
   profiles:
     active: ${APP_PROFILE:local}
   application:
     name: sip-api
-    applicationUrl: ${APPLICATION_URL:http://localhost:8080}
 
   datasource:
     url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/sip}
@@ -83,5 +74,18 @@ minio:
   bucketItems: ${MINIO_BUCKET_ITEMS:itemsimage}
   application:
     max_images_item: ${MAX_IMAGE_ITEM:3}
+
+sip:
+  root:
+    email: ${ROOT_EMAIL:root@sip.com}
+    password: ${ROOT_PASS:SenhaSegura@123}
+    name: ${ROOT_NAME:Root Admin}
+    phone: ${ROOT_PHONE:71999998888}
+    cpf: ${ROOT_CPF:00000000000}
+
+application:
+  front-end:
+    url: ${FRONTEND_APPLICATION_URL:http://localhost:8080}
+
 
 

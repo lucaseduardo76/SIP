@@ -29,7 +29,7 @@ public class EmailService {
     private final TokenService tokenService;
     private final UserRepository userRepository;
 
-    @Value("${spring.application.applicationUrl}")
+    @Value("${application.front-end.url}")
     private String applicationUrl;
 
     public void sendEmailWithCode(
