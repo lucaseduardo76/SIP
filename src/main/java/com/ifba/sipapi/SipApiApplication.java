@@ -1,6 +1,7 @@
 package com.ifba.sipapi;
 
 import com.ifba.sipapi.notification.application.UserNotificationDto;
+import com.ifba.sipapi.notification.infra.NotificationProducer;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -15,14 +16,13 @@ public class SipApiApplication {
     }
 
     @Bean
-    public CommandLineRunner sendStartupMessage(SimpMessagingTemplate messagingTemplate) {
+    public CommandLineRunner sendStartupMessage(NotificationProducer producer) {
         return args -> {
             new Thread(() -> {
                 try {
                     Thread.sleep(10_000); // wait 10 seconds
-                    var msg = new UserNotificationDto("✅ SIP API started successfully!");
-                    messagingTemplate.convertAndSend("/topic/public", msg);
-                    System.out.println("Startup message sent to /topic/public after 10s");
+                    producer.send("✅ SIP API started successfully!");
+                    System.out.println("Startup message published to Kafka (consumer will broadcast to /topic/public)");
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
