@@ -3,9 +3,11 @@ package com.ifba.sipapi.item.api.controller;
 
 import com.ifba.sipapi.docs.swagger.ItemsAPIDocs;
 import com.ifba.sipapi.item.api.dto.ImageUrlResponseDto;
+import com.ifba.sipapi.item.api.dto.ItemDeleteImageDto;
 import com.ifba.sipapi.item.dto.ItemRequestDto;
 import com.ifba.sipapi.item.dto.ItemResponseDto;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,6 +35,27 @@ public interface ItemApi {
     List<ImageUrlResponseDto> uploadImages(
             @PathVariable UUID itemId,
             @RequestPart("itemImages") List<MultipartFile> itemImages
+    );
+
+    @ItemsAPIDocs.DeleteImageItem
+    @DeleteMapping(value = "/admin/image/delete")
+    @ResponseStatus(HttpStatus.OK)
+    void deleteImage(
+            @RequestBody @Valid ItemDeleteImageDto itemDeleteImageDto
+    );
+
+    @ItemsAPIDocs.DeleteAllImagesItem
+    @DeleteMapping(value = "/admin/image/delete-all/{itemId}")
+    @ResponseStatus(HttpStatus.OK)
+    void deleteAllImages(
+            @PathVariable UUID itemId
+    );
+
+    @ItemsAPIDocs.DeleteItem
+    @DeleteMapping(value = "/admin/delete/{itemId}")
+    @ResponseStatus(HttpStatus.OK)
+    void deleteItem(
+            @PathVariable UUID itemId
     );
 
 }

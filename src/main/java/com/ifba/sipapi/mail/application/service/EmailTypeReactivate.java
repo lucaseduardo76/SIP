@@ -20,7 +20,7 @@ public class EmailTypeReactivate implements EmailProcess{
         emailService.sendEmailWithCode(new EmailDetailsDto(
                 payload.getSendTo(),
                 "Reativação de conta - SIP",
-                "/authentication/reactivate/token/",
+                "/reactivate?token=",
                 "email_reactivation"
         ));
         log.debug("[finish] EmailTypeReactivate - sendEmail");
