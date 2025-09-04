@@ -7,7 +7,7 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class NotificationController {
 
-    @MessageMapping("/chat.send")
+    @MessageMapping("/notification.send")
     @SendTo("/topic/public")
     public UserNotificationDto send(UserNotificationDto dto) {
         return dto;

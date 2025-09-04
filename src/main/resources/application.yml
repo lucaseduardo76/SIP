@@ -32,6 +32,10 @@ spring:
   kafka:
     bootstrap-servers: ${KAFKA_URL:localhost:9093}
     consumer:
+      notification:
+        group-id: notification-sender
+        topic: notification
+        factory: notificationKafkaListenerContainerFactory
       email:
         group-id: email-sender
         topic: email
