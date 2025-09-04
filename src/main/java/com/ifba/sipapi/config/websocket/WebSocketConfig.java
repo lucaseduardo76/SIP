@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.security.messaging.access.intercept.AuthorizationChannelInterceptor;
 import org.springframework.web.socket.config.annotation.*;
 import com.ifba.sipapi.websocket.StompJwtChannelInterceptor;
 
@@ -13,6 +14,7 @@ import com.ifba.sipapi.websocket.StompJwtChannelInterceptor;
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final StompJwtChannelInterceptor jwtInterceptor;
+    private final AuthorizationChannelInterceptor authorizationChannelInterceptorInterceptor;
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
@@ -24,11 +26,11 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry.setApplicationDestinationPrefixes("/app");
-        registry.enableSimpleBroker("/topic","/queue");
+        registry.enableSimpleBroker("/admin","/common");
     }
 
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
-        registration.interceptors(jwtInterceptor);
+        registration.interceptors(jwtInterceptor, authorizationChannelInterceptorInterceptor);
     }
 }
