@@ -1,6 +1,7 @@
 package com.ifba.sipapi.item.api.controller;
 
 import com.ifba.sipapi.item.api.dto.ImageUrlResponseDto;
+import com.ifba.sipapi.item.api.dto.ItemDeleteImageDto;
 import com.ifba.sipapi.item.api.service.ItemService;
 import com.ifba.sipapi.item.dto.ItemRequestDto;
 import com.ifba.sipapi.item.dto.ItemResponseDto;
@@ -35,5 +36,19 @@ public class ItemApplicationApi implements ItemApi {
         List<ImageUrlResponseDto> imageList =  itemService.uploadImages(itemId, itemImages);
         log.debug("[finish] ItemApplicationApi - uploadImages");
         return imageList;
+    }
+
+    @Override
+    public void deleteImage(ItemDeleteImageDto itemDeleteImageDto) {
+        log.info("[start] ItemApplicationApi - deleteImage");
+        itemService.deleteImage(itemDeleteImageDto);
+        log.debug("[finish] ItemApplicationApi - deleteImage");
+    }
+
+    @Override
+    public void deleteAllImages(UUID itemId) {
+        log.info("[start] ItemApplicationApi - deleteAllImages");
+        itemService.deleteAllImages(itemId);
+        log.debug("[finish] ItemApplicationApi - deleteAllImages");
     }
 }

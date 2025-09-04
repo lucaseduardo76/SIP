@@ -3,6 +3,7 @@ package com.ifba.sipapi.item.api.service;
 import com.ifba.sipapi.config.handler.APIException;
 import com.ifba.sipapi.config.security.TokenService;
 import com.ifba.sipapi.item.api.dto.ImageUrlResponseDto;
+import com.ifba.sipapi.item.api.dto.ItemDeleteImageDto;
 import com.ifba.sipapi.item.domain.item.Category;
 import com.ifba.sipapi.item.domain.item.Item;
 import com.ifba.sipapi.item.domain.picture.Picture;
@@ -10,7 +11,7 @@ import com.ifba.sipapi.item.dto.ItemRequestDto;
 import com.ifba.sipapi.item.dto.ItemResponseDto;
 import com.ifba.sipapi.item.infra.item.ItemRepository;
 import com.ifba.sipapi.item.infra.picture.PictureRepository;
-import com.ifba.sipapi.minio.application.service.MinioClient;
+import com.ifba.sipapi.minio.api.service.MinioClient;
 import com.ifba.sipapi.user.domain.User;
 import com.ifba.sipapi.user.infra.UserRepository;
 import jakarta.transaction.Transactional;
@@ -87,6 +88,28 @@ public class ItemApplicationService implements ItemService {
         List<Picture> savedPictures = itemImages.stream().map(file -> uploadAndSave(file, item)).toList();
         log.debug("[finish] ItemApplicationService - uploadImages itemId={}, savedImages={}", itemId, savedPictures.size());
         return savedPictures.stream().map(ImageUrlResponseDto::new).toList();
+    }
+
+    @Override
+    public void deleteImage(ItemDeleteImageDto itemDeleteImageDto) {
+        log.info("[start] ItemApplicationService - deleteImage");
+        Picture picture = pictureRepository.findByUrl(itemDeleteImageDto.getImageUrl()).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Foto não encontrada"));
+        Item item = itemRepository.findById(itemDeleteImageDto.getItemId()).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Item não encontrado"));
+        picture.assertBelongsTo(item);
+        minioClient.deleteItemImage(itemDeleteImageDto.getImageUrl());
+        pictureRepository.delete(picture);
+        log.debug("[finish] ItemApplicationService - deleteImage");
+    }
+
+    @Override
+    public void deleteAllImages(UUID itemId) {
+        log.info("[start] ItemApplicationService - deleteAllImages");
+        Item item = itemRepository.findById(itemId).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Item não encontrado"));
+        item.getPictures().forEach(picture -> {
+            minioClient.deleteItemImage(picture.getUrl());
+            pictureRepository.delete(picture);
+        });
+        log.debug("[finish] ItemApplicationService - deleteAllImages");
     }
 
     private void validateMaxImagesPerItem(Item item, List<MultipartFile> itemImages) {
