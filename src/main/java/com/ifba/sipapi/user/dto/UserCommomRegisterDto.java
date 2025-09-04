@@ -8,7 +8,7 @@ import org.hibernate.validator.constraints.br.CPF;
 
 @Getter
 @EqualsAndHashCode
-public class  UserCommomRegisterDto{
+public class  UserCommomRegisterDto implements UserRegisterDto{
     @NotBlank(message = "O nome é obrigatório")
     @Size(min = 2, max = 100, message = "O nome deve ter entre 2 e 100 caracteres")
     @Schema(example = "João da Silva")
@@ -43,7 +43,7 @@ public class  UserCommomRegisterDto{
     @Schema(example = "71999998888")
     private String phone;
 
-    public void updateHashedPassword(UserBasicInfo userBasicInfo) {
-        this.password = userBasicInfo.getPassword();
+    public void updateHashedPassword(String passwordHash) {
+        this.password = passwordHash;
     }
 }

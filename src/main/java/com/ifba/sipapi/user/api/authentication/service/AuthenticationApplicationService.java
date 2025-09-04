@@ -38,8 +38,7 @@ public class AuthenticationApplicationService implements AuthenticationService {
     @Override
     public void createNewUser(UserCommomRegisterDto userCommomRegisterDto) {
         log.info("[start] AuthenticationApplicationService - createNewUser");
-        UserBasicInfo userBasicInfo = verifyUserInternal(new UserBasicInfo(userCommomRegisterDto));
-        userCommomRegisterDto.updateHashedPassword(userBasicInfo);
+        verifyUserInternal(userCommomRegisterDto);
         User user = userRepository.save(new User(userCommomRegisterDto));
         sendEmail(user.getEmail(), EmailType.VERIFICATION);
         log.debug("[finish] AuthenticationApplicationService - createNewUser");
@@ -48,19 +47,18 @@ public class AuthenticationApplicationService implements AuthenticationService {
     @Override
     public void createNewUser(UserAdminRegisterDto userAdminRegisterDto) {
         log.info("[start] AuthenticationApplicationService - createNewAdminUser");
-        UserBasicInfo userBasicInfo = verifyUserInternal(new UserBasicInfo(userAdminRegisterDto));
-        userAdminRegisterDto.updateHashedPassword(userBasicInfo);
+        userAdminRegisterDto.updatePasswordWithDefaultFormat();
+        verifyUserInternal(userAdminRegisterDto);
         User user = userRepository.save(new User(userAdminRegisterDto));
         sendEmail(user.getEmail(), EmailType.VERIFICATION);
         log.debug("[finish] AuthenticationApplicationService - createNewAdminUser");
     }
 
-    private UserBasicInfo verifyUserInternal(UserBasicInfo userBasicInfo) {
+    private void verifyUserInternal(UserRegisterDto userRegisterDto) {
         log.info("[start] AuthenticationApplicationService - verifyUserInternal");
-        this.handleNewUserValidations(userBasicInfo);
-        this.generatePasswordHash(userBasicInfo);
+        this.handleNewUserValidations(userRegisterDto);
+        this.generatePasswordHash(userRegisterDto);
         log.debug("[finish] AuthenticationApplicationService - verifyUserInternal");
-        return userBasicInfo;
     }
 
     private void sendEmail(String userEmail, EmailType emailType){
@@ -70,22 +68,19 @@ public class AuthenticationApplicationService implements AuthenticationService {
         log.debug("[finish] AuthenticationApplicationService - sendEmail");
     }
 
-    private void handleNewUserValidations(UserBasicInfo userBasicInfo) {
-        if (userRepository.existsByEmail(userBasicInfo.getEmail())) {
+        private void handleNewUserValidations(UserRegisterDto userRegisterDto) {
+        if (userRepository.existsByEmail(userRegisterDto.getEmail())) {
             throw APIException.build(HttpStatus.BAD_REQUEST, "E-mail já está em uso. Por favor, utilize outro.");
         }
 
-        if (userRepository.existsByCpf(userBasicInfo.getCpf())) {
+        if (userRepository.existsByCpf(userRegisterDto.getCpf())) {
             throw APIException.build(HttpStatus.BAD_REQUEST, "CPF já está em uso. Por favor, verifique os dados informados.");
         }
     }
 
-    private void generatePasswordHash(UserBasicInfo userBasicInfo) {
+    private void generatePasswordHash(UserRegisterDto userRegisterDto) {
         log.info("[start] AuthenticationApplicationService - generatePasswordHash");
-        String passwordToHash = userBasicInfo.getPassword() != null
-                ? userBasicInfo.getPassword()
-                : "ifba." + userBasicInfo.getCpf();
-        userBasicInfo.updateHashedPassword(passwordEncoder.encode(passwordToHash));
+        userRegisterDto.updateHashedPassword(passwordEncoder.encode(userRegisterDto.getPassword()));
         log.debug("[finish] AuthenticationApplicationService - generatePasswordHash");
     }
 
