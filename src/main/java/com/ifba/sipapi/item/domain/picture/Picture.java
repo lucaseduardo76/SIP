@@ -4,10 +4,7 @@ import com.ifba.sipapi.config.handler.APIException;
 import com.ifba.sipapi.item.domain.item.Item;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.http.HttpStatus;
 
 import java.util.UUID;
@@ -18,6 +15,7 @@ import java.util.UUID;
 @Table(name = "picture")
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class Picture {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

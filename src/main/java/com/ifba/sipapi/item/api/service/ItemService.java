@@ -18,4 +18,5 @@ public interface ItemService {
     List<ImageUrlResponseDto> uploadImages(UUID itemId, List<MultipartFile> itemImages);
     void deleteImage(ItemDeleteImageDto itemDeleteImageDto);
     void deleteAllImages(UUID itemId);
+    void deleteItem(UUID itemId);
 }

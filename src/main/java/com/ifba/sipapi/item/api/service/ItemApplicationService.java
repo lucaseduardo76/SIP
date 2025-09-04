@@ -105,11 +105,18 @@ public class ItemApplicationService implements ItemService {
     public void deleteAllImages(UUID itemId) {
         log.info("[start] ItemApplicationService - deleteAllImages");
         Item item = itemRepository.findById(itemId).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Item não encontrado"));
-        item.getPictures().forEach(picture -> {
-            minioClient.deleteItemImage(picture.getUrl());
-            pictureRepository.delete(picture);
-        });
+        item.getPictures().forEach(picture -> {minioClient.deleteItemImage(picture.getUrl());});
+        item.getPictures().clear();
+        itemRepository.save(item);
         log.debug("[finish] ItemApplicationService - deleteAllImages");
+    }
+
+    @Override
+    public void deleteItem(UUID itemId) {
+        log.info("[start] ItemApplicationService - deleteItem");
+        this.deleteAllImages(itemId);
+        itemRepository.deleteById(itemId);
+        log.debug("[finish] ItemApplicationService - deleteItem");
     }
 
     private void validateMaxImagesPerItem(Item item, List<MultipartFile> itemImages) {

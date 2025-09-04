@@ -51,4 +51,11 @@ public class ItemApplicationApi implements ItemApi {
         itemService.deleteAllImages(itemId);
         log.debug("[finish] ItemApplicationApi - deleteAllImages");
     }
+
+    @Override
+    public void deleteItem(UUID itemId) {
+        log.info("[start] ItemApplicationApi - deleteItem");
+        itemService.deleteItem(itemId);
+        log.debug("[finish] ItemApplicationApi - deleteItem");
+    }
 }

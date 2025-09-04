@@ -51,6 +51,11 @@ public interface ItemApi {
             @PathVariable UUID itemId
     );
 
-
+    @ItemsAPIDocs.DeleteItem
+    @DeleteMapping(value = "/admin/delete/{itemId}")
+    @ResponseStatus(HttpStatus.OK)
+    void deleteItem(
+            @PathVariable UUID itemId
+    );
 
 }

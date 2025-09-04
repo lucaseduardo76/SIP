@@ -55,4 +55,15 @@ public @interface ItemsAPIDocs {
 
     public @interface DeleteAllImagesItem {
     }
+
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @Operation(summary = "Deleta item", description = "Metodo deleta item")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Item Deletado"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"message\": \"mensagem qualquer.\" }"))),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"description\": \"INTERNAL SERVER ERROR!\", \"message\": \"POR FAVOR INFORME AO ADMINISTRADOR DO SISTEMA!\" }")))})
+
+    public @interface DeleteItem {
+    }
 }
