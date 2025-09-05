@@ -120,7 +120,9 @@ public class ItemApplicationService implements ItemService {
     public void editItem(UUID itemId, ItemEditRequestDto itemEditRequestDto) {
         log.info("[start] ItemApplicationService - editItem");
         Item item = itemRepository.findById(itemId).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Item não encontrado"));
-        item.validateItemIsAvailable();
+        item.validateItemIsAvailableToUpdate();
+        item.update(itemEditRequestDto);
+        itemRepository.save(item);
         log.debug("[finish] ItemApplicationService - editItem");
     }
 

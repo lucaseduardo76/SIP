@@ -20,12 +20,6 @@ public class ItemEditRequestDto {
     @Schema(description = "Cor do item", example = "Vermelho")
     private String color;
 
-    @Schema(description = "Data em que o item foi encontrado", example = "2025-08-27")
-    private LocalDate finding_date;
-
-    @Schema(description = "Período do dia em que o item foi encontrado", example = "MORNING")
-    private DayPeriod day_period;
-
     @Schema(description = "Categoria do item", example = "ELECTRONIC")
     private Category category;
 
