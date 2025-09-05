@@ -1,6 +1,7 @@
 package com.ifba.sipapi.item.domain.item;
 
 import com.ifba.sipapi.Auditable;
+import com.ifba.sipapi.config.handler.APIException;
 import com.ifba.sipapi.item.domain.picture.Picture;
 import com.ifba.sipapi.item.dto.ItemRequestDto;
 import com.ifba.sipapi.user.domain.User;
@@ -10,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.http.HttpStatus;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -70,4 +72,11 @@ public class Item extends Auditable {
         this.area = itemRequestDto.getArea();
         this.code = code;
     }
+
+    public void validateItemIsAvailable() {
+        if(status != Status.DISPONIBLE)
+            throw APIException.build(HttpStatus.BAD_REQUEST, "Item não está mais disponível");
+    }
+
+
 }

@@ -2,10 +2,7 @@ package com.ifba.sipapi.item.api.service;
 
 
 
-import com.ifba.sipapi.item.api.dto.ImageUrlResponseDto;
-import com.ifba.sipapi.item.api.dto.ItemDeleteImageDto;
-import com.ifba.sipapi.item.dto.ItemRequestDto;
-import com.ifba.sipapi.item.dto.ItemResponseDto;
+import com.ifba.sipapi.item.dto.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,4 +16,5 @@ public interface ItemService {
     void deleteImage(ItemDeleteImageDto itemDeleteImageDto);
     void deleteAllImages(UUID itemId);
     void deleteItem(UUID itemId);
+    void editItem(UUID itemId, ItemEditRequestDto itemEditRequestDto);
 }

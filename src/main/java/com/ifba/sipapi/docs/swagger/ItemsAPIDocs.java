@@ -66,4 +66,15 @@ public @interface ItemsAPIDocs {
 
     public @interface DeleteItem {
     }
+
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @Operation(summary = "Edita item", description = "Metodo edita item")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Update efetuado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"message\": \"mensagem qualquer.\" }"))),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"description\": \"INTERNAL SERVER ERROR!\", \"message\": \"POR FAVOR INFORME AO ADMINISTRADOR DO SISTEMA!\" }")))})
+    public @interface EditItem {
+    }
+
 }

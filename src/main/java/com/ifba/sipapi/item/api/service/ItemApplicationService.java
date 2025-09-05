@@ -2,13 +2,10 @@ package com.ifba.sipapi.item.api.service;
 
 import com.ifba.sipapi.config.handler.APIException;
 import com.ifba.sipapi.config.security.TokenService;
-import com.ifba.sipapi.item.api.dto.ImageUrlResponseDto;
-import com.ifba.sipapi.item.api.dto.ItemDeleteImageDto;
+import com.ifba.sipapi.item.dto.*;
 import com.ifba.sipapi.item.domain.item.Category;
 import com.ifba.sipapi.item.domain.item.Item;
 import com.ifba.sipapi.item.domain.picture.Picture;
-import com.ifba.sipapi.item.dto.ItemRequestDto;
-import com.ifba.sipapi.item.dto.ItemResponseDto;
 import com.ifba.sipapi.item.infra.item.ItemRepository;
 import com.ifba.sipapi.item.infra.picture.PictureRepository;
 import com.ifba.sipapi.minio.api.service.MinioClient;
@@ -117,6 +114,14 @@ public class ItemApplicationService implements ItemService {
         this.deleteAllImages(itemId);
         itemRepository.deleteById(itemId);
         log.debug("[finish] ItemApplicationService - deleteItem");
+    }
+
+    @Override
+    public void editItem(UUID itemId, ItemEditRequestDto itemEditRequestDto) {
+        log.info("[start] ItemApplicationService - editItem");
+        Item item = itemRepository.findById(itemId).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Item não encontrado"));
+        item.validateItemIsAvailable();
+        log.debug("[finish] ItemApplicationService - editItem");
     }
 
     private void validateMaxImagesPerItem(Item item, List<MultipartFile> itemImages) {
