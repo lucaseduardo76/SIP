@@ -1,6 +1,7 @@
 package com.ifba.sipapi.config.security;
 
 
+import com.ifba.sipapi.config.websocket.JwtWsPreAuthFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,6 +25,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 public class SecurityConfiguration {
 
     private final SecurityFilter securityFilter;
+    private final JwtWsPreAuthFilter wsFilter;
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
@@ -31,7 +33,6 @@ public class SecurityConfiguration {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/notification/**").permitAll()
                         .requestMatchers(
                                 "public/**",
                                 "v3/api-docs/**",
@@ -46,6 +47,7 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.POST, "authentication/**").permitAll()
                         .anyRequest().authenticated()
                 )
+                .addFilterBefore(wsFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

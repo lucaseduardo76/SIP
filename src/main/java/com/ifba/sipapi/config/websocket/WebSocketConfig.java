@@ -1,36 +1,26 @@
-package com.ifba.sipapi.websocket;
+package com.ifba.sipapi.config.websocket;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.messaging.simp.config.ChannelRegistration;
-import org.springframework.messaging.simp.config.MessageBrokerRegistry;
-import org.springframework.security.messaging.access.intercept.AuthorizationChannelInterceptor;
-import org.springframework.web.socket.config.annotation.*;
-import com.ifba.sipapi.websocket.StompJwtChannelInterceptor;
+import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.config.annotation.EnableWebSocket;
+import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
+import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 
-@Configuration
-@EnableWebSocketMessageBroker
 @RequiredArgsConstructor
-public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+@Configuration
+@EnableWebSocket
+public class WebSocketConfig implements WebSocketConfigurer {
 
-    private final StompJwtChannelInterceptor jwtInterceptor;
-    private final AuthorizationChannelInterceptor authorizationChannelInterceptorInterceptor;
-
-    @Override
-    public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/notification")
-                .setAllowedOriginPatterns("*")
-                .withSockJS();
-    }
+    private final CustomWebSocketHandshakeHandler customWebSocketHandshakeHandler;
+    private final NotificationHandler notificationHandler;
 
     @Override
-    public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.setApplicationDestinationPrefixes("/app");
-        registry.enableSimpleBroker("/admin","/common");
-    }
-
-    @Override
-    public void configureClientInboundChannel(ChannelRegistration registration) {
-        registration.interceptors(jwtInterceptor, authorizationChannelInterceptorInterceptor);
+    public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+        registry.addHandler(notificationHandler, "/ws", "/ws/common", "/ws/admin")
+                .setHandshakeHandler(customWebSocketHandshakeHandler)
+                .setAllowedOriginPatterns("*");
     }
 }
+

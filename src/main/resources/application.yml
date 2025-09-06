@@ -6,6 +6,12 @@ sip:
     phone: ${ROOT_PHONE:71999998888}
     cpf: ${ROOT_CPF:00000000000}
 
+logging:
+  level:
+    org.springframework.messaging: DEBUG
+    org.springframework.web.socket: DEBUG
+    org.springframework.web.socket.messaging: DEBUG
+
 spring:
   profiles:
     active: ${APP_PROFILE:local}
