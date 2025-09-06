@@ -2,8 +2,9 @@ package com.ifba.sipapi.item.api.controller;
 
 
 import com.ifba.sipapi.docs.swagger.ItemsAPIDocs;
-import com.ifba.sipapi.item.api.dto.ImageUrlResponseDto;
-import com.ifba.sipapi.item.api.dto.ItemDeleteImageDto;
+import com.ifba.sipapi.item.dto.ImageUrlResponseDto;
+import com.ifba.sipapi.item.dto.ItemDeleteImageDto;
+import com.ifba.sipapi.item.dto.ItemEditRequestDto;
 import com.ifba.sipapi.item.dto.ItemRequestDto;
 import com.ifba.sipapi.item.dto.ItemResponseDto;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -30,7 +31,7 @@ public interface ItemApi {
 
 
     @ItemsAPIDocs.UpdateImagesItem
-    @PostMapping(value = "/admin/{itemId}/images")
+    @PostMapping(value = "/admin/images/{itemId}")
     @ResponseStatus(HttpStatus.OK)
     List<ImageUrlResponseDto> uploadImages(
             @PathVariable UUID itemId,
@@ -56,6 +57,14 @@ public interface ItemApi {
     @ResponseStatus(HttpStatus.OK)
     void deleteItem(
             @PathVariable UUID itemId
+    );
+
+    @ItemsAPIDocs.EditItem
+    @PutMapping(value = "/admin/edit/{itemId}")
+    @ResponseStatus(HttpStatus.OK)
+    void editItem(
+            @PathVariable UUID itemId,
+            @RequestBody ItemEditRequestDto ItemEditRequestDto
     );
 
 }

@@ -78,31 +78,32 @@ services:
       - ./init.sh:/init.sh
       - minio-data:/data
 
-#  sip-api:
-#    image: lucaseduardo76/sip-api:4.3.1
-#    container_name: sip-api
-#    restart: always
-#    depends_on:
-#      - postgres
-#      - kafka
-#      - minio
-#    ports:
-#      - "8080:8080"
-#    environment:
-#      APP_PROFILE: local
-#      APPLICATION_URL: sip-api:8080
-#      DATASOURCE_URL: jdbc:postgresql://postgres:5432/sip
-#      DATASOURCE_USER: postgres
-#      DATASOURCE_PASS: postgres
-#      EMAIL_USERNAME: ${EMAIL}
-#      EMAIL_PASSWORD: ${EMAIL_CODE}
-#      SECURITY_JWT_SECRET: 1234567abcdeABCDE
-#      SECURITY_JWT_EXPIRATION_EM_HORAS: 8
-#      MINIO_ENDPOINT: http://192.168.1.9:9000
-#      MINIO_ACCESS: admin
-#      MINIO_SECRET: admin123
-#      MINIO_BUCKET_PROFILE: profimage
-#      KAFKA_URL: kafka:9092
+  sip-api:
+    build: .
+    container_name: sip-api
+    restart: always
+    depends_on:
+      - postgres
+      - kafka
+      - minio
+    ports:
+      - "8080:8080"
+    environment:
+      APP_PROFILE: local
+      APPLICATION_URL: sip-api:8080
+      DATASOURCE_URL: jdbc:postgresql://postgres:5432/sip
+      DATASOURCE_USER: postgres
+      DATASOURCE_PASS: postgres
+      EMAIL_USERNAME: lesds2001@gmail.com
+      EMAIL_PASSWORD: jyil cfes tmkx ukek
+      SECURITY_JWT_SECRET: 1234567abcdeABCDE
+      SECURITY_JWT_EXPIRATION_EM_HORAS: 8
+      MINIO_ENDPOINT: http://192.168.56.1:9000
+      MINIO_ACCESS: admin
+      MINIO_SECRET: admin123
+      MINIO_BUCKET_PROFILE: profimage
+      KAFKA_URL: kafka:9092
+
 
 volumes:
   postgres_data:

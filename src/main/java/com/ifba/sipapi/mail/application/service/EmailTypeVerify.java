@@ -20,7 +20,7 @@ public class EmailTypeVerify implements EmailProcess{
         emailService.sendEmailWithCode(new EmailDetailsDto(
                 payload.getSendTo(),
                 "Verificação de conta - SIP",
-                "/verify-account?token=",
+                "/verification?type=" + EmailType.VERIFICATION + "&token=",
                 "email"
         ));
         log.debug("[finish] EmailTypeVerify - sendEmail");

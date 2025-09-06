@@ -1,10 +1,7 @@
 package com.ifba.sipapi.item.api.controller;
 
-import com.ifba.sipapi.item.api.dto.ImageUrlResponseDto;
-import com.ifba.sipapi.item.api.dto.ItemDeleteImageDto;
+import com.ifba.sipapi.item.dto.*;
 import com.ifba.sipapi.item.api.service.ItemService;
-import com.ifba.sipapi.item.dto.ItemRequestDto;
-import com.ifba.sipapi.item.dto.ItemResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.web.bind.annotation.RestController;
@@ -57,5 +54,12 @@ public class ItemApplicationApi implements ItemApi {
         log.info("[start] ItemApplicationApi - deleteItem");
         itemService.deleteItem(itemId);
         log.debug("[finish] ItemApplicationApi - deleteItem");
+    }
+
+    @Override
+    public void editItem(UUID itemId, ItemEditRequestDto itemEditRequestDto) {
+        log.info("[start] ItemApplicationApi - editItem");
+        itemService.editItem(itemId, itemEditRequestDto);
+        log.debug("[finish] ItemApplicationApi - editItem");
     }
 }
