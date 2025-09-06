@@ -31,7 +31,7 @@ public interface ItemApi {
 
 
     @ItemsAPIDocs.UpdateImagesItem
-    @PostMapping(value = "/admin/{itemId}/images")
+    @PostMapping(value = "/admin/images/{itemId}")
     @ResponseStatus(HttpStatus.OK)
     List<ImageUrlResponseDto> uploadImages(
             @PathVariable UUID itemId,
