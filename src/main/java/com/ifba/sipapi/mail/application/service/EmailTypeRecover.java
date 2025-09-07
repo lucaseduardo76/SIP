@@ -20,7 +20,7 @@ public class EmailTypeRecover implements EmailProcess{
         emailService.sendEmailWithCode(new EmailDetailsDto(
                 payload.getSendTo(),
                 "Recuperação de senha - SIP",
-                "user/account/reset-password/token/",
+                "/recover-password?type="+EmailType.RECOVER_PASSWORD+"&token=",
                 "email"
         ));
         log.debug("[finish] EmailTypeRecover - sendEmail");

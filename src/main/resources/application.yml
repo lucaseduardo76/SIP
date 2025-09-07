@@ -6,18 +6,11 @@ sip:
     phone: ${ROOT_PHONE:71999998888}
     cpf: ${ROOT_CPF:00000000000}
 
-logging:
-  level:
-    org.springframework.messaging: DEBUG
-    org.springframework.web.socket: DEBUG
-    org.springframework.web.socket.messaging: DEBUG
-
 spring:
   profiles:
     active: ${APP_PROFILE:local}
   application:
     name: sip-api
-    applicationUrl: ${APPLICATION_URL:http://localhost:8080}
 
   datasource:
     url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/sip}
@@ -38,10 +31,6 @@ spring:
   kafka:
     bootstrap-servers: ${KAFKA_URL:localhost:9093}
     consumer:
-      notification:
-        group-id: notification-sender
-        topic: notification
-        factory: notificationKafkaListenerContainerFactory
       email:
         group-id: email-sender
         topic: email

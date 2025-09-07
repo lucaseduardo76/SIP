@@ -12,11 +12,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserPasswordUpdateDto {
-    @NotBlank(message = "Senha não pode ser nulo")
+    @NotBlank(message = "Senha não pode ser nula")
     @Schema(example = "SenhaSegura@123")
     private String password;
 
-    @NotBlank(message = "A nova senha não pode ser nulo")
+    @NotBlank(message = "A nova senha não pode ser nula")
     @Size(min = 8, message = "A senha deve ter no mínimo 8 caracteres")
     @Pattern(
             regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*(),.?\":{}|<>\\[\\]\\\\/~`_+=;'\\-]).{8,}$",

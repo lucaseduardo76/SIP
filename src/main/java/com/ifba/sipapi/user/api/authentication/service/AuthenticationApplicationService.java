@@ -113,7 +113,7 @@ public class AuthenticationApplicationService implements AuthenticationService {
         return switch (status) {
             case NOT_VERIFIED -> "Usuário ainda não foi verificado. Procure o código no seu email e faça a verificação.";
             case ACTIVE -> "Usuário ou senha inválidos. Verifique e tente novamente.";
-            case BLOCKED -> "Usuário bloqueado por excesso de tentativas. Faça a recuperação da conta.";
+            case BLOCKED -> "Usuário bloqueado por excesso de tentativas.";
             default -> "Status do usuário inválido ou desconhecido.";
         };
     }

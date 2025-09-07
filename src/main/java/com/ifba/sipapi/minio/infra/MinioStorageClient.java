@@ -2,7 +2,8 @@ package com.ifba.sipapi.minio.infra;
 
 import com.ifba.sipapi.config.handler.APIException;
 import com.ifba.sipapi.item.domain.item.Item;
-import com.ifba.sipapi.minio.application.service.MinioClient;
+import com.ifba.sipapi.minio.api.service.MinioClient;
+import com.ifba.sipapi.minio.dto.BucketFileDto;
 import com.ifba.sipapi.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -17,7 +18,6 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import javax.imageio.ImageIO;
 import java.io.IOException;
-import java.util.Random;
 import java.util.UUID;
 
 @Component
@@ -61,6 +61,27 @@ public class MinioStorageClient implements MinioClient {
         log.debug("[finish] minioApplicationService - updateProfileImage");
         return buildPublicImageUrl(filename, profileBucket);
     }
+
+    @Override
+    public void deleteItemImage(String imageUrl) {
+        log.info("[start] MinioStorageClient - deleteItemImage");
+        try {
+            BucketFileDto bucketFileDto = extractBucketAndFilenameFromUrl(imageUrl);
+            s3Client.deleteObject(builder -> builder.bucket(bucketFileDto.getBucket()).key(bucketFileDto.getFilename()));
+            log.debug("[finish] MinioStorageClient - deleteItemImage");
+        } catch (Exception e) {
+            throw APIException.build(HttpStatus.BAD_REQUEST,
+                    "Não foi possível excluir a imagem do item: " + imageUrl);
+        }
+    }
+
+    private BucketFileDto extractBucketAndFilenameFromUrl(String imageUrl) {
+        String relativePath = imageUrl.replace(minioEndpoint + "/", "");
+        String bucket = relativePath.substring(0, relativePath.indexOf("/"));
+        String filename = relativePath.substring(relativePath.indexOf("/") + 1);
+        return new BucketFileDto(bucket, filename);
+    }
+
 
     private void ensureBucketExists(String bucketName) {
         boolean exists = s3Client.listBuckets().buckets().stream().anyMatch(b -> b.name().equals(bucketName));
