@@ -11,15 +11,12 @@ import java.security.Principal;
 @Controller
 public class NotificationWsController {
 
-    /* other parts of the code*/
     @EventListener
     public void onSocketConnected(final SessionConnectedEvent event) {
-        // Retrieve the 'simpUser' attribute from the session headers
         Principal sessionUser = (Principal) event.getMessage().getHeaders().get("simpUser");
 
         if (sessionUser != null) {
             log.info("User connected: {}", sessionUser.getName());
-            // Further processing if required
         } else {
             log.warn("No user information found in the session.");
         }

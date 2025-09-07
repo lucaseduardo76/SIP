@@ -4,6 +4,7 @@ import com.ifba.sipapi.config.security.TokenService;
 import com.ifba.sipapi.user.infra.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.server.ServerHttpRequest; // servlet stack
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketHandler;
@@ -36,26 +37,23 @@ public class CustomWebSocketHandshakeHandler extends DefaultHandshakeHandler {
         final var userDetails = userRepository.findByEmail(username)
                 .orElseThrow(() -> new RuntimeException("User not found: " + username));
 
-        // Extract authorities (e.g., ROLE_ADMIN, ROLE_USER)
         final var roles = userDetails.getAuthorities().stream()
                 .map(a -> a.getAuthority())
                 .collect(Collectors.toSet());
 
-        // OPTIONAL: enforce endpoint-based roles (e.g., /ws/admin requires ROLE_ADMIN)
-        final var path = request.getURI().getPath(); // e.g., /sip/api/ws/admin
+        final var path = request.getURI().getPath();
+        final String channel = path.endsWith("/admin") ? "admin" : "common";
         if (path.endsWith("/admin") && !roles.contains("ROLE_ADMIN")) {
-            throw new org.springframework.security.access.AccessDeniedException("Admin only");
+            throw new AccessDeniedException("Admin only");
         }
 
-        // Expose roles to the session
         attributes.put("roles", roles);
         attributes.put("username", username);
+        attributes.put("channel", channel);
 
-        // Principal for session.getPrincipal()
         return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
     }
 
-    // Utility method to extract query parameter from the URI
     public static Optional<String> getQueryParam(final ServerHttpRequest request, final String paramName) {
         URI uri = request.getURI();
         String query = uri.getQuery();
