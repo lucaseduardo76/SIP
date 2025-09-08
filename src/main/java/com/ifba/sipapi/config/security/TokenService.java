@@ -32,7 +32,17 @@ public class TokenService {
     private Long expiration;
 
     public String generateTokenUser(User user) {
-        return generateTokenInternal(user.getUsername());
+        try {
+            Algorithm algorithm = Algorithm.HMAC256(secret);
+            return JWT.create()
+                    .withIssuer("SIP")
+                    .withSubject(user.getUsername())
+                    .withClaim("role", user.getRole().name())
+                    .withExpiresAt(generateExpirationTime())
+                    .sign(algorithm);
+        } catch (JWTCreationException exception) {
+            throw APIException.build(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao gerar token: " + exception.getMessage());
+        }
     }
 
     public String generateTokenToEmail(EmailData emailData) {
