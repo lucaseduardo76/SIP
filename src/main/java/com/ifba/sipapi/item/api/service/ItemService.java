@@ -11,10 +11,12 @@ import java.util.UUID;
 
 @Service
 public interface ItemService {
-    ItemResponseDto createItem(ItemRequestDto itemRequestDto, String token);
+    ItemCreatedResponseDto createItem(ItemRequestDto itemRequestDto, String token);
     List<ImageUrlResponseDto> uploadImages(UUID itemId, List<MultipartFile> itemImages);
     void deleteImage(ItemDeleteImageDto itemDeleteImageDto);
     void deleteAllImages(UUID itemId);
     void deleteItem(UUID itemId);
     void editItem(UUID itemId, ItemEditRequestDto itemEditRequestDto);
+    ItemResponseDto getItem(UUID idItem);
+
 }

@@ -54,7 +54,7 @@ public class Item extends Auditable {
     @Enumerated(EnumType.STRING)
     private Area area;
 
-    private LocalDate returnedAt;
+    private LocalDate dateReturned;
 
     private String code;
 

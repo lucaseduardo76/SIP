@@ -2,11 +2,7 @@ package com.ifba.sipapi.item.api.controller;
 
 
 import com.ifba.sipapi.docs.swagger.ItemsAPIDocs;
-import com.ifba.sipapi.item.dto.ImageUrlResponseDto;
-import com.ifba.sipapi.item.dto.ItemDeleteImageDto;
-import com.ifba.sipapi.item.dto.ItemEditRequestDto;
-import com.ifba.sipapi.item.dto.ItemRequestDto;
-import com.ifba.sipapi.item.dto.ItemResponseDto;
+import com.ifba.sipapi.item.dto.*;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -25,10 +21,14 @@ public interface ItemApi {
     @ItemsAPIDocs.CreateItem
     @PostMapping("/admin/create")
     @ResponseStatus(HttpStatus.CREATED)
-    ItemResponseDto createItem(
+    ItemCreatedResponseDto createItem(
             @RequestHeader(name = "Authorization", required = true) String token,
             @RequestBody ItemRequestDto itemRequestDto);
 
+    @ItemsAPIDocs.GetItem
+    @GetMapping("/{idItem}")
+    @ResponseStatus(HttpStatus.OK)
+    ItemResponseDto getItem(@PathVariable UUID idItem);
 
     @ItemsAPIDocs.UpdateImagesItem
     @PostMapping(value = "/admin/images/{itemId}")

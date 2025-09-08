@@ -24,6 +24,15 @@ public @interface ItemsAPIDocs {
 
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
+    @Operation(summary = "Retorna item pelo Id", description = "Metodo quando bem sucedido retorna dados de um item")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Retorna item"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"message\": \"mensagem qualquer.\" }"))),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"description\": \"INTERNAL SERVER ERROR!\", \"message\": \"POR FAVOR INFORME AO ADMINISTRADOR DO SISTEMA!\" }")))})
+    public @interface GetItem { }
+
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
     @Operation(summary = "Adiciona fotos a um item", description = "Metodo criado para adicionar fotos a um item existente")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Foto adicionada"),
