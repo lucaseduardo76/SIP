@@ -38,7 +38,7 @@ public class ItemApplicationService implements ItemService {
     private Integer MAX_IMAGES;
 
     @Override
-    public ItemResponseDto createItem(ItemRequestDto itemRequestDto, String token) {
+    public ItemCreatedResponseDto createItem(ItemRequestDto itemRequestDto, String token) {
         log.info("[start] ItemApplicationService - createItem");
         String email = tokenService.getSubject(token);
         User user = userRepository.findByEmail(email)
@@ -49,7 +49,7 @@ public class ItemApplicationService implements ItemService {
         Item item = new Item(itemRequestDto, itemCode);
         log.debug("[finish] ItemApplicationService - createItem");
         log.info("itemCode={}", itemCode);
-        return new ItemResponseDto(itemRepository.save(item));
+        return new ItemCreatedResponseDto(itemRepository.save(item));
     }
 
     private String generateItemCode(ItemRequestDto itemRequestDto) {
@@ -124,6 +124,14 @@ public class ItemApplicationService implements ItemService {
         item.update(itemEditRequestDto);
         itemRepository.save(item);
         log.debug("[finish] ItemApplicationService - editItem");
+    }
+
+    @Override
+    public ItemResponseDto getItem(UUID idItem) {
+        log.info("[start] ItemApplicationService - getItem");
+        Item item = itemRepository.findById(idItem).orElseThrow(() -> APIException.build(HttpStatus.BAD_REQUEST, "Item não encontrado!"));
+        log.debug("[finish] ItemApplicationService - getItem");
+        return new ItemResponseDto(item);
     }
 
     private void validateMaxImagesPerItem(Item item, List<MultipartFile> itemImages) {
