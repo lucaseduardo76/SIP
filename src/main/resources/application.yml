@@ -1,11 +1,3 @@
-sip:
-  root:
-    email: ${ROOT_EMAIL:root@sip.com}
-    password: ${ROOT_PASS:SenhaSegura@123}
-    name: ${ROOT_NAME:Root Admin}
-    phone: ${ROOT_PHONE:71999998888}
-    cpf: ${ROOT_CPF:00000000000}
-
 spring:
   profiles:
     active: ${APP_PROFILE:local}
@@ -31,6 +23,10 @@ spring:
   kafka:
     bootstrap-servers: ${KAFKA_URL:localhost:9093}
     consumer:
+      notification:
+        group-id: notification-sender
+        topic: notification
+        factory: notificationKafkaListenerContainerFactory
       email:
         group-id: email-sender
         topic: email
@@ -75,7 +71,7 @@ springdoc:
     enabled: false
 
 minio:
-  endpoint: ${MINIO_ENDPOINT:http://10.0.0.102:9000}
+  endpoint: ${MINIO_ENDPOINT:http://192.168.1.5:9000}
   accessKey: ${MINIO_ACCESS:admin}
   secretKey: ${MINIO_SECRET:admin123}
   bucketProfile: ${MINIO_BUCKET_PROFILE:profimage}
@@ -83,4 +79,14 @@ minio:
   application:
     max_images_item: ${MAX_IMAGE_ITEM:3}
 
+sip:
+  root:
+    email: ${ROOT_EMAIL:root@sip.com}
+    password: ${ROOT_PASS:SenhaSegura@123}
+    name: ${ROOT_NAME:Root Admin}
+    phone: ${ROOT_PHONE:71999998888}
+    cpf: ${ROOT_CPF:00000000000}
 
+application:
+  front-end:
+    url: ${FRONTEND_APPLICATION_URL:http://localhost:8080}
