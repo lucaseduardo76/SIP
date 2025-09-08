@@ -27,7 +27,7 @@ public interface ItemApi {
 
     @ItemsAPIDocs.GetItem
     @GetMapping("/{idItem}")
-    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseStatus(HttpStatus.OK)
     ItemResponseDto getItem(@PathVariable UUID idItem);
 
     @ItemsAPIDocs.UpdateImagesItem
