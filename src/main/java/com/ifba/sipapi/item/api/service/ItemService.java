@@ -3,8 +3,11 @@ package com.ifba.sipapi.item.api.service;
 
 
 import com.ifba.sipapi.item.dto.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
 
 import java.util.List;
 import java.util.UUID;
@@ -18,5 +21,6 @@ public interface ItemService {
     void deleteItem(UUID itemId);
     void editItem(UUID itemId, ItemEditRequestDto itemEditRequestDto);
     ItemResponseDto getItem(UUID idItem);
+    Page<ItemResponseDto> getAllItems(Pageable pageable, ItemFilterDto itemFilterDto);
 
 }

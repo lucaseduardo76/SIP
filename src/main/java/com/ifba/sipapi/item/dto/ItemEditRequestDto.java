@@ -17,9 +17,6 @@ public class ItemEditRequestDto {
     @Schema(description = "Descrição do item", example = "Chave de carro vermelha encontrada próximo à biblioteca")
     private String description;
 
-    @Schema(description = "Cor do item", example = "Vermelho")
-    private String color;
-
     @Schema(description = "Categoria do item", example = "ELECTRONIC")
     private Category category;
 

@@ -35,11 +35,12 @@ public class Item extends Auditable {
     @Column(nullable = false)
     private String description;
 
-    @Column(nullable = false)
-    private String color;
 
     @Column(nullable = false)
     private LocalDate findingAt;
+
+    @Column(nullable = false)
+    private LocalDate donationDate;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -69,21 +70,20 @@ public class Item extends Auditable {
     @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RecoveryRequest> recoveryRequests;
 
-    public Item(ItemRequestDto itemRequestDto, String code) {
+    public Item(ItemRequestDto itemRequestDto, String code, Integer donationTime) {
         this.description = HandleString.capitalize(itemRequestDto.getDescription());
-        this.color = HandleString.toLowerCase(itemRequestDto.getColor());
         this.findingAt = itemRequestDto.getFinding_date();
         this.status = Status.DISPONIBLE;
         this.dayPeriod = itemRequestDto.getDay_period();
         this.category = itemRequestDto.getCategory();
         this.area = itemRequestDto.getArea();
         this.code = code;
+        this.donationDate =  LocalDate.now().plusDays(donationTime);
     }
 
     public void update(ItemEditRequestDto itemEditRequestDto) {
         this.area = itemEditRequestDto.getArea() != null ? itemEditRequestDto.getArea() : this.area;
         this.description = HandleString.capitalize(ItemHelper.getOrDefault(itemEditRequestDto.getDescription(), this.description));
-        this.color = HandleString.toLowerCase(ItemHelper.getOrDefault(itemEditRequestDto.getColor(), this.color));
         this.category = itemEditRequestDto.getCategory() != null ? itemEditRequestDto.getCategory() : this.category;
     }
 

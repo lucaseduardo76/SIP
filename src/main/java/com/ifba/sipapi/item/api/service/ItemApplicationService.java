@@ -2,6 +2,7 @@ package com.ifba.sipapi.item.api.service;
 
 import com.ifba.sipapi.config.handler.APIException;
 import com.ifba.sipapi.config.security.TokenService;
+import com.ifba.sipapi.item.domain.item.Status;
 import com.ifba.sipapi.item.dto.*;
 import com.ifba.sipapi.item.domain.item.Category;
 import com.ifba.sipapi.item.domain.item.Item;
@@ -15,12 +16,18 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+
 
 
 @Service
@@ -37,6 +44,15 @@ public class ItemApplicationService implements ItemService {
     @Value("${minio.application.max_images_item}")
     private Integer MAX_IMAGES;
 
+    @Value("${application.time.about-to-donate}")
+    private Integer TIME_TO_DONATE;
+
+    @Value("${application.time.donation}")
+    private Integer DONATION_TIME;
+
+    private static final LocalDate OLDEST_ACCEPTABLE_DATE = LocalDate.of(1900, 1, 1);
+    private static final LocalDate FUTURE_LIMIT_DATE = LocalDate.of(2999, 12, 31);
+
     @Override
     public ItemCreatedResponseDto createItem(ItemRequestDto itemRequestDto, String token) {
         log.info("[start] ItemApplicationService - createItem");
@@ -46,7 +62,7 @@ public class ItemApplicationService implements ItemService {
         user.requireAdminRole();
 
         String itemCode = generateItemCode(itemRequestDto);
-        Item item = new Item(itemRequestDto, itemCode);
+        Item item = new Item(itemRequestDto, itemCode, DONATION_TIME);
         log.debug("[finish] ItemApplicationService - createItem");
         log.info("itemCode={}", itemCode);
         return new ItemCreatedResponseDto(itemRepository.save(item));
@@ -132,6 +148,49 @@ public class ItemApplicationService implements ItemService {
         Item item = itemRepository.findById(idItem).orElseThrow(() -> APIException.build(HttpStatus.BAD_REQUEST, "Item não encontrado!"));
         log.debug("[finish] ItemApplicationService - getItem");
         return new ItemResponseDto(item);
+    }
+
+    @Override
+    public Page<ItemResponseDto> getAllItems(Pageable pageable, ItemFilterDto itemFilterDto) {
+        log.info("[start] ItemApplicationService - getAllItems");
+        Page<ItemResponseDto> itemList = null;
+        if(itemFilterDto.isEmpty())
+             itemList = itemRepository.findAllItemByStatus(Status.DISPONIBLE, pageable).map(ItemResponseDto::new);
+        else
+            itemList = filterSearch(itemFilterDto, pageable);
+        log.debug("[finish] ItemApplicationService - getAllItems");
+        return itemList;
+    }
+
+    private Page<ItemResponseDto> filterSearch(ItemFilterDto itemFilterDto, Pageable pageable) {
+        log.info("[start] ItemApplicationService - filterSearch");
+        LocalDate dateFrom = calculateDateFrom(itemFilterDto.getLastDays());
+        LocalDate dateCloseToDonation = calculateDateCloseToDonation(itemFilterDto.getAboutToBeDonated());
+
+        Page<ItemResponseDto> result;
+
+        if (itemFilterDto.getCategory() != null)
+            result = itemRepository.findByFilterQuery(pageable, dateFrom, dateCloseToDonation, itemFilterDto.getCategory(), Status.DISPONIBLE).map(ItemResponseDto::new);
+        else
+            result = itemRepository.findByFilterQuery(pageable, dateFrom, dateCloseToDonation, Status.DISPONIBLE).map(ItemResponseDto::new);
+        log.debug("[finish] ItemApplicationService - filterSearch");
+        return result;
+    }
+
+    private LocalDate checkIfDonationFilterIsActive(Boolean aboutToBeDonated) {
+        return Boolean.TRUE.equals(aboutToBeDonated) ? LocalDate.now().plusDays(TIME_TO_DONATE) : null;
+    }
+
+    private LocalDate calculateDateFrom(Long lastDays) {
+        return Optional.ofNullable(lastDays)
+                .map(days -> LocalDate.now().minusDays(days))
+                .orElse(OLDEST_ACCEPTABLE_DATE);
+    }
+
+    private LocalDate calculateDateCloseToDonation(Boolean aboutToBeDonated) {
+        LocalDate date = checkIfDonationFilterIsActive(aboutToBeDonated);
+        return Optional.ofNullable(date)
+                .orElse(FUTURE_LIMIT_DATE);
     }
 
     private void validateMaxImagesPerItem(Item item, List<MultipartFile> itemImages) {
