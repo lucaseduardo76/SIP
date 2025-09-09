@@ -170,9 +170,9 @@ public class ItemApplicationService implements ItemService {
         Page<ItemResponseDto> result;
 
         if (itemFilterDto.getCategory() != null)
-            result = itemRepository.findByFilterQuery(pageable, dateFrom, dateCloseToDonation, itemFilterDto.getCategory(), Status.DISPONIBLE);
+            result = itemRepository.findByFilterQuery(pageable, dateFrom, dateCloseToDonation, itemFilterDto.getCategory(), Status.DISPONIBLE).map(ItemResponseDto::new);
         else
-            result = itemRepository.findByFilterQuery(pageable, dateFrom, dateCloseToDonation, Status.DISPONIBLE);
+            result = itemRepository.findByFilterQuery(pageable, dateFrom, dateCloseToDonation, Status.DISPONIBLE).map(ItemResponseDto::new);
         log.debug("[finish] ItemApplicationService - filterSearch");
         return result;
     }

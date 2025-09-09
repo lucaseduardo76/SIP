@@ -31,7 +31,7 @@ public interface ItemRepository extends JpaRepository<Item, UUID> {
           AND (i.category = :category)
           AND (i.status = :status)
     """)
-    Page<ItemResponseDto> findByFilterQuery(Pageable pageable,
+    Page<Item> findByFilterQuery(Pageable pageable,
                                             @Param("dateToSearch") LocalDate dateToSearch,
                                             @Param("dateCloseToDonation")LocalDate dateCloseToDonation,
                                             @Param("category")Category category,
@@ -44,7 +44,7 @@ public interface ItemRepository extends JpaRepository<Item, UUID> {
           AND (i.donationDate <= :dateCloseToDonation)
           AND (i.status = :status)
     """)
-    Page<ItemResponseDto> findByFilterQuery(Pageable pageable,
+    Page<Item> findByFilterQuery(Pageable pageable,
                                             @Param("dateToSearch") LocalDate dateToSearch,
                                             @Param("dateCloseToDonation")LocalDate dateCloseToDonation,
                                             @Param("status") Status status);
