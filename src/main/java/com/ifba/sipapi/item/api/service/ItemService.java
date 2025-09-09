@@ -2,6 +2,7 @@ package com.ifba.sipapi.item.api.service;
 
 
 
+import com.ifba.sipapi.item.dto.ItemRecoveryRequestDto;
 import com.ifba.sipapi.item.dto.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,5 +23,5 @@ public interface ItemService {
     void editItem(UUID itemId, ItemEditRequestDto itemEditRequestDto);
     ItemResponseDto getItem(UUID idItem);
     Page<ItemResponseDto> getAllItems(Pageable pageable, ItemFilterDto itemFilterDto);
-
+    void recoveryItem(ItemRecoveryRequestDto itemRecoveryRequest, String token);
 }

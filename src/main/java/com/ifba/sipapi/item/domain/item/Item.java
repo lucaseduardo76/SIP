@@ -5,7 +5,7 @@ import com.ifba.sipapi.config.handler.APIException;
 import com.ifba.sipapi.item.domain.picture.Picture;
 import com.ifba.sipapi.item.dto.ItemEditRequestDto;
 import com.ifba.sipapi.item.dto.ItemRequestDto;
-import com.ifba.sipapi.recoveryRequest.domain.RecoveryRequest;
+import com.ifba.sipapi.item.domain.recoveryRequest.Recovery;
 import com.ifba.sipapi.user.domain.User;
 import com.ifba.sipapi.util.HandleString;
 import com.ifba.sipapi.util.ItemHelper;
@@ -68,7 +68,7 @@ public class Item extends Auditable {
     private User owner;
 
     @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<RecoveryRequest> recoveryRequests;
+    private List<Recovery> recoveries;
 
     public Item(ItemRequestDto itemRequestDto, String code, Integer donationTime) {
         this.description = HandleString.capitalize(itemRequestDto.getDescription());
