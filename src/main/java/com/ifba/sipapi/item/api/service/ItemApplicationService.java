@@ -14,6 +14,7 @@ import com.ifba.sipapi.item.infra.item.ItemRepository;
 import com.ifba.sipapi.item.infra.picture.PictureRepository;
 import com.ifba.sipapi.item.infra.recovery.RecoveryRepository;
 import com.ifba.sipapi.minio.api.service.MinioClient;
+import com.ifba.sipapi.user.domain.Role;
 import com.ifba.sipapi.user.domain.User;
 import com.ifba.sipapi.user.infra.UserRepository;
 import com.ifba.sipapi.util.GenerateItemCode;
@@ -160,6 +161,10 @@ public class ItemApplicationService implements ItemService {
     }
 
     private void validateRecoveryRequest(User user, Item item) {
+        if(user.getRole() == Role.ROOT)
+            throw APIException.build(HttpStatus.BAD_REQUEST, "O usuario ROOT não deve fazer solicitações de itens");
+
+
         if (recoveryRepository.existsByUserAndItem(user, item))
             throw APIException.build(HttpStatus.BAD_REQUEST, "Solicitação já efetuada");
 
