@@ -23,6 +23,9 @@ public class ItemResponseDto {
     @Schema(example = "29-04-2025")
     private LocalDate findingAt;
 
+    @Schema(example = "29-10-2025")
+    private LocalDate donationDate;
+
     @Schema(example = "DISPONIBLE")
     private Status status;
 
@@ -57,6 +60,7 @@ public class ItemResponseDto {
         this.area = item.getArea();
         this.dateReturned = item.getDateReturned();
         this.code = item.getCode();
+        this.donationDate = item.getDonationDate();
 
         if (item.getPictures() != null) {
             this.pictures = item.getPictures().stream()

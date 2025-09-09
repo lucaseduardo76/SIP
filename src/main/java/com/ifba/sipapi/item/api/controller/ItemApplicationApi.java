@@ -1,11 +1,16 @@
 package com.ifba.sipapi.item.api.controller;
 
+import com.ifba.sipapi.item.domain.item.Category;
 import com.ifba.sipapi.item.dto.*;
 import com.ifba.sipapi.item.api.service.ItemService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
 
 import java.util.List;
 import java.util.UUID;
@@ -33,6 +38,14 @@ public class ItemApplicationApi implements ItemApi {
         ItemResponseDto item = itemService.getItem(idItem);
         log.debug("[finish] ItemApplicationApi - getItem");
         return item;
+    }
+
+    @Override
+    public Page<ItemResponseDto> getAllItem(Pageable pageable, ItemFilterDto itemFilterDto) {
+        log.info("[start] ItemApplicationApi - getAllItem");
+        Page<ItemResponseDto> itemList = itemService.getAllItems(pageable, itemFilterDto);
+        log.debug("[finish] ItemApplicationApi - getAllItem");
+        return itemList;
     }
 
     @Override

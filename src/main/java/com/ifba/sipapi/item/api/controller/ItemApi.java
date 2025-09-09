@@ -2,12 +2,16 @@ package com.ifba.sipapi.item.api.controller;
 
 
 import com.ifba.sipapi.docs.swagger.ItemsAPIDocs;
+import com.ifba.sipapi.item.domain.item.Category;
 import com.ifba.sipapi.item.dto.*;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
 
 import java.util.List;
 import java.util.UUID;
@@ -29,6 +33,12 @@ public interface ItemApi {
     @GetMapping("/{idItem}")
     @ResponseStatus(HttpStatus.OK)
     ItemResponseDto getItem(@PathVariable UUID idItem);
+
+    @ItemsAPIDocs.GetAllItems
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    Page<ItemResponseDto> getAllItem(Pageable pageable,
+                                     @ModelAttribute ItemFilterDto itemFilterDto);
 
     @ItemsAPIDocs.UpdateImagesItem
     @PostMapping(value = "/admin/images/{itemId}")

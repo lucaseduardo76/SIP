@@ -33,6 +33,15 @@ public @interface ItemsAPIDocs {
 
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
+    @Operation(summary = "Retorna Todos os item paginado", description = "Metodo quando bem sucedido retorna dados de todos os itens de forma paginada")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Retorna todos os itens"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"message\": \"mensagem qualquer.\" }"))),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"description\": \"INTERNAL SERVER ERROR!\", \"message\": \"POR FAVOR INFORME AO ADMINISTRADOR DO SISTEMA!\" }")))})
+    public @interface GetAllItems { }
+
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
     @Operation(summary = "Adiciona fotos a um item", description = "Metodo criado para adicionar fotos a um item existente")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Foto adicionada"),

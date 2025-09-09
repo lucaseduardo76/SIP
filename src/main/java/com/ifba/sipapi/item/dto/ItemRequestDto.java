@@ -21,10 +21,6 @@ public class ItemRequestDto {
     @Schema(description = "Descrição do item", example = "Chave de carro vermelha encontrada próximo à biblioteca")
     private String description;
 
-    @NotBlank(message = "A cor é obrigatória")
-    @Schema(description = "Cor do item", example = "Vermelho")
-    private String color;
-
     @NotNull(message = "A data em que o item foi encontrado é obrigatória")
     @Schema(description = "Data em que o item foi encontrado", example = "2025-08-27")
     private LocalDate finding_date;

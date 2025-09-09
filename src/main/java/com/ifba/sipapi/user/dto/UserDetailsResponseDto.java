@@ -6,6 +6,9 @@ import com.ifba.sipapi.user.domain.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @Getter
 @EqualsAndHashCode
 @NoArgsConstructor
@@ -25,6 +28,8 @@ public class UserDetailsResponseDto {
     private String phone;
     @Schema(example = "sip.edu.br/3b766f4e-54a8-4065-93bf-6602b9d64e4b")
     private String profileImageUrl;
+    @Schema(example = "04-29-2001T21:45:12.345")
+    private LocalDateTime registrationDate;
 
     public UserDetailsResponseDto(User user) {
         this.name = user.getName();
@@ -34,5 +39,6 @@ public class UserDetailsResponseDto {
         this.statusMember = user.getStatusMember();
         this.phone = user.getPhone();
         this.profileImageUrl = user.getProfileImageUrl();
+        this. registrationDate = user.getCreatedAt();
     }
 }
