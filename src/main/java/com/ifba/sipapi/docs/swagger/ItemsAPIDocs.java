@@ -95,4 +95,14 @@ public @interface ItemsAPIDocs {
     public @interface EditItem {
     }
 
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @Operation(summary = "Cria uma solicitação de recuperação de item", description = "Permite que o usuário dono de um item perdido crie uma solicitação para recuperá-lo. Quando bem-sucedido, retorna o código 201 indicando que a solicitação foi criada.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Solicitação criada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"message\": \"Dados inválidos para criar solicitação.\" }"))),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"description\": \"INTERNAL SERVER ERROR!\", \"message\": \"POR FAVOR INFORME AO ADMINISTRADOR DO SISTEMA!\" }")))})
+
+    public @interface RecoveryItem { }
+
 }

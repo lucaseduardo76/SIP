@@ -2,6 +2,9 @@ package com.ifba.sipapi.item.api.service;
 
 import com.ifba.sipapi.config.handler.APIException;
 import com.ifba.sipapi.config.security.TokenService;
+import com.ifba.sipapi.item.domain.recoveryRequest.Recovery;
+import com.ifba.sipapi.item.domain.recoveryRequest.StatusRecovery;
+import com.ifba.sipapi.item.dto.ItemRecoveryRequestDto;
 import com.ifba.sipapi.item.domain.item.Status;
 import com.ifba.sipapi.item.dto.*;
 import com.ifba.sipapi.item.domain.item.Category;
@@ -9,9 +12,12 @@ import com.ifba.sipapi.item.domain.item.Item;
 import com.ifba.sipapi.item.domain.picture.Picture;
 import com.ifba.sipapi.item.infra.item.ItemRepository;
 import com.ifba.sipapi.item.infra.picture.PictureRepository;
+import com.ifba.sipapi.item.infra.recovery.RecoveryRepository;
 import com.ifba.sipapi.minio.api.service.MinioClient;
+import com.ifba.sipapi.user.domain.Role;
 import com.ifba.sipapi.user.domain.User;
 import com.ifba.sipapi.user.infra.UserRepository;
+import com.ifba.sipapi.util.GenerateItemCode;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -40,6 +46,7 @@ public class ItemApplicationService implements ItemService {
     private final UserRepository userRepository;
     private final MinioClient minioClient;
     private final PictureRepository pictureRepository;
+    private final RecoveryRepository recoveryRepository;
 
     @Value("${minio.application.max_images_item}")
     private Integer MAX_IMAGES;
@@ -57,38 +64,17 @@ public class ItemApplicationService implements ItemService {
     public ItemCreatedResponseDto createItem(ItemRequestDto itemRequestDto, String token) {
         log.info("[start] ItemApplicationService - createItem");
         String email = tokenService.getSubject(token);
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "User not found"));
+        User user = userRepository.findByEmail(email).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "User not found"));
         user.requireAdminRole();
 
-        String itemCode = generateItemCode(itemRequestDto);
+        String itemCode = GenerateItemCode.generateItemCode(itemRequestDto, itemRepository.findItemCodesByCategory(itemRequestDto.getCategory()));
         Item item = new Item(itemRequestDto, itemCode, DONATION_TIME);
         log.debug("[finish] ItemApplicationService - createItem");
         log.info("itemCode={}", itemCode);
         return new ItemCreatedResponseDto(itemRepository.save(item));
     }
 
-    private String generateItemCode(ItemRequestDto itemRequestDto) {
-        Category category = itemRequestDto.getCategory();
 
-        String prefix = category.name().length() > 4 ? category.name().substring(0, 4) : category.name();
-        List<String> codes = itemRepository.findItemCodesByCategory(category);
-
-        int maxNumber = codes.stream().map(code -> code.replace(prefix + "-", ""))
-                .mapToInt(numStr -> {
-                    try {
-                        return Integer.parseInt(numStr);
-                    } catch (NumberFormatException e) {
-                        return 0;
-                    }
-                })
-                .max()
-                .orElse(999);
-
-        int nextNumber = maxNumber + 1;
-
-        return prefix + "-" + nextNumber;
-    }
 
     @Override
     @Transactional
@@ -160,6 +146,40 @@ public class ItemApplicationService implements ItemService {
             itemList = filterSearch(itemFilterDto, pageable);
         log.debug("[finish] ItemApplicationService - getAllItems");
         return itemList;
+    }
+
+    @Override
+    public void recoveryItem(ItemRecoveryRequestDto itemRecoveryRequest, String token) {
+        log.info("[start] ItemApplicationService - recoveryItem");
+        User user = assertEmailBelongsToAndReturnUser(token, itemRecoveryRequest.getEmail());
+        Item item = itemRepository.findById(itemRecoveryRequest.getItemId()).orElseThrow(() -> APIException.build(HttpStatus.BAD_REQUEST, "Item não encontrado"));
+
+        validateRecoveryRequest(user, item);
+        Recovery recovery = new Recovery(itemRecoveryRequest, user, item);
+        recoveryRepository.save(recovery);
+        log.debug("[finish] ItemApplicationService - recoveryItem");
+    }
+
+    private void validateRecoveryRequest(User user, Item item) {
+        if(user.getRole() == Role.ROOT)
+            throw APIException.build(HttpStatus.BAD_REQUEST, "O usuario ROOT não deve fazer solicitações de itens");
+
+
+        if (recoveryRepository.existsByUserAndItem(user, item))
+            throw APIException.build(HttpStatus.BAD_REQUEST, "Solicitação já efetuada");
+
+        long activeRequests = recoveryRepository.findByUserAndStatus(user, StatusRecovery.PENDING).size();
+        if (activeRequests >= 5)
+            throw APIException.build(HttpStatus.BAD_REQUEST, "Usuário não pode ter mais de 5 solicitações ativas");
+    }
+
+    private User assertEmailBelongsToAndReturnUser(String token, String email) {
+        User user = userRepository.findByEmail(tokenService.getSubject(token)).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
+
+        if(!user.getEmail().equals(email)){
+            throw APIException.build(HttpStatus.UNAUTHORIZED, "Token não corresponde ao email enviado");
+        }
+        return user;
     }
 
     private Page<ItemResponseDto> filterSearch(ItemFilterDto itemFilterDto, Pageable pageable) {

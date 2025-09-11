@@ -2,7 +2,7 @@ package com.ifba.sipapi.item.api.controller;
 
 
 import com.ifba.sipapi.docs.swagger.ItemsAPIDocs;
-import com.ifba.sipapi.item.domain.item.Category;
+import com.ifba.sipapi.item.dto.ItemRecoveryRequestDto;
 import com.ifba.sipapi.item.dto.*;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -75,6 +75,14 @@ public interface ItemApi {
     void editItem(
             @PathVariable UUID itemId,
             @RequestBody ItemEditRequestDto ItemEditRequestDto
+    );
+
+    @ItemsAPIDocs.RecoveryItem
+    @PostMapping(value = "/recovery")
+    @ResponseStatus(HttpStatus.CREATED)
+    void recoveryItem(
+            @RequestHeader(name = "Authorization", required = true) String token,
+            @RequestBody @Valid ItemRecoveryRequestDto itemRecoveryRequest
     );
 
 }

@@ -1,7 +1,8 @@
-package com.ifba.sipapi.recoveryRequest.domain;
+package com.ifba.sipapi.item.domain.recoveryRequest;
 
 import com.ifba.sipapi.Auditable;
 import com.ifba.sipapi.item.domain.item.Item;
+import com.ifba.sipapi.item.dto.ItemRecoveryRequestDto;
 import com.ifba.sipapi.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -16,7 +17,7 @@ import java.util.UUID;
 @Entity
 @ToString
 @Table(name = "recovery_request")
-public class RecoveryRequest extends Auditable {
+public class Recovery extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -27,10 +28,10 @@ public class RecoveryRequest extends Auditable {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private StatusRequest status;
+    private StatusRecovery status;
 
     @Column(nullable = false)
-    private LocalDateTime recoveryDate;
+    private LocalDateTime requestDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id")
@@ -39,4 +40,12 @@ public class RecoveryRequest extends Auditable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+
+    public Recovery(ItemRecoveryRequestDto itemRecoveryRequestDto, User user, Item item) {
+        this.item = item;
+        this.user = user;
+        this.description = itemRecoveryRequestDto.getDescription();
+        this.status = StatusRecovery.PENDING;
+        this.requestDate = LocalDateTime.now();
+    }
 }

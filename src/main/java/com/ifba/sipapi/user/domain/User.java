@@ -3,7 +3,7 @@ package com.ifba.sipapi.user.domain;
 import com.ifba.sipapi.Auditable;
 import com.ifba.sipapi.config.handler.APIException;
 import com.ifba.sipapi.item.domain.item.Item;
-import com.ifba.sipapi.recoveryRequest.domain.RecoveryRequest;
+import com.ifba.sipapi.item.domain.recoveryRequest.Recovery;
 import com.ifba.sipapi.user.api.authentication.service.LoginType;
 import com.ifba.sipapi.user.dto.*;
 import jakarta.persistence.*;
@@ -64,7 +64,7 @@ public class User extends Auditable implements UserDetails {
     private List<Item> items;
 
     @OneToMany(mappedBy = "user")
-    private List<RecoveryRequest> recoveryRequests;
+    private List<Recovery> recoveries;
 
     public User(UserCommomRegisterDto userCommomRegisterDto) {
         this.createBasicUser(userCommomRegisterDto);
