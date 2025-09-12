@@ -78,11 +78,19 @@ public interface ItemApi {
     );
 
     @ItemsAPIDocs.RecoveryItem
-    @PostMapping(value = "/recovery")
+    @PostMapping(value = "/recovery/withdrawal-requests")
     @ResponseStatus(HttpStatus.CREATED)
     void recoveryItem(
             @RequestHeader(name = "Authorization", required = true) String token,
             @RequestBody @Valid ItemRecoveryRequestDto itemRecoveryRequest
+    );
+
+    @ItemsAPIDocs.RecoveryReview
+    @PostMapping(value = "/admin/recovery/withdrawal-requests/review")
+    @ResponseStatus(HttpStatus.CREATED)
+    void RecoveryReview(
+            @RequestHeader(name = "Authorization", required = true) String token,
+            @RequestBody @Valid ItemRequestReviewDto itemRequestReviewDto
     );
 
 }

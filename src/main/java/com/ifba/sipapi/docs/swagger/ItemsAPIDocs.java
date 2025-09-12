@@ -105,4 +105,15 @@ public @interface ItemsAPIDocs {
 
     public @interface RecoveryItem { }
 
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @Operation(summary = "Revisa uma solicitação de recuperação de item", description = "Permite que o administrador revise uma solicitação de recuperação de item, aprovando ou recusando-a. O administrador deve fornecer o ID da solicitação e o status desejado (APPROVED ou REFUSED). Quando bem-sucedido, retorna o código 200 indicando que a solicitação foi atualizada.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Solicitação revisada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"message\": \"Dados inválidos para revisar solicitação.\" }"))),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"message\": \"Solicitação não encontrada.\" }"))),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"description\": \"INTERNAL SERVER ERROR!\", \"message\": \"POR FAVOR INFORME AO ADMINISTRADOR DO SISTEMA!\" }")))})
+    public @interface RecoveryReview { }
+
+
 }

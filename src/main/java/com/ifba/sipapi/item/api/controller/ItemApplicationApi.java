@@ -89,4 +89,11 @@ public class ItemApplicationApi implements ItemApi {
         itemService.recoveryItem(itemRecoveryRequest, token);
         log.debug("[finish] ItemApplicationApi - recoveryItem");
     }
+
+    @Override
+    public void RecoveryReview(String token, ItemRequestReviewDto itemRequestReviewDto) {
+        log.info("[start] ItemApplicationApi - RecoveryReview");
+        git
+        log.debug("[finish] ItemApplicationApi - RecoveryReview");
+    }
 }
