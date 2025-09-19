@@ -104,9 +104,25 @@ public class Item extends Auditable {
 
 
     public void updateStatusToClaimed(Recovery recovery) {
+        if(recovery == null) {
+            throw APIException.build(HttpStatus.BAD_REQUEST, "Recovery não pode ser nulo");
+        }
+
         validateRecoveryBelongsToItem(recovery);
         validateRecoveryApproved(recovery);
+        updateOwner(recovery.getUser());
+        updateDateReturned();
         this.status = Status.CLAIMED;
+    }
+
+    private void updateDateReturned() {
+        this.dateReturned = LocalDate.now();
+    }
+
+    private void updateOwner(User user) {
+        if(user == null)
+            throw APIException.build(HttpStatus.BAD_REQUEST, "Solicitação precisa de um usuario como referencia");
+        this.owner = user;
     }
 
     private void validateRecoveryBelongsToItem(Recovery recovery) {
