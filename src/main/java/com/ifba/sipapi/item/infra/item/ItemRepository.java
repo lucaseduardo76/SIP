@@ -24,18 +24,18 @@ public interface ItemRepository extends JpaRepository<Item, UUID> {
     Page<Item> findAllItemByStatus(@Param("status") Status status, Pageable pageable);
 
     @Query("""
-        SELECT i
-        FROM Item i
-        WHERE (i.findingAt >= :dateToSearch)
-          AND (i.donationDate <= :dateCloseToDonation)
-          AND (i.category = :category)
-          AND (i.status = :status)
-    """)
+    SELECT i
+    FROM Item i
+    WHERE (i.findingAt >= :dateToSearch)
+      AND (i.donationDate <= :dateCloseToDonation)
+      AND (i.category IN :categories)
+      AND (i.status = :status)
+""")
     Page<Item> findByFilterQuery(Pageable pageable,
-                                            @Param("dateToSearch") LocalDate dateToSearch,
-                                            @Param("dateCloseToDonation")LocalDate dateCloseToDonation,
-                                            @Param("category")Category category,
-                                            @Param("status") Status status);
+                                 @Param("dateToSearch") LocalDate dateToSearch,
+                                 @Param("dateCloseToDonation") LocalDate dateCloseToDonation,
+                                 @Param("categories") List<Category> categories,
+                                 @Param("status") Status status);
 
     @Query("""
         SELECT i

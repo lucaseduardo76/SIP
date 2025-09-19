@@ -35,7 +35,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 
-
 @Service
 @RequiredArgsConstructor
 @Log4j2
@@ -75,14 +74,13 @@ public class ItemApplicationService implements ItemService {
     }
 
 
-
     @Override
     @Transactional
     public List<ImageUrlResponseDto> uploadImages(UUID itemId, List<MultipartFile> itemImages) {
         log.info("[start] ItemApplicationService - uploadImages itemId={}", itemId);
         Item item = itemRepository.findById(itemId).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Item not found"));
 
-        validateMaxImagesPerItem(item,itemImages);
+        validateMaxImagesPerItem(item, itemImages);
 
         List<Picture> savedPictures = itemImages.stream().map(file -> uploadAndSave(file, item)).toList();
         log.debug("[finish] ItemApplicationService - uploadImages itemId={}, savedImages={}", itemId, savedPictures.size());
@@ -104,7 +102,9 @@ public class ItemApplicationService implements ItemService {
     public void deleteAllImages(UUID itemId) {
         log.info("[start] ItemApplicationService - deleteAllImages");
         Item item = itemRepository.findById(itemId).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Item não encontrado"));
-        item.getPictures().forEach(picture -> {minioClient.deleteItemImage(picture.getUrl());});
+        item.getPictures().forEach(picture -> {
+            minioClient.deleteItemImage(picture.getUrl());
+        });
         item.getPictures().clear();
         itemRepository.save(item);
         log.debug("[finish] ItemApplicationService - deleteAllImages");
@@ -140,8 +140,8 @@ public class ItemApplicationService implements ItemService {
     public Page<ItemResponseDto> getAllItems(Pageable pageable, ItemFilterDto itemFilterDto) {
         log.info("[start] ItemApplicationService - getAllItems");
         Page<ItemResponseDto> itemList = null;
-        if(itemFilterDto.isEmpty())
-             itemList = itemRepository.findAllItemByStatus(Status.DISPONIBLE, pageable).map(ItemResponseDto::new);
+        if (itemFilterDto.isEmpty())
+            itemList = itemRepository.findAllItemByStatus(Status.DISPONIBLE, pageable).map(ItemResponseDto::new);
         else
             itemList = filterSearch(itemFilterDto, pageable);
         log.debug("[finish] ItemApplicationService - getAllItems");
@@ -161,7 +161,7 @@ public class ItemApplicationService implements ItemService {
     }
 
     private void validateRecoveryRequest(User user, Item item) {
-        if(user.getRole() == Role.ROOT)
+        if (user.getRole() == Role.ROOT)
             throw APIException.build(HttpStatus.BAD_REQUEST, "O usuario ROOT não deve fazer solicitações de itens");
 
 
@@ -176,7 +176,7 @@ public class ItemApplicationService implements ItemService {
     private User assertEmailBelongsToAndReturnUser(String token, String email) {
         User user = userRepository.findByEmail(tokenService.getSubject(token)).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
 
-        if(!user.getEmail().equals(email)){
+        if (!user.getEmail().equals(email)) {
             throw APIException.build(HttpStatus.UNAUTHORIZED, "Token não corresponde ao email enviado");
         }
         return user;
@@ -189,10 +189,11 @@ public class ItemApplicationService implements ItemService {
 
         Page<ItemResponseDto> result;
 
-        if (itemFilterDto.getCategory() != null)
+        if (itemFilterDto.getCategory() != null && !itemFilterDto.getCategory().isEmpty()) {
             result = itemRepository.findByFilterQuery(pageable, dateFrom, dateCloseToDonation, itemFilterDto.getCategory(), Status.DISPONIBLE).map(ItemResponseDto::new);
-        else
+        } else {
             result = itemRepository.findByFilterQuery(pageable, dateFrom, dateCloseToDonation, Status.DISPONIBLE).map(ItemResponseDto::new);
+        }
         log.debug("[finish] ItemApplicationService - filterSearch");
         return result;
     }
@@ -215,7 +216,7 @@ public class ItemApplicationService implements ItemService {
 
     private void validateMaxImagesPerItem(Item item, List<MultipartFile> itemImages) {
         List<Picture> pictureList = pictureRepository.findByItem(item);
-        if(pictureList.size() + itemImages.size() > MAX_IMAGES)
+        if (pictureList.size() + itemImages.size() > MAX_IMAGES)
             throw APIException.build(HttpStatus.BAD_REQUEST, "Limite de imagem para um item ultrapassado");
 
         validateImages(itemImages);
