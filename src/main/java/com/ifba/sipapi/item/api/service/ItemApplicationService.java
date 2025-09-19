@@ -7,6 +7,7 @@ import com.ifba.sipapi.item.domain.recoveryRequest.StatusRecovery;
 import com.ifba.sipapi.item.dto.ItemRecoveryRequestDto;
 import com.ifba.sipapi.item.domain.item.Status;
 import com.ifba.sipapi.item.dto.*;
+import com.ifba.sipapi.item.domain.item.Category;
 import com.ifba.sipapi.item.domain.item.Item;
 import com.ifba.sipapi.item.domain.picture.Picture;
 import com.ifba.sipapi.item.infra.item.ItemRepository;
@@ -74,6 +75,7 @@ public class ItemApplicationService implements ItemService {
         log.info("itemCode={}", itemCode);
         return new ItemCreatedResponseDto(itemRepository.save(item));
     }
+
 
 
     @Override
@@ -229,7 +231,6 @@ public class ItemApplicationService implements ItemService {
         }
     }
 
-
     private User assertEmailBelongsToAndReturnUser(String token, String email) {
         User user = userRepository.findByEmail(tokenService.getSubject(token)).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
 
@@ -246,10 +247,11 @@ public class ItemApplicationService implements ItemService {
 
         Page<ItemResponseDto> result;
 
-        if (itemFilterDto.getCategory() != null)
+        if (itemFilterDto.getCategory() != null && !itemFilterDto.getCategory().isEmpty()) {
             result = itemRepository.findByFilterQuery(pageable, dateFrom, dateCloseToDonation, itemFilterDto.getCategory(), Status.DISPONIBLE).map(ItemResponseDto::new);
-        else
+        } else {
             result = itemRepository.findByFilterQuery(pageable, dateFrom, dateCloseToDonation, Status.DISPONIBLE).map(ItemResponseDto::new);
+        }
         log.debug("[finish] ItemApplicationService - filterSearch");
         return result;
     }

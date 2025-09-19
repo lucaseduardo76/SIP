@@ -4,6 +4,7 @@ import com.ifba.sipapi.item.domain.item.Category;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import java.util.List;
 
 @Getter
 @AllArgsConstructor
@@ -13,9 +14,9 @@ public class ItemFilterDto {
             example = "7")
     private Long lastDays;
 
-    @Schema(description = "Categoria do item para filtrar",
+    @Schema(description = "Categorias para filtrar os itens",
             example = "BOOK")
-    private Category category;
+    private List<Category> category;
 
     @Schema(description = "Indica se o item está prestes a ser doado",
             example = "true")
