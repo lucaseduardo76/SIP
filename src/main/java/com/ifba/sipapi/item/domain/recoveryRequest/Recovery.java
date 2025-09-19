@@ -1,11 +1,13 @@
 package com.ifba.sipapi.item.domain.recoveryRequest;
 
 import com.ifba.sipapi.Auditable;
+import com.ifba.sipapi.config.handler.APIException;
 import com.ifba.sipapi.item.domain.item.Item;
 import com.ifba.sipapi.item.dto.ItemRecoveryRequestDto;
 import com.ifba.sipapi.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -15,7 +17,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@ToString
 @Table(name = "recovery_request")
 public class Recovery extends Auditable {
 
@@ -48,4 +49,26 @@ public class Recovery extends Auditable {
         this.status = StatusRecovery.PENDING;
         this.requestDate = LocalDateTime.now();
     }
+
+    public void processRequestAcceptance(StatusRecovery newStatus) {
+        if(newStatus == null)
+            throw APIException.build(HttpStatus.BAD_REQUEST, "status não pode ser null");
+
+
+        if (this.status != StatusRecovery.PENDING) {
+            System.out.println("O status é: " + this.status);
+            throw APIException.build(HttpStatus.BAD_REQUEST, "Status da solicitação não pode mais ser alterado");
+        }
+        updateRequestAcceptance(newStatus);
+    }
+
+    private void updateRequestAcceptance(StatusRecovery newStatus) {
+        switch (newStatus) {
+            case APPROVED -> this.status = StatusRecovery.APPROVED;
+            case REFUSED -> this.status = StatusRecovery.REFUSED;
+            default -> throw APIException.build(HttpStatus.BAD_REQUEST, "Status inválido");
+        }
+    }
+
+
 }

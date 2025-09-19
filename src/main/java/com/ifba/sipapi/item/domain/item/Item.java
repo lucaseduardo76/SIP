@@ -3,6 +3,7 @@ package com.ifba.sipapi.item.domain.item;
 import com.ifba.sipapi.Auditable;
 import com.ifba.sipapi.config.handler.APIException;
 import com.ifba.sipapi.item.domain.picture.Picture;
+import com.ifba.sipapi.item.domain.recoveryRequest.StatusRecovery;
 import com.ifba.sipapi.item.dto.ItemEditRequestDto;
 import com.ifba.sipapi.item.dto.ItemRequestDto;
 import com.ifba.sipapi.item.domain.recoveryRequest.Recovery;
@@ -19,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Getter
@@ -101,5 +103,21 @@ public class Item extends Auditable {
     }
 
 
+    public void updateStatusToClaimed(Recovery recovery) {
+        validateRecoveryBelongsToItem(recovery);
+        validateRecoveryApproved(recovery);
+        this.status = Status.CLAIMED;
+    }
 
+    private void validateRecoveryBelongsToItem(Recovery recovery) {
+        if (!Objects.equals(recovery.getItem(), this)) {
+            throw APIException.build(HttpStatus.CONFLICT, "Item da solicitação é incompatível com o item atual");
+        }
+    }
+
+    private void validateRecoveryApproved(Recovery recovery) {
+        if (recovery.getStatus() != StatusRecovery.APPROVED) {
+            throw APIException.build(HttpStatus.BAD_REQUEST, "Solicitação ainda não foi autorizada");
+        }
+    }
 }
