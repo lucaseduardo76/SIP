@@ -54,15 +54,13 @@ public class Recovery extends Auditable {
         if(newStatus == null)
             throw APIException.build(HttpStatus.BAD_REQUEST, "status não pode ser null");
 
-
-        if (this.status != StatusRecovery.PENDING) {
-            System.out.println("O status é: " + this.status);
+        if (this.status != StatusRecovery.PENDING)
             throw APIException.build(HttpStatus.BAD_REQUEST, "Status da solicitação não pode mais ser alterado");
-        }
-        updateRequestAcceptance(newStatus);
+
+        validateAndUpdateStatus(newStatus);
     }
 
-    private void updateRequestAcceptance(StatusRecovery newStatus) {
+    private void validateAndUpdateStatus(StatusRecovery newStatus) {
         switch (newStatus) {
             case APPROVED -> this.status = StatusRecovery.APPROVED;
             case REFUSED -> this.status = StatusRecovery.REFUSED;
