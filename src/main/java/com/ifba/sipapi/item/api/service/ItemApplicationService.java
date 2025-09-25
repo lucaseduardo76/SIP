@@ -7,7 +7,6 @@ import com.ifba.sipapi.item.domain.recoveryRequest.StatusRecovery;
 import com.ifba.sipapi.item.dto.ItemRecoveryRequestDto;
 import com.ifba.sipapi.item.domain.item.Status;
 import com.ifba.sipapi.item.dto.*;
-import com.ifba.sipapi.item.domain.item.Category;
 import com.ifba.sipapi.item.domain.item.Item;
 import com.ifba.sipapi.item.domain.picture.Picture;
 import com.ifba.sipapi.item.infra.item.ItemRepository;
@@ -173,12 +172,12 @@ public class ItemApplicationService implements ItemService {
 
         if (itemRequestReviewDto.getStatusRecovery().equals(StatusRecovery.APPROVED)) {
             rejectAllExcept(recovery);
-            updateItemStatus(recovery);
+            applyClaimToItem(recovery);
         }
         log.debug("[finish] ItemApplicationService - recoveryReview");
     }
 
-    private void updateItemStatus(Recovery recovery) {
+    private void applyClaimToItem(Recovery recovery) {
         Item item = recovery.getItem();
         item.updateStatusToClaimed(recovery);
         itemRepository.save(item);
