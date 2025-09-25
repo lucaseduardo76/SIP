@@ -24,4 +24,6 @@ public interface ItemService {
     ItemResponseDto getItem(UUID idItem);
     Page<ItemResponseDto> getAllItems(Pageable pageable, ItemFilterDto itemFilterDto);
     void recoveryItem(ItemRecoveryRequestDto itemRecoveryRequest, String token);
+
+    void recoveryReview(ItemRequestReviewDto itemRequestReviewDto);
 }

@@ -7,7 +7,6 @@ import com.ifba.sipapi.item.domain.recoveryRequest.StatusRecovery;
 import com.ifba.sipapi.item.dto.ItemRecoveryRequestDto;
 import com.ifba.sipapi.item.domain.item.Status;
 import com.ifba.sipapi.item.dto.*;
-import com.ifba.sipapi.item.domain.item.Category;
 import com.ifba.sipapi.item.domain.item.Item;
 import com.ifba.sipapi.item.domain.picture.Picture;
 import com.ifba.sipapi.item.infra.item.ItemRepository;
@@ -56,6 +55,9 @@ public class ItemApplicationService implements ItemService {
     @Value("${application.time.donation}")
     private Integer DONATION_TIME;
 
+    @Value("${application.item.max-active-requests}")
+    private Integer MAX_ACTIVE_REQUESTS;
+
     private static final LocalDate OLDEST_ACCEPTABLE_DATE = LocalDate.of(1900, 1, 1);
     private static final LocalDate FUTURE_LIMIT_DATE = LocalDate.of(2999, 12, 31);
 
@@ -72,6 +74,7 @@ public class ItemApplicationService implements ItemService {
         log.info("itemCode={}", itemCode);
         return new ItemCreatedResponseDto(itemRepository.save(item));
     }
+
 
 
     @Override
@@ -160,17 +163,71 @@ public class ItemApplicationService implements ItemService {
         log.debug("[finish] ItemApplicationService - recoveryItem");
     }
 
+    @Override
+    public void recoveryReview(ItemRequestReviewDto itemRequestReviewDto) {
+        log.info("[start] ItemApplicationService - recoveryReview");
+        Recovery recovery = recoveryRepository.findById(itemRequestReviewDto.getIdRecovery()).orElseThrow(() -> APIException.build(HttpStatus.BAD_REQUEST, "Solicitação inexistente, verifique o ID!"));
+        recovery.processRequestAcceptance(itemRequestReviewDto.getStatusRecovery());
+        recoveryRepository.save(recovery);
+
+        if (itemRequestReviewDto.getStatusRecovery().equals(StatusRecovery.APPROVED)) {
+            rejectAllExcept(recovery);
+            applyClaimToItem(recovery);
+        }
+        log.debug("[finish] ItemApplicationService - recoveryReview");
+    }
+
+    private void applyClaimToItem(Recovery recovery) {
+        Item item = recovery.getItem();
+        item.updateStatusToClaimed(recovery);
+        itemRepository.save(item);
+    }
+
+
+    private void rejectAllExcept(Recovery recovery) {
+        List<Recovery> recoveriesByItem = recoveryRepository.findAllByItem(recovery.getItem());
+        recoveriesByItem.stream().filter(other -> !other.equals(recovery)).forEach(this::rejectAndSaveRecovery);
+    }
+
+    private void rejectAndSaveRecovery(Recovery recovery) {
+        recovery.processRequestAcceptance(StatusRecovery.REFUSED);
+        recoveryRepository.save(recovery);
+    }
+
     private void validateRecoveryRequest(User user, Item item) {
-        if (user.getRole() == Role.ROOT)
-            throw APIException.build(HttpStatus.BAD_REQUEST, "O usuario ROOT não deve fazer solicitações de itens");
+        validateUser(user);
+        validateItem(item);
+        validateDuplicateRequest(user, item);
+        validateMaxActiveRequests(user);
+    }
 
+    private void validateUser(User user) {
+        if (user.getRole() == Role.ROOT) {
+            throw APIException.build(HttpStatus.BAD_REQUEST,
+                    "O usuário ROOT não deve fazer solicitações de itens");
+        }
+    }
 
-        if (recoveryRepository.existsByUserAndItem(user, item))
-            throw APIException.build(HttpStatus.BAD_REQUEST, "Solicitação já efetuada");
+    private void validateItem(Item item) {
+        if (item.getStatus() != Status.DISPONIBLE) {
+            throw APIException.build(HttpStatus.BAD_REQUEST,
+                    "Item não pode mais ser solicitado");
+        }
+    }
 
-        long activeRequests = recoveryRepository.findByUserAndStatus(user, StatusRecovery.PENDING).size();
-        if (activeRequests >= 5)
-            throw APIException.build(HttpStatus.BAD_REQUEST, "Usuário não pode ter mais de 5 solicitações ativas");
+    private void validateDuplicateRequest(User user, Item item) {
+        if (recoveryRepository.existsByUserAndItemAndStatusNot(user, item, StatusRecovery.REFUSED)) {
+            throw APIException.build(HttpStatus.BAD_REQUEST,
+                    "Solicitação já efetuada");
+        }
+    }
+
+    private void validateMaxActiveRequests(User user) {
+        long activeRequests = recoveryRepository.countByUserAndStatus(user, StatusRecovery.PENDING);
+        if (activeRequests >= MAX_ACTIVE_REQUESTS) {
+            throw APIException.build(HttpStatus.BAD_REQUEST,
+                    "Usuário não pode ter mais de " + MAX_ACTIVE_REQUESTS + " solicitações ativas");
+        }
     }
 
     private User assertEmailBelongsToAndReturnUser(String token, String email) {

@@ -42,7 +42,7 @@ public interface ItemApi {
 
     @ItemsAPIDocs.UpdateImagesItem
     @PostMapping(value = "/admin/images/{itemId}")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.CREATED)
     List<ImageUrlResponseDto> uploadImages(
             @PathVariable UUID itemId,
             @RequestPart("itemImages") List<MultipartFile> itemImages
@@ -50,39 +50,46 @@ public interface ItemApi {
 
     @ItemsAPIDocs.DeleteImageItem
     @DeleteMapping(value = "/admin/image/delete")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     void deleteImage(
             @RequestBody @Valid ItemDeleteImageDto itemDeleteImageDto
     );
 
     @ItemsAPIDocs.DeleteAllImagesItem
     @DeleteMapping(value = "/admin/image/delete-all/{itemId}")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     void deleteAllImages(
             @PathVariable UUID itemId
     );
 
     @ItemsAPIDocs.DeleteItem
     @DeleteMapping(value = "/admin/delete/{itemId}")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     void deleteItem(
             @PathVariable UUID itemId
     );
 
     @ItemsAPIDocs.EditItem
     @PutMapping(value = "/admin/edit/{itemId}")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     void editItem(
             @PathVariable UUID itemId,
             @RequestBody ItemEditRequestDto ItemEditRequestDto
     );
 
     @ItemsAPIDocs.RecoveryItem
-    @PostMapping(value = "/recovery")
+    @PostMapping(value = "/recovery/withdrawal-requests")
     @ResponseStatus(HttpStatus.CREATED)
     void recoveryItem(
             @RequestHeader(name = "Authorization", required = true) String token,
             @RequestBody @Valid ItemRecoveryRequestDto itemRecoveryRequest
+    );
+
+    @ItemsAPIDocs.RecoveryReview
+    @PostMapping(value = "/admin/recovery/withdrawal-requests/review")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void RecoveryReview(
+            @RequestBody @Valid ItemRequestReviewDto itemRequestReviewDto
     );
 
 }
