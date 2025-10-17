@@ -1,10 +1,3 @@
-# 🧭 SIP — Sistema de Informações de Ponto
-
-O **SIP (Sistema de Informações de Ponto)** é um sistema desenvolvido para facilitar o controle de ponto e a gestão de usuários.  
-A aplicação utiliza **Docker Compose** para orquestrar os serviços necessários de forma simples e automatizada.
-
----
-
 ## 🐳 Pré-requisitos
 
 Antes de executar a aplicação, verifique se você possui os seguintes requisitos instalados:
