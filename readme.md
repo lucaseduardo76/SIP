@@ -1,14 +1,37 @@
-# Depois do login vá em add new server
+# 🧭 SIP — Sistema de Informações de Ponto
 
-Name: qualquer nome
+O **SIP (Sistema de Informações de Ponto)** é um sistema desenvolvido para facilitar o controle de ponto e a gestão de usuários.  
+A aplicação utiliza **Docker Compose** para orquestrar os serviços necessários de forma simples e automatizada.
 
-## Seção de conexão
+---
 
-    Host name/address: postgres
+## 🐳 Pré-requisitos
 
-    Port: 5432
+Antes de executar a aplicação, verifique se você possui os seguintes requisitos instalados:
 
-    Username: sip-root
+- [Docker](https://www.docker.com/get-started)
+- [Docker Compose](https://docs.docker.com/compose/)
+- O **Docker deve estar em execução**
 
-    Password: sip2025
+---
 
+## ▶️ Como executar a aplicação
+
+### 1️⃣ Clone este repositório:
+```bash
+git clone https://github.com/lucaseduardo76/SIP.git
+```
+
+### 2️⃣ Entre no projeto:
+```bash
+cd SIP
+```
+
+### 3️⃣ Rode o Docker Compose:
+```bash
+docker compose up -d
+```
+Ou
+```bash
+docker-compose up -d
+```
