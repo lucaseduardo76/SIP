@@ -22,7 +22,7 @@ public class UserAdminRegisterDto implements UserRegisterDto{
 
     @NotBlank(message = "O e-mail é obrigatório")
     @Email(message = "E-mail inválido")
-    @Schema(example = "9999999@ifba.edu.br")
+    @Schema(example = "9999999999999@ifba.edu.br")
     private String email;
 
     @Size(min = 8, message = "A senha deve ter no mínimo 8 caracteres")

@@ -13,13 +13,15 @@ import java.lang.annotation.Target;
 
 public @interface AgendaAPIDocs {
 
+
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
-    @Operation(summary = "Cria um nome Item", description = "Metodo quando bem sucedido retorna códgio 201 e cria um novo item na base de dados")
+    @Operation(summary = "Cria uma nova Agenda", description = "Método quando bem sucedido retorna código 201 e cria uma nova agenda na base de dados. A agenda contém horários ocupados, dias disponíveis e horários de início e fim do expediente.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "item criado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"message\": \"mensagem qualquer.\" }"))),
+            @ApiResponse(responseCode = "201", description = "Agenda criada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"message\": \"Campos obrigatórios ausentes ou inválidos.\" }"))),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"description\": \"INTERNAL SERVER ERROR!\", \"message\": \"POR FAVOR INFORME AO ADMINISTRADOR DO SISTEMA!\" }")))})
-    public @interface CreateItem { }
+    public @interface CreateAgenda { }
+
 
 }
