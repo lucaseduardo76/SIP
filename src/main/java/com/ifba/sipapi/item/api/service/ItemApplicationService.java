@@ -68,6 +68,8 @@ public class ItemApplicationService implements ItemService {
         User user = userRepository.findByEmail(email).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "User not found"));
         user.requireAdminRole();
 
+        checkDateIsAfterTodayAndThrowException(itemRequestDto.getFinding_date());
+
         String itemCode = GenerateItemCode.generateItemCode(itemRequestDto, itemRepository.findItemCodesByCategory(itemRequestDto.getCategory()));
         Item item = new Item(itemRequestDto, itemCode, DONATION_TIME);
         log.debug("[finish] ItemApplicationService - createItem");
@@ -75,6 +77,10 @@ public class ItemApplicationService implements ItemService {
         return new ItemCreatedResponseDto(itemRepository.save(item));
     }
 
+    private void checkDateIsAfterTodayAndThrowException(LocalDate findingDate) {
+        if(LocalDate.now().isBefore(findingDate))
+            throw APIException.build(HttpStatus.BAD_REQUEST, "A data não pode ser futura");
+    }
 
 
     @Override
@@ -105,9 +111,7 @@ public class ItemApplicationService implements ItemService {
     public void deleteAllImages(UUID itemId) {
         log.info("[start] ItemApplicationService - deleteAllImages");
         Item item = itemRepository.findById(itemId).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Item não encontrado"));
-        item.getPictures().forEach(picture -> {
-            minioClient.deleteItemImage(picture.getUrl());
-        });
+        item.getPictures().forEach(picture -> minioClient.deleteItemImage(picture.getUrl()));
         item.getPictures().clear();
         itemRepository.save(item);
         log.debug("[finish] ItemApplicationService - deleteAllImages");
@@ -142,7 +146,7 @@ public class ItemApplicationService implements ItemService {
     @Override
     public Page<ItemResponseDto> getAllItems(Pageable pageable, ItemFilterDto itemFilterDto) {
         log.info("[start] ItemApplicationService - getAllItems");
-        Page<ItemResponseDto> itemList = null;
+        Page<ItemResponseDto> itemList;
         if (itemFilterDto.isEmpty())
             itemList = itemRepository.findAllItemByStatus(Status.DISPONIBLE, pageable).map(ItemResponseDto::new);
         else
@@ -170,14 +174,14 @@ public class ItemApplicationService implements ItemService {
         recovery.processRequestAcceptance(itemRequestReviewDto.getStatusRecovery());
         recoveryRepository.save(recovery);
 
-        if (itemRequestReviewDto.getStatusRecovery().equals(StatusRecovery.APPROVED)) {
-            rejectAllExcept(recovery);
+        if (itemRequestReviewDto.getStatusRecovery().equals(StatusRecovery.APPROVED))
             applyClaimToItem(recovery);
-        }
+
         log.debug("[finish] ItemApplicationService - recoveryReview");
     }
 
     private void applyClaimToItem(Recovery recovery) {
+        rejectAllExcept(recovery);
         Item item = recovery.getItem();
         item.updateStatusToClaimed(recovery);
         itemRepository.save(item);

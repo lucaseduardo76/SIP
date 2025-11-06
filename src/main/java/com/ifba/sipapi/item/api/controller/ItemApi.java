@@ -27,7 +27,7 @@ public interface ItemApi {
     @ResponseStatus(HttpStatus.CREATED)
     ItemCreatedResponseDto createItem(
             @RequestHeader(name = "Authorization", required = true) String token,
-            @RequestBody ItemRequestDto itemRequestDto);
+            @RequestBody @Valid  ItemRequestDto itemRequestDto);
 
     @ItemsAPIDocs.GetItem
     @GetMapping("/{idItem}")

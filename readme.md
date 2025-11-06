@@ -1,14 +1,30 @@
-# Depois do login vá em add new server
+## 🐳 Pré-requisitos
 
-Name: qualquer nome
+Antes de executar a aplicação, verifique se você possui os seguintes requisitos instalados:
 
-## Seção de conexão
+- [Docker](https://www.docker.com/get-started)
+- [Docker Compose](https://docs.docker.com/compose/)
+- O **Docker deve estar em execução**
 
-    Host name/address: postgres
+---
 
-    Port: 5432
+## ▶️ Como executar a aplicação
 
-    Username: sip-root
+### 1️⃣ Clone este repositório:
+```bash
+git clone https://github.com/lucaseduardo76/SIP.git
+```
 
-    Password: sip2025
+### 2️⃣ Entre no projeto:
+```bash
+cd SIP
+```
 
+### 3️⃣ Rode o Docker Compose:
+```bash
+docker compose up -d
+```
+Ou
+```bash
+docker-compose up -d
+```
