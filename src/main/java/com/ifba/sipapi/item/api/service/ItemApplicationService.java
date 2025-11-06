@@ -1,5 +1,9 @@
 package com.ifba.sipapi.item.api.service;
 
+import com.ifba.sipapi.agenda.domain.AvailableDay;
+import com.ifba.sipapi.agenda.domain.AvailableTime;
+import com.ifba.sipapi.agenda.domain.DayOfWeekEnum;
+import com.ifba.sipapi.agenda.repository.AvailableDayRepository;
 import com.ifba.sipapi.config.handler.APIException;
 import com.ifba.sipapi.config.security.TokenService;
 import com.ifba.sipapi.item.domain.recoveryRequest.Recovery;
@@ -29,9 +33,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 
 @Service
@@ -45,6 +52,7 @@ public class ItemApplicationService implements ItemService {
     private final MinioClient minioClient;
     private final PictureRepository pictureRepository;
     private final RecoveryRepository recoveryRepository;
+    private final AvailableDayRepository availableDayRepository;
 
     @Value("${minio.application.max_images_item}")
     private Integer MAX_IMAGES;
@@ -159,12 +167,34 @@ public class ItemApplicationService implements ItemService {
     public void recoveryItem(ItemRecoveryRequestDto itemRecoveryRequest, String token) {
         log.info("[start] ItemApplicationService - recoveryItem");
         User user = assertEmailBelongsToAndReturnUser(token, itemRecoveryRequest.getEmail());
-        Item item = itemRepository.findById(itemRecoveryRequest.getItemId()).orElseThrow(() -> APIException.build(HttpStatus.BAD_REQUEST, "Item não encontrado"));
+        Item item = itemRepository.findById(itemRecoveryRequest.getItemId()).orElseThrow(
+                () -> APIException.build(HttpStatus.BAD_REQUEST, "Item não encontrado"));
 
         validateRecoveryRequest(user, item);
+        validateAgenda(itemRecoveryRequest.getDateTime());
         Recovery recovery = new Recovery(itemRecoveryRequest, user, item);
         recoveryRepository.save(recovery);
         log.debug("[finish] ItemApplicationService - recoveryItem");
+    }
+
+    private void validateAgenda(LocalDateTime dateTime) {
+        log.info("[start] ItemApplicationService - validateAgenda");
+        AvailableDay availableDay = availableDayRepository.findAllByAvailableDay(DayOfWeekEnum.valueOf(dateTime.getDayOfWeek().name())).orElseThrow(
+                () -> APIException.build(HttpStatus.BAD_REQUEST, "Dia escolhido não está disponivel"));
+
+        LocalTime time = LocalTime.of(dateTime.getHour(), dateTime.getMinute(), dateTime.getSecond());
+        AtomicReference<AvailableTime> availableTime = new AtomicReference<>();
+
+        availableDay.getAvailableTimeList().forEach(dbTime -> {
+            if (time.isAfter(dbTime.getStartTime()) && time.isBefore(dbTime.getEndTime())) {
+                availableTime.set(dbTime);
+            }
+        });
+
+        if (availableTime.get() == null)
+            throw APIException.build(HttpStatus.BAD_REQUEST, "O horário selecionado não está disponível");
+
+        log.debug("[finish] ItemApplicationService - validateAgenda");
     }
 
     @Override
@@ -232,40 +262,35 @@ public class ItemApplicationService implements ItemService {
     }
 
     private void validateUser(User user) {
-        if (user.getRole() == Role.ROOT) {
+        if (user.getRole() == Role.ROOT)
             throw APIException.build(HttpStatus.BAD_REQUEST,
                     "O usuário ROOT não deve fazer solicitações de itens");
-        }
     }
 
     private void validateItem(Item item) {
-        if (item.getStatus() != Status.DISPONIBLE) {
+        if (item.getStatus() != Status.DISPONIBLE)
             throw APIException.build(HttpStatus.BAD_REQUEST,
                     "Item não pode mais ser solicitado");
-        }
     }
 
     private void validateDuplicateRequest(User user, Item item) {
-        if (recoveryRepository.existsByUserAndItemAndStatusNot(user, item, StatusRecovery.REFUSED)) {
+        if (recoveryRepository.existsByUserAndItemAndStatusNot(user, item, StatusRecovery.REFUSED))
             throw APIException.build(HttpStatus.BAD_REQUEST,
                     "Solicitação já efetuada");
-        }
     }
 
     private void validateMaxActiveRequests(User user) {
         long activeRequests = recoveryRepository.countByUserAndStatus(user, StatusRecovery.PENDING);
-        if (activeRequests >= MAX_ACTIVE_REQUESTS) {
+        if (activeRequests >= MAX_ACTIVE_REQUESTS)
             throw APIException.build(HttpStatus.BAD_REQUEST,
                     "Usuário não pode ter mais de " + MAX_ACTIVE_REQUESTS + " solicitações ativas");
-        }
     }
 
     private User assertEmailBelongsToAndReturnUser(String token, String email) {
         User user = userRepository.findByEmail(tokenService.getSubject(token)).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
-
-        if (!user.getEmail().equals(email)) {
+        if (!user.getEmail().equals(email))
             throw APIException.build(HttpStatus.UNAUTHORIZED, "Token não corresponde ao email enviado");
-        }
+
         return user;
     }
 
@@ -276,11 +301,11 @@ public class ItemApplicationService implements ItemService {
 
         Page<ItemResponseDto> result;
 
-        if (itemFilterDto.getCategory() != null && !itemFilterDto.getCategory().isEmpty()) {
+        if (itemFilterDto.getCategory() != null && !itemFilterDto.getCategory().isEmpty())
             result = itemRepository.findByFilterQuery(pageable, dateFrom, dateCloseToDonation, itemFilterDto.getCategory(), Status.DISPONIBLE).map(ItemResponseDto::new);
-        } else {
+        else
             result = itemRepository.findByFilterQuery(pageable, dateFrom, dateCloseToDonation, Status.DISPONIBLE).map(ItemResponseDto::new);
-        }
+
         log.debug("[finish] ItemApplicationService - filterSearch");
         return result;
     }

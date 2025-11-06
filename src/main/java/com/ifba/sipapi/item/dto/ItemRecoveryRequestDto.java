@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
@@ -25,4 +26,8 @@ public class ItemRecoveryRequestDto {
     @Schema(example = "Descrição da solicitação")
     @NotBlank(message = "Descrição não pode ser nula")
     private String description;
+
+    @Schema(example = "Data e hora que sera retirado")
+    @NotNull(message = "Data de retirada não pode ser nula")
+    private LocalDateTime dateTime;
 }

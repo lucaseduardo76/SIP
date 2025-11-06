@@ -6,14 +6,15 @@ import com.ifba.sipapi.item.domain.item.Item;
 import com.ifba.sipapi.item.dto.ItemRecoveryRequestDto;
 import com.ifba.sipapi.user.domain.User;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
-@EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -34,6 +35,9 @@ public class Recovery extends Auditable {
     @Column(nullable = false)
     private LocalDateTime requestDate;
 
+    @Column(nullable = false)
+    private LocalDateTime recoveryDateTime;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id")
     private Item item;
@@ -48,6 +52,7 @@ public class Recovery extends Auditable {
         this.description = itemRecoveryRequestDto.getDescription();
         this.status = StatusRecovery.PENDING;
         this.requestDate = LocalDateTime.now();
+        this.recoveryDateTime = itemRecoveryRequestDto.getDateTime();
     }
 
     public void processRequestAcceptance(StatusRecovery newStatus) {
