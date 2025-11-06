@@ -88,8 +88,22 @@ public interface ItemApi {
     @ItemsAPIDocs.RecoveryReview
     @PostMapping(value = "/admin/recovery/withdrawal-requests/review")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void RecoveryReview(
+    void recoveryReview(
             @RequestBody @Valid ItemRequestReviewDto itemRequestReviewDto
     );
 
+    @ItemsAPIDocs.GetAllRecoveries
+    @GetMapping(value = "/admin/recovery")
+    @ResponseStatus(HttpStatus.OK)
+    List<RecoveryResponse> getAllRecovery();
+
+    @ItemsAPIDocs.GetAllRecoveries
+    @GetMapping(value = "/admin/recovery-by-item/{idItem}")
+    @ResponseStatus(HttpStatus.OK)
+    RecoveryResponseByItem getRecoveryByItem(@PathVariable  UUID idItem);
+
+    @ItemsAPIDocs.GetAllRecoveries
+    @GetMapping(value = "/admin/recovery-by-user/{idUser}")
+    @ResponseStatus(HttpStatus.OK)
+    RecoveryResponseByUser getRecoveryByUser(@PathVariable UUID idUser);
 }

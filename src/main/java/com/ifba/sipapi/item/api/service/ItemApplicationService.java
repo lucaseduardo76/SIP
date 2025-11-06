@@ -180,6 +180,32 @@ public class ItemApplicationService implements ItemService {
         log.debug("[finish] ItemApplicationService - recoveryReview");
     }
 
+    @Override
+    public List<RecoveryResponse> getAllRecoveries() {
+        log.info("[start] ItemApplicationService - getAllRecoveries");
+        List<RecoveryResponse> recoveryList = recoveryRepository.findAll().stream().map(RecoveryResponse::new).toList();
+        log.debug("[finish] ItemApplicationService - getAllRecoveries");
+        return recoveryList;
+    }
+
+    @Override
+    public RecoveryResponseByItem getRecoveriesByItem(UUID idItem) {
+        log.info("[start] ItemApplicationService - getRecoveriesByItem");
+        Item item = itemRepository.findById(idItem).orElseThrow(() -> APIException.build(HttpStatus.BAD_REQUEST, "Item não encontrado"));
+        RecoveryResponseByItem recoveryList = new RecoveryResponseByItem(recoveryRepository.findAllByItem(item));
+        log.debug("[finish] ItemApplicationService - getRecoveriesByItem");
+        return recoveryList;
+    }
+
+    @Override
+    public RecoveryResponseByUser getRecoveriesByUser(UUID idUser) {
+        log.info("[start] ItemApplicationService - getRecoveriesByUser");
+        User user = userRepository.findById(idUser).orElseThrow(() -> APIException.build(HttpStatus.BAD_REQUEST, "Usuário não encontrado"));
+        RecoveryResponseByUser recoveryList = new RecoveryResponseByUser(recoveryRepository.findAllByUser(user));
+        log.debug("[finish] ItemApplicationService - getRecoveriesByUser");
+        return recoveryList;
+    }
+
     private void applyClaimToItem(Recovery recovery) {
         rejectAllExcept(recovery);
         Item item = recovery.getItem();

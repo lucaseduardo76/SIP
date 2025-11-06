@@ -116,4 +116,13 @@ public @interface ItemsAPIDocs {
     public @interface RecoveryReview { }
 
 
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @Operation(summary = "Faz um get de todos os Recoveries no banco", description = "Permite que o administrador veja todas as solicitações feitas no sistema")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Recoveries retornadas com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"message\": \"Dados inválidos para revisar solicitação.\" }"))),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"description\": \"INTERNAL SERVER ERROR!\", \"message\": \"POR FAVOR INFORME AO ADMINISTRADOR DO SISTEMA!\" }")))})
+    public @interface GetAllRecoveries {
+    }
 }

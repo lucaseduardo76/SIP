@@ -91,9 +91,35 @@ public class ItemApplicationApi implements ItemApi {
     }
 
     @Override
-    public void RecoveryReview(ItemRequestReviewDto itemRequestReviewDto) {
+    public void recoveryReview(ItemRequestReviewDto itemRequestReviewDto) {
         log.info("[start] ItemApplicationApi - RecoveryReview");
         itemService.recoveryReview(itemRequestReviewDto);
         log.debug("[finish] ItemApplicationApi - RecoveryReview");
     }
+
+    @Override
+    public List<RecoveryResponse> getAllRecovery() {
+        log.info("[start] ItemApplicationApi - getAllRecovery");
+        List<RecoveryResponse> recoveryResponseList = itemService.getAllRecoveries();
+        log.debug("[finish] ItemApplicationApi - getAllRecovery");
+        return recoveryResponseList;
+    }
+
+    @Override
+    public RecoveryResponseByItem getRecoveryByItem(UUID idItem) {
+        log.info("[start] ItemApplicationApi - getRecoveryByItem");
+        RecoveryResponseByItem recoveryResponse = itemService.getRecoveriesByItem(idItem);
+        log.debug("[finish] ItemApplicationApi - getRecoveryByItem");
+        return recoveryResponse;
+    }
+
+    @Override
+    public RecoveryResponseByUser getRecoveryByUser(UUID idUser) {
+        log.info("[start] ItemApplicationApi - getRecoveryByUser");
+        RecoveryResponseByUser recoveryResponse = itemService.getRecoveriesByUser(idUser);
+        log.debug("[finish] ItemApplicationApi - getRecoveryByUser");
+        return recoveryResponse;
+    }
+
+
 }
