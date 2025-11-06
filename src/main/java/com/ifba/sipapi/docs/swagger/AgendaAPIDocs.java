@@ -16,12 +16,11 @@ public @interface AgendaAPIDocs {
 
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
-    @Operation(summary = "Cria uma nova Agenda", description = "Método quando bem sucedido retorna código 201 e cria uma nova agenda na base de dados. A agenda contém horários ocupados, dias disponíveis e horários de início e fim do expediente.")
+    @Operation(summary = "Cria ou Edita Agenda", description = "Método quando bem sucedido retorna código 200 e edita agenda na base de dados. A agenda contém horários ocupados, dias disponíveis e horários de início e fim do expediente.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Agenda criada com sucesso"),
+            @ApiResponse(responseCode = "200", description = "Agenda editada com sucesso"),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"message\": \"Campos obrigatórios ausentes ou inválidos.\" }"))),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"description\": \"INTERNAL SERVER ERROR!\", \"message\": \"POR FAVOR INFORME AO ADMINISTRADOR DO SISTEMA!\" }")))})
-    public @interface CreateAgenda { }
-
-
+    @interface CreateEditAgenda {
+    }
 }

@@ -1,6 +1,6 @@
 package com.ifba.sipapi.agenda.domain;
 
-import com.ifba.sipapi.agenda.dto.AgendaRequestDto;
+import com.ifba.sipapi.agenda.dto.AvailableTimeSlotRequest;
 import com.ifba.sipapi.config.handler.APIException;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -34,7 +34,7 @@ public class AvailableTime {
     @ManyToMany(mappedBy = "availableTimeList")
     private List<AvailableDay> availableDays;
 
-    public AvailableTime(AgendaRequestDto.AvailableTimeSlotRequest time) {
+    public AvailableTime(AvailableTimeSlotRequest time) {
         if(time == null || !time.getStartTime().isBefore(time.getEndTime()))
             throw APIException.build(HttpStatus.BAD_REQUEST,
                     "Horário não pode ser nulo, e horario inicial não pode ser posterior a horario final");
