@@ -27,7 +27,7 @@ public class AvailableDay {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private DayOfWeekEnum availableDays;
+    private DayOfWeekEnum availableDay;
 
     @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinTable(
@@ -39,7 +39,7 @@ public class AvailableDay {
 
     public AvailableDay(DayOfWeekEnum day) {
         if (day != null) {
-            this.availableDays = day;
+            this.availableDay = day;
             availableTimeList = new ArrayList<>();
         }
     }

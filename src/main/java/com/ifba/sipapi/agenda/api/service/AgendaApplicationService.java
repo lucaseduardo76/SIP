@@ -2,12 +2,15 @@ package com.ifba.sipapi.agenda.api.service;
 
 import com.ifba.sipapi.agenda.domain.AvailableDay;
 import com.ifba.sipapi.agenda.dto.AgendaEditRequestDto;
+import com.ifba.sipapi.agenda.dto.AvailableDayResponse;
 import com.ifba.sipapi.agenda.repository.AvailableDayRepository;
 import com.ifba.sipapi.agenda.repository.AvailableTimeRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @Log4j2
@@ -32,6 +35,12 @@ public class AgendaApplicationService implements AgendaService {
 
         cleanupOrphanTimes();
         log.debug("[finish] AgendaApplicationService - editAgenda");
+    }
+
+    @Override
+    public List<AvailableDayResponse> getAgenda() {
+        log.info("AgendaApplicationService - getAgenda");
+        return availableDayRepository.findAll().stream().map(AvailableDayResponse::new).toList();
     }
 
     private void cleanupOrphanTimes() {

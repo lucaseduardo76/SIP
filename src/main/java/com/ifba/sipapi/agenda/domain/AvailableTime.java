@@ -1,5 +1,6 @@
 package com.ifba.sipapi.agenda.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ifba.sipapi.agenda.dto.AvailableTimeSlotRequest;
 import com.ifba.sipapi.config.handler.APIException;
 import jakarta.persistence.*;
@@ -23,6 +24,7 @@ public class AvailableTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @JsonIgnore
     private UUID id;
 
     @Column(nullable = false)
@@ -31,6 +33,7 @@ public class AvailableTime {
     @Column(nullable = false)
     private LocalTime endTime;
 
+    @JsonIgnore
     @ManyToMany(mappedBy = "availableTimeList")
     private List<AvailableDay> availableDays;
 
