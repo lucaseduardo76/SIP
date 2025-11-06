@@ -26,7 +26,7 @@ public class AgendaApplicationService implements AgendaService {
         log.info("[start] AgendaApplicationService - editAgenda");
 
         agendaEditRequestDto.getAvailableDayTimeSlotRequest().forEach(availableTimeSlot ->{
-            AvailableDay availableDays = availableDayRepository.findAllByAvailableDays(availableTimeSlot.getAvailableDay())
+            AvailableDay availableDays = availableDayRepository.findAllByAvailableDay(availableTimeSlot.getAvailableDay())
                     .orElse(new AvailableDay(availableTimeSlot.getAvailableDay()));
 
             availableDays.changeTimeList(availableTimeSlot.getAvailableTimeSlotRequest());
