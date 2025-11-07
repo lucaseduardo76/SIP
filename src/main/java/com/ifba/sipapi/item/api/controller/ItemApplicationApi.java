@@ -49,6 +49,14 @@ public class ItemApplicationApi implements ItemApi {
     }
 
     @Override
+    public RecoveryResponseByUser getAllSelfUserRecoveries(String token, String email, StatusRecovery status) {
+        log.info("[start] ItemApplicationApi - getAllSelfUserRecoveries");
+        RecoveryResponseByUser recoveryResponse = itemService.getSelfRecoveriesByUser(token, email, status);
+        log.debug("[finish] ItemApplicationApi - getAllSelfUserRecoveries");
+        return recoveryResponse;
+    }
+
+    @Override
     public List<ImageUrlResponseDto> uploadImages(UUID itemId, List<MultipartFile> itemImages) {
         log.info("[start] ItemApplicationApi - uploadImages");
         List<ImageUrlResponseDto> imageList =  itemService.uploadImages(itemId, itemImages);

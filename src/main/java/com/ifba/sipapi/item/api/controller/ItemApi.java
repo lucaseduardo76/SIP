@@ -41,6 +41,14 @@ public interface ItemApi {
     Page<ItemResponseDto> getAllItem(Pageable pageable,
                                      @ModelAttribute ItemFilterDto itemFilterDto);
 
+    @ItemsAPIDocs.GetAllSelfUserRecoveries
+    @GetMapping(value = "/recovery-self")
+    @ResponseStatus(HttpStatus.OK)
+    RecoveryResponseByUser getAllSelfUserRecoveries(@RequestHeader(name = "Authorization", required = true) String token,
+                                                    @RequestParam String email,
+                                                    @RequestParam(required = false) StatusRecovery status
+    );
+
     @ItemsAPIDocs.UpdateImagesItem
     @PostMapping(value = "/admin/images/{itemId}")
     @ResponseStatus(HttpStatus.CREATED)
