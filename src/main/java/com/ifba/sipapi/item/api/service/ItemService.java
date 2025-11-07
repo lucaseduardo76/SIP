@@ -2,6 +2,7 @@ package com.ifba.sipapi.item.api.service;
 
 
 
+import com.ifba.sipapi.item.domain.recoveryRequest.StatusRecovery;
 import com.ifba.sipapi.item.dto.ItemRecoveryRequestDto;
 import com.ifba.sipapi.item.dto.*;
 import org.springframework.data.domain.Page;
@@ -25,7 +26,7 @@ public interface ItemService {
     Page<ItemResponseDto> getAllItems(Pageable pageable, ItemFilterDto itemFilterDto);
     void recoveryItem(ItemRecoveryRequestDto itemRecoveryRequest, String token);
     void recoveryReview(ItemRequestReviewDto itemRequestReviewDto);
-    List<RecoveryResponse> getAllRecoveries();
+    List<RecoveryResponse> getAllRecoveries(StatusRecovery statusRecovery);
     RecoveryResponseByItem getRecoveriesByItem(UUID idItem);
     RecoveryResponseByUser getRecoveriesByUser(UUID idUser);
 }

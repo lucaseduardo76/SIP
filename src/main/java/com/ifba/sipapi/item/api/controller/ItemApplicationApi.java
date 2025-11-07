@@ -1,5 +1,6 @@
 package com.ifba.sipapi.item.api.controller;
 
+import com.ifba.sipapi.item.domain.recoveryRequest.StatusRecovery;
 import com.ifba.sipapi.item.dto.ItemRecoveryRequestDto;
 import com.ifba.sipapi.item.dto.*;
 import com.ifba.sipapi.item.api.service.ItemService;
@@ -98,9 +99,9 @@ public class ItemApplicationApi implements ItemApi {
     }
 
     @Override
-    public List<RecoveryResponse> getAllRecovery() {
+    public List<RecoveryResponse> getAllRecovery(StatusRecovery statusRecovery) {
         log.info("[start] ItemApplicationApi - getAllRecovery");
-        List<RecoveryResponse> recoveryResponseList = itemService.getAllRecoveries();
+        List<RecoveryResponse> recoveryResponseList = itemService.getAllRecoveries(statusRecovery);
         log.debug("[finish] ItemApplicationApi - getAllRecovery");
         return recoveryResponseList;
     }
