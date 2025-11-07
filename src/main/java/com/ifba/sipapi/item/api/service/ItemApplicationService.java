@@ -211,15 +211,21 @@ public class ItemApplicationService implements ItemService {
     }
 
     @Override
-    public List<RecoveryResponse> getAllRecoveries(StatusRecovery statusRecovery) {
+    public Page<RecoveryResponse> getAllRecoveries(Pageable pageable, StatusRecovery statusRecovery) {
         log.info("[start] ItemApplicationService - getAllRecoveries");
-        List<RecoveryResponse> recoveryList;
-        if(statusRecovery == null)
-            recoveryList = recoveryRepository.findAll().stream().map(RecoveryResponse::new).toList();
+
+        Page<Recovery> recoveryPage;
+
+        if (statusRecovery == null)
+            recoveryPage = recoveryRepository.findAll(pageable);
         else
-            recoveryList = recoveryRepository.findAllByStatus(statusRecovery).stream().map(RecoveryResponse::new).toList();
+            recoveryPage = recoveryRepository.findAllByStatus(statusRecovery, pageable);
+
+
+        Page<RecoveryResponse> recoveryResponsePage = recoveryPage.map(RecoveryResponse::new);
+
         log.debug("[finish] ItemApplicationService - getAllRecoveries");
-        return recoveryList;
+        return recoveryResponsePage;
     }
 
     @Override

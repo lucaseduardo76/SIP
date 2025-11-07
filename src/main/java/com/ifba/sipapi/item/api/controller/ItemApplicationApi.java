@@ -107,9 +107,9 @@ public class ItemApplicationApi implements ItemApi {
     }
 
     @Override
-    public List<RecoveryResponse> getAllRecovery(StatusRecovery statusRecovery) {
+    public Page<RecoveryResponse> getAllRecovery(Pageable pageable, StatusRecovery statusRecovery) {
         log.info("[start] ItemApplicationApi - getAllRecovery");
-        List<RecoveryResponse> recoveryResponseList = itemService.getAllRecoveries(statusRecovery);
+        Page<RecoveryResponse> recoveryResponseList = itemService.getAllRecoveries(pageable,statusRecovery);
         log.debug("[finish] ItemApplicationApi - getAllRecovery");
         return recoveryResponseList;
     }

@@ -41,14 +41,6 @@ public interface ItemApi {
     Page<ItemResponseDto> getAllItem(Pageable pageable,
                                      @ModelAttribute ItemFilterDto itemFilterDto);
 
-    @ItemsAPIDocs.GetAllSelfUserRecoveries
-    @GetMapping(value = "/recovery-self")
-    @ResponseStatus(HttpStatus.OK)
-    RecoveryResponseByUser getAllSelfUserRecoveries(@RequestHeader(name = "Authorization", required = true) String token,
-                                                    @RequestParam String email,
-                                                    @RequestParam(required = false) StatusRecovery status
-    );
-
     @ItemsAPIDocs.UpdateImagesItem
     @PostMapping(value = "/admin/images/{itemId}")
     @ResponseStatus(HttpStatus.CREATED)
@@ -104,7 +96,9 @@ public interface ItemApi {
     @ItemsAPIDocs.GetAllRecoveries
     @GetMapping(value = "/admin/recovery")
     @ResponseStatus(HttpStatus.OK)
-    List<RecoveryResponse> getAllRecovery(@RequestParam(required = false) StatusRecovery status);
+    Page<RecoveryResponse> getAllRecovery(
+            Pageable pageable,
+            @RequestParam(required = false) StatusRecovery status);
 
     @ItemsAPIDocs.GetAllRecoveries
     @GetMapping(value = "/admin/recovery-by-item/{idItem}")
@@ -115,4 +109,12 @@ public interface ItemApi {
     @GetMapping(value = "/admin/recovery-by-user/{idUser}")
     @ResponseStatus(HttpStatus.OK)
     RecoveryResponseByUser getRecoveryByUser(@PathVariable UUID idUser);
+
+    @ItemsAPIDocs.GetAllSelfUserRecoveries
+    @GetMapping(value = "/recovery-self")
+    @ResponseStatus(HttpStatus.OK)
+    RecoveryResponseByUser getAllSelfUserRecoveries(@RequestHeader(name = "Authorization", required = true) String token,
+                                                    @RequestParam String email,
+                                                    @RequestParam(required = false) StatusRecovery status
+    );
 }
