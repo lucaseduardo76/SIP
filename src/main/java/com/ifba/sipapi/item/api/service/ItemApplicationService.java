@@ -235,9 +235,22 @@ public class ItemApplicationService implements ItemService {
     public RecoveryResponseByUser getRecoveriesByUser(UUID idUser) {
         log.info("[start] ItemApplicationService - getRecoveriesByUser");
         User user = userRepository.findById(idUser).orElseThrow(() -> APIException.build(HttpStatus.BAD_REQUEST, "Usuário não encontrado"));
-        RecoveryResponseByUser recoveryList = new RecoveryResponseByUser(recoveryRepository.findAllByUser(user));
+        RecoveryResponseByUser recoveryList = new RecoveryResponseByUser(recoveryRepository.findAllByUser(user), user);
         log.debug("[finish] ItemApplicationService - getRecoveriesByUser");
         return recoveryList;
+    }
+
+    @Override
+    public RecoveryResponseByUser getSelfRecoveriesByUser(String token, String email, StatusRecovery status) {
+        log.info("[start] ItemApplicationService - getSelfRecoveriesByUser");
+        User user = assertEmailBelongsToAndReturnUser(token, email);
+        List<Recovery> recoveryList = recoveryRepository.findAllByUser(user);
+
+        if(status != null)
+            recoveryList = recoveryList.stream().filter(r -> r.getStatus().equals(status)).toList();
+
+        log.debug("[finish] ItemApplicationService - getSelfRecoveriesByUser");
+        return new RecoveryResponseByUser(recoveryList, user);
     }
 
     private void applyClaimToItem(Recovery recovery) {

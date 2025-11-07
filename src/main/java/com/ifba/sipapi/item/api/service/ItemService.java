@@ -29,4 +29,5 @@ public interface ItemService {
     List<RecoveryResponse> getAllRecoveries(StatusRecovery statusRecovery);
     RecoveryResponseByItem getRecoveriesByItem(UUID idItem);
     RecoveryResponseByUser getRecoveriesByUser(UUID idUser);
+    RecoveryResponseByUser getSelfRecoveriesByUser(String token, String email, StatusRecovery status);
 }
