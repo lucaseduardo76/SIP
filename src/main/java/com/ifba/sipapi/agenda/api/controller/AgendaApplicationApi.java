@@ -17,9 +17,9 @@ public class AgendaApplicationApi implements AgendaApi {
 
     @Override
     public void createOrEditAgenda(AgendaEditRequestDto agendaEditRequestDto) {
-        log.info("[start] AgendaApplicationApi - editAgenda");
+        log.info("[start] AgendaApplicationApi - createOrEditAgenda");
         agendaService.createOrEditAgenda(agendaEditRequestDto);
-        log.debug("[finish] AgendaApplicationApi - editAgenda");
+        log.debug("[finish] AgendaApplicationApi - createOrEditAgenda");
     }
 
     @Override
@@ -30,3 +30,4 @@ public class AgendaApplicationApi implements AgendaApi {
         return agenda;
     }
 }
+
