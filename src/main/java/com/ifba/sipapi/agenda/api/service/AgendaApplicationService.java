@@ -23,7 +23,7 @@ public class AgendaApplicationService implements AgendaService {
     @Transactional
     @Override
     public void createOrEditAgenda(AgendaEditRequestDto agendaEditRequestDto) {
-        log.info("[start] AgendaApplicationService - editAgenda");
+        log.info("[start] AgendaApplicationService - createOrEditAgenda");
 
         agendaEditRequestDto.getAvailableDayTimeSlotRequest().forEach(availableTimeSlot ->{
             AvailableDay availableDays = availableDayRepository.findAllByAvailableDay(availableTimeSlot.getAvailableDay())
@@ -34,7 +34,7 @@ public class AgendaApplicationService implements AgendaService {
         });
 
         cleanupOrphanTimes();
-        log.debug("[finish] AgendaApplicationService - editAgenda");
+        log.debug("[finish] AgendaApplicationService - createOrEditAgenda");
     }
 
     @Override

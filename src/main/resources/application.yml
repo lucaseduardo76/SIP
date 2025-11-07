@@ -89,7 +89,7 @@ sip:
 
 application:
   front-end:
-    url: ${FRONTEND_APPLICATION_URL:http://localhost:8080}
+    url: ${FRONTEND_APPLICATION_URL:http://localhost:3000}
   time:
     donation: ${DONATION_TIME_DAYS:180}
     about-to-donate: ${ABOUT_TO_DONATE:30}

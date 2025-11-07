@@ -6,6 +6,7 @@ import com.ifba.sipapi.agenda.domain.DayOfWeekEnum;
 import com.ifba.sipapi.agenda.repository.AvailableDayRepository;
 import com.ifba.sipapi.config.handler.APIException;
 import com.ifba.sipapi.config.security.TokenService;
+import com.ifba.sipapi.item.domain.item.Category;
 import com.ifba.sipapi.item.domain.recoveryRequest.Recovery;
 import com.ifba.sipapi.item.domain.recoveryRequest.StatusRecovery;
 import com.ifba.sipapi.item.dto.ItemRecoveryRequestDto;
@@ -66,7 +67,6 @@ public class ItemApplicationService implements ItemService {
     @Value("${application.item.max-active-requests}")
     private Integer MAX_ACTIVE_REQUESTS;
 
-    private static final LocalDate OLDEST_ACCEPTABLE_DATE = LocalDate.of(1900, 1, 1);
     private static final LocalDate FUTURE_LIMIT_DATE = LocalDate.of(2999, 12, 31);
 
     @Override
@@ -319,28 +319,39 @@ public class ItemApplicationService implements ItemService {
 
     private Page<ItemResponseDto> filterSearch(ItemFilterDto itemFilterDto, Pageable pageable) {
         log.info("[start] ItemApplicationService - filterSearch");
-        LocalDate dateFrom = calculateDateFrom(itemFilterDto.getLastDays());
+
         LocalDate dateCloseToDonation = calculateDateCloseToDonation(itemFilterDto.getAboutToBeDonated());
+        validateSearchPeriod(itemFilterDto.getStartPeriod(), itemFilterDto.getEndPeriod());
 
-        Page<ItemResponseDto> result;
+        String itemNamePattern = (itemFilterDto.getItemName() != null && !itemFilterDto.getItemName().isBlank())
+                ? "%" + itemFilterDto.getItemName() + "%"
+                : null;
 
-        if (itemFilterDto.getCategory() != null && !itemFilterDto.getCategory().isEmpty())
-            result = itemRepository.findByFilterQuery(pageable, dateFrom, dateCloseToDonation, itemFilterDto.getCategory(), Status.DISPONIBLE).map(ItemResponseDto::new);
-        else
-            result = itemRepository.findByFilterQuery(pageable, dateFrom, dateCloseToDonation, Status.DISPONIBLE).map(ItemResponseDto::new);
+        List<Category> categories = (itemFilterDto.getCategory() != null && !itemFilterDto.getCategory().isEmpty())
+                ? itemFilterDto.getCategory()
+                : null;
+
+        Status status = itemFilterDto.getStatus() != null ? itemFilterDto.getStatus() : null;
+
+        Page<ItemResponseDto> result = itemRepository
+                .findByFilterQuery(pageable, dateCloseToDonation, categories, status, itemNamePattern, itemFilterDto.getStartPeriod(), itemFilterDto.getEndPeriod())
+                .map(ItemResponseDto::new);
 
         log.debug("[finish] ItemApplicationService - filterSearch");
         return result;
     }
 
-    private LocalDate checkIfDonationFilterIsActive(Boolean aboutToBeDonated) {
-        return Boolean.TRUE.equals(aboutToBeDonated) ? LocalDate.now().plusDays(TIME_TO_DONATE) : null;
+
+    private void validateSearchPeriod(LocalDate startPeriod, LocalDate endPeriod) {
+        if(startPeriod == null || endPeriod == null )
+            return;
+
+        if(startPeriod.isAfter(endPeriod))
+            throw APIException.build(HttpStatus.BAD_REQUEST, "Data inicial do periodo de busca é posterior a data final, corriga e tente novamente");
     }
 
-    private LocalDate calculateDateFrom(Long lastDays) {
-        return Optional.ofNullable(lastDays)
-                .map(days -> LocalDate.now().minusDays(days))
-                .orElse(OLDEST_ACCEPTABLE_DATE);
+    private LocalDate checkIfDonationFilterIsActive(Boolean aboutToBeDonated) {
+        return Boolean.TRUE.equals(aboutToBeDonated) ? LocalDate.now().plusDays(TIME_TO_DONATE) : null;
     }
 
     private LocalDate calculateDateCloseToDonation(Boolean aboutToBeDonated) {
