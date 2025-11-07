@@ -211,9 +211,13 @@ public class ItemApplicationService implements ItemService {
     }
 
     @Override
-    public List<RecoveryResponse> getAllRecoveries() {
+    public List<RecoveryResponse> getAllRecoveries(StatusRecovery statusRecovery) {
         log.info("[start] ItemApplicationService - getAllRecoveries");
-        List<RecoveryResponse> recoveryList = recoveryRepository.findAll().stream().map(RecoveryResponse::new).toList();
+        List<RecoveryResponse> recoveryList;
+        if(statusRecovery == null)
+            recoveryList = recoveryRepository.findAll().stream().map(RecoveryResponse::new).toList();
+        else
+            recoveryList = recoveryRepository.findAllByStatus(statusRecovery).stream().map(RecoveryResponse::new).toList();
         log.debug("[finish] ItemApplicationService - getAllRecoveries");
         return recoveryList;
     }

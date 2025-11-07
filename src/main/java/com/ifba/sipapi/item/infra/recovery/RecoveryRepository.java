@@ -14,4 +14,5 @@ public interface RecoveryRepository extends JpaRepository<Recovery, UUID> {
     List<Recovery>findAllByUser(User user);
     long countByUserAndStatus(User user, StatusRecovery statusRecovery);
     boolean existsByUserAndItemAndStatusNot(User user, Item item, StatusRecovery statusRecovery);
+    List<Recovery> findAllByStatus(StatusRecovery status);
 }

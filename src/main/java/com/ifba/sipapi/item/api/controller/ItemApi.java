@@ -2,6 +2,7 @@ package com.ifba.sipapi.item.api.controller;
 
 
 import com.ifba.sipapi.docs.swagger.ItemsAPIDocs;
+import com.ifba.sipapi.item.domain.recoveryRequest.StatusRecovery;
 import com.ifba.sipapi.item.dto.ItemRecoveryRequestDto;
 import com.ifba.sipapi.item.dto.*;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -95,7 +96,7 @@ public interface ItemApi {
     @ItemsAPIDocs.GetAllRecoveries
     @GetMapping(value = "/admin/recovery")
     @ResponseStatus(HttpStatus.OK)
-    List<RecoveryResponse> getAllRecovery();
+    List<RecoveryResponse> getAllRecovery(@RequestParam(required = false) StatusRecovery status);
 
     @ItemsAPIDocs.GetAllRecoveries
     @GetMapping(value = "/admin/recovery-by-item/{idItem}")
