@@ -18,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.*;
 
 @Getter
+@Setter
 @EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
@@ -32,7 +33,7 @@ public class User extends Auditable implements UserDetails {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false, unique = true)
+    @Column(unique = true)
     private String cpf;
 
     @Column(nullable = false, unique = true)
@@ -49,15 +50,18 @@ public class User extends Auditable implements UserDetails {
     @Column(nullable = false)
     private Integer failedLoginAttempts;
 
-    @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
     private String phone;
 
+    @Column(nullable = false)
     private String accountCode;
 
     @Column(nullable = false)
+    private boolean isFromGoogleAccount;
+
+
+
     private String profileImageUrl;
 
     @OneToMany(mappedBy = "owner")
@@ -82,6 +86,18 @@ public class User extends Auditable implements UserDetails {
         this.role = Role.ADMIN;
     }
 
+    public User (GoogleUserDto googleUser) {
+        this.createBasicUser(googleUser);
+        this.profileImageUrl = googleUser.getPicture() != null ? googleUser.getPicture() : "";
+        this.isFromGoogleAccount = true;
+        this.role = Role.COMMON;
+
+        if(googleUser.isEmailVerified())
+            this.statusMember = StatusMember.ACTIVE;
+        else
+            this.statusMember = StatusMember.NOT_VERIFIED;
+    }
+
     private void createBasicUser(UserRegisterDto dto) {
         this.name = dto.getName();
         this.cpf = dto.getCpf();
@@ -90,6 +106,7 @@ public class User extends Auditable implements UserDetails {
         this.phone = dto.getPhone();
         this.failedLoginAttempts = 0;
         this.accountCode = GenerateNumber.generateCode();
+        this.isFromGoogleAccount = false;
         this.statusMember = StatusMember.NOT_VERIFIED;
         this.profileImageUrl = "";
     }

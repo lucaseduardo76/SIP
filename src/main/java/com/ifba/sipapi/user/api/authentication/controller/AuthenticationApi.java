@@ -2,12 +2,11 @@ package com.ifba.sipapi.user.api.authentication.controller;
 
 import com.ifba.sipapi.docs.swagger.AuthenticationAPIDocs;
 import com.ifba.sipapi.user.dto.UserAdminRegisterDto;
-import com.ifba.sipapi.user.dto.UserLoginDto;
 import com.ifba.sipapi.user.dto.UserCommomRegisterDto;
+import com.ifba.sipapi.user.dto.UserLoginDto;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -35,7 +34,9 @@ public interface AuthenticationApi {
     @AuthenticationAPIDocs.TokenTeste
     @GetMapping("/token-teste")
     @ResponseStatus(code = HttpStatus.OK)
-    public Map<String, String> tokenTeste();
+    Map<String, String> tokenTeste();
 
-
+    @AuthenticationAPIDocs.Login
+    @PostMapping("/google")
+    AuthenticationResponseDto authenticateWithGoogle(@RequestBody Map<String, String> payload);
 }
