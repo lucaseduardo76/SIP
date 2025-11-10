@@ -95,6 +95,24 @@
             <version>4.4.0</version>
         </dependency>
 
+        <!-- Oauth (Para Google Login) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-client</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.api-client</groupId>
+            <artifactId>google-api-client</artifactId>
+            <version>2.2.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.http-client</groupId>
+            <artifactId>google-http-client-gson</artifactId>
+            <version>1.43.3</version>
+        </dependency>
+
         <!-- AWS SDK v2 (Boot doesn't manage this; keep version) -->
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
