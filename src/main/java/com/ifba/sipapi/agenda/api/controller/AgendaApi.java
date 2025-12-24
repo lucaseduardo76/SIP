@@ -1,5 +1,6 @@
 package com.ifba.sipapi.agenda.api.controller;
 
+import com.ifba.sipapi.agenda.domain.DayOfWeekEnum;
 import com.ifba.sipapi.agenda.dto.AgendaEditRequestDto;
 import com.ifba.sipapi.agenda.dto.AvailableDayResponse;
 import com.ifba.sipapi.docs.swagger.AgendaAPIDocs;
@@ -26,4 +27,8 @@ public interface AgendaApi {
     @ResponseStatus(HttpStatus.OK)
     List<AvailableDayResponse> getAgenda();
 
+    @AgendaAPIDocs.DeleteDay
+    @DeleteMapping("/admin")
+    @ResponseStatus(HttpStatus.OK)
+    void deleteDay(@RequestParam DayOfWeekEnum dayOfWeek);
 }

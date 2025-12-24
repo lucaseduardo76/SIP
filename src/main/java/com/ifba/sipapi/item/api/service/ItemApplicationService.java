@@ -351,7 +351,7 @@ public class ItemApplicationService implements ItemService {
     }
 
     private LocalDate checkIfDonationFilterIsActive(Boolean aboutToBeDonated) {
-        return Boolean.TRUE.equals(aboutToBeDonated) ? LocalDate.now().plusDays(TIME_TO_DONATE) : null;
+        return aboutToBeDonated ? LocalDate.now().plusDays(TIME_TO_DONATE) : null;
     }
 
     private LocalDate calculateDateCloseToDonation(Boolean aboutToBeDonated) {

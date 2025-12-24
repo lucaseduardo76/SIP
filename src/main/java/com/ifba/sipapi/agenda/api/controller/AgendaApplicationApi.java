@@ -1,6 +1,7 @@
 package com.ifba.sipapi.agenda.api.controller;
 
 import com.ifba.sipapi.agenda.api.service.AgendaService;
+import com.ifba.sipapi.agenda.domain.DayOfWeekEnum;
 import com.ifba.sipapi.agenda.dto.AgendaEditRequestDto;
 import com.ifba.sipapi.agenda.dto.AvailableDayResponse;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,13 @@ public class AgendaApplicationApi implements AgendaApi {
         List<AvailableDayResponse> agenda = agendaService.getAgenda();
         log.debug("[finish] AgendaApplicationApi - getAgenda");
         return agenda;
+    }
+
+    @Override
+    public void deleteDay(DayOfWeekEnum dayOfWeek) {
+        log.info("[start] AgendaApplicationApi - deleteDay");
+        agendaService.deleteDay(dayOfWeek);
+        log.debug("[finish] AgendaApplicationApi - deleteDay");
     }
 }
 

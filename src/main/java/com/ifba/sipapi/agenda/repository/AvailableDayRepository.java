@@ -10,4 +10,5 @@ import java.util.UUID;
 public interface AvailableDayRepository extends JpaRepository<AvailableDay, UUID> {
 
     Optional<AvailableDay> findAllByAvailableDay(DayOfWeekEnum availableDay);
+    void deleteByAvailableDay(DayOfWeekEnum dayOfWeek);
 }

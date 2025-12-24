@@ -126,14 +126,14 @@ public class Item extends Auditable {
     }
 
     private void validateRecoveryBelongsToItem(Recovery recovery) {
-        if (!Objects.equals(recovery.getItem(), this)) {
+        if (!Objects.equals(recovery.getItem(), this))
             throw APIException.build(HttpStatus.CONFLICT, "Item da solicitação é incompatível com o item atual");
-        }
+
     }
 
     private void validateRecoveryApproved(Recovery recovery) {
-        if (recovery.getStatus() != StatusRecovery.APPROVED) {
+        if (recovery.getStatus() != StatusRecovery.APPROVED)
             throw APIException.build(HttpStatus.BAD_REQUEST, "Solicitação ainda não foi autorizada");
-        }
+
     }
 }

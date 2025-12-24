@@ -62,15 +62,13 @@ public class ItemResponseDto {
         this.code = item.getCode();
         this.donationDate = item.getDonationDate();
 
-        if (item.getPictures() != null) {
+        if (item.getPictures() != null)
             this.pictures = item.getPictures().stream()
                     .map(p -> new PictureResponseDto(p.getId(), p.getUrl()))
                     .toList();
-        }
 
-        if (item.getOwner() != null) {
+        if (item.getOwner() != null)
             this.owner = new UserDetailsResponseDto(item.getOwner());
-        }
     }
 
 }
