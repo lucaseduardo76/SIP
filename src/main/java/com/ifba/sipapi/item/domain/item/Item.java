@@ -15,6 +15,7 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDate;
@@ -25,6 +26,7 @@ import java.util.UUID;
 
 @Getter
 @EqualsAndHashCode
+@Log4j2
 @Entity
 @Table(name = "item")
 @NoArgsConstructor
@@ -135,5 +137,10 @@ public class Item extends Auditable {
         if (recovery.getStatus() != StatusRecovery.APPROVED)
             throw APIException.build(HttpStatus.BAD_REQUEST, "Solicitação ainda não foi autorizada");
 
+    }
+
+    public void setToCharity() {
+        this.status = Status.CHARITY;
+        log.info("Item code={} set to CHARITY", this.getCode());
     }
 }

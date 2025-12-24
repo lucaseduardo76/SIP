@@ -86,7 +86,7 @@ public class ItemApplicationService implements ItemService {
     }
 
     private void checkDateIsAfterTodayAndThrowException(LocalDate findingDate) {
-        if(LocalDate.now().isBefore(findingDate))
+        if (LocalDate.now().isBefore(findingDate))
             throw APIException.build(HttpStatus.BAD_REQUEST, "A data não pode ser futura");
     }
 
@@ -252,11 +252,21 @@ public class ItemApplicationService implements ItemService {
         User user = assertEmailBelongsToAndReturnUser(token, email);
         List<Recovery> recoveryList = recoveryRepository.findAllByUser(user);
 
-        if(status != null)
+        if (status != null)
             recoveryList = recoveryList.stream().filter(r -> r.getStatus().equals(status)).toList();
 
         log.debug("[finish] ItemApplicationService - getSelfRecoveriesByUser");
         return new RecoveryResponseByUser(recoveryList, user);
+    }
+
+    @Override
+    public void refreshItemToCharity() {
+        log.info("[start] ItemApplicationService - refreshItemToCharity");
+        itemRepository.findByDonationDateLessThanEqualAndStatus(LocalDate.now(), Status.DISPONIBLE).forEach(item -> {
+            recoveryRepository.findAllByItem(item).forEach(this::rejectAndSaveRecovery);
+            item.setToCharity();
+        });
+        log.debug("[finish] ItemApplicationService - refreshItemToCharity");
     }
 
     private void applyClaimToItem(Recovery recovery) {
@@ -343,10 +353,10 @@ public class ItemApplicationService implements ItemService {
 
 
     private void validateSearchPeriod(LocalDate startPeriod, LocalDate endPeriod) {
-        if(startPeriod == null || endPeriod == null )
+        if (startPeriod == null || endPeriod == null)
             return;
 
-        if(startPeriod.isAfter(endPeriod))
+        if (startPeriod.isAfter(endPeriod))
             throw APIException.build(HttpStatus.BAD_REQUEST, "Data inicial do periodo de busca é posterior a data final, corriga e tente novamente");
     }
 
