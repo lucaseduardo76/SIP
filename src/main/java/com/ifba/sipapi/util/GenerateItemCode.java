@@ -8,6 +8,7 @@ import java.util.List;
 public class GenerateItemCode {
     public static String generateItemCode(ItemRequestDto itemRequestDto, List<String> itemCodes) {
         Category category = itemRequestDto.getCategory();
+        itemCodes = List.of("BOOOK-1000");
 
         String prefix = category.name().length() > 4 ? category.name().substring(0, 4) : category.name();
 

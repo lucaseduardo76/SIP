@@ -7,17 +7,17 @@ import com.ifba.sipapi.agenda.repository.AvailableDayRepository;
 import com.ifba.sipapi.config.handler.APIException;
 import com.ifba.sipapi.config.security.TokenService;
 import com.ifba.sipapi.item.domain.item.Category;
+import com.ifba.sipapi.item.domain.item.Item;
+import com.ifba.sipapi.item.domain.item.Status;
+import com.ifba.sipapi.item.domain.picture.Picture;
 import com.ifba.sipapi.item.domain.recoveryRequest.Recovery;
 import com.ifba.sipapi.item.domain.recoveryRequest.StatusRecovery;
-import com.ifba.sipapi.item.dto.ItemRecoveryRequestDto;
-import com.ifba.sipapi.item.domain.item.Status;
 import com.ifba.sipapi.item.dto.*;
-import com.ifba.sipapi.item.domain.item.Item;
-import com.ifba.sipapi.item.domain.picture.Picture;
 import com.ifba.sipapi.item.infra.item.ItemRepository;
 import com.ifba.sipapi.item.infra.picture.PictureRepository;
 import com.ifba.sipapi.item.infra.recovery.RecoveryRepository;
 import com.ifba.sipapi.minio.api.service.MinioClient;
+import com.ifba.sipapi.notification.application.NotificationToItemService;
 import com.ifba.sipapi.user.domain.Role;
 import com.ifba.sipapi.user.domain.User;
 import com.ifba.sipapi.user.infra.UserRepository;
@@ -31,7 +31,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -54,6 +53,7 @@ public class ItemApplicationService implements ItemService {
     private final PictureRepository pictureRepository;
     private final RecoveryRepository recoveryRepository;
     private final AvailableDayRepository availableDayRepository;
+    private final NotificationToItemService  notificationToItemService;
 
     @Value("${minio.application.max_images_item}")
     private Integer MAX_IMAGES;
@@ -79,10 +79,11 @@ public class ItemApplicationService implements ItemService {
         checkDateIsAfterTodayAndThrowException(itemRequestDto.getFinding_date());
 
         String itemCode = GenerateItemCode.generateItemCode(itemRequestDto, itemRepository.findItemCodesByCategory(itemRequestDto.getCategory()));
-        Item item = new Item(itemRequestDto, itemCode, DONATION_TIME);
-        log.debug("[finish] ItemApplicationService - createItem");
+        Item itemSaved = itemRepository.save(new Item(itemRequestDto, itemCode, DONATION_TIME));
+
+        notificationToItemService.itemCreated(itemSaved);
         log.info("itemCode={}", itemCode);
-        return new ItemCreatedResponseDto(itemRepository.save(item));
+        return new ItemCreatedResponseDto(itemSaved);
     }
 
     private void checkDateIsAfterTodayAndThrowException(LocalDate findingDate) {
@@ -167,13 +168,14 @@ public class ItemApplicationService implements ItemService {
     public void recoveryItem(ItemRecoveryRequestDto itemRecoveryRequest, String token) {
         log.info("[start] ItemApplicationService - recoveryItem");
         User user = assertEmailBelongsToAndReturnUser(token, itemRecoveryRequest.getEmail());
-        Item item = itemRepository.findById(itemRecoveryRequest.getItemId()).orElseThrow(
-                () -> APIException.build(HttpStatus.BAD_REQUEST, "Item não encontrado"));
+        Item item = itemRepository.findById(itemRecoveryRequest.getItemId()).orElseThrow(() -> APIException.build(HttpStatus.BAD_REQUEST, "Item não encontrado"));
 
         validateRecoveryRequest(user, item);
         validateAgenda(itemRecoveryRequest.getDateTime());
         Recovery recovery = new Recovery(itemRecoveryRequest, user, item);
         recoveryRepository.save(recovery);
+
+        notificationToItemService.requestCreated(item);
         log.debug("[finish] ItemApplicationService - recoveryItem");
     }
 
@@ -186,9 +188,8 @@ public class ItemApplicationService implements ItemService {
         AtomicReference<AvailableTime> availableTime = new AtomicReference<>();
 
         availableDay.getAvailableTimeList().forEach(dbTime -> {
-            if (time.isAfter(dbTime.getStartTime()) && time.isBefore(dbTime.getEndTime())) {
+            if (time.isAfter(dbTime.getStartTime()) && time.isBefore(dbTime.getEndTime()))
                 availableTime.set(dbTime);
-            }
         });
 
         if (availableTime.get() == null)
@@ -204,8 +205,12 @@ public class ItemApplicationService implements ItemService {
         recovery.processRequestAcceptance(itemRequestReviewDto.getStatusRecovery());
         recoveryRepository.save(recovery);
 
-        if (itemRequestReviewDto.getStatusRecovery().equals(StatusRecovery.APPROVED))
+        if (itemRequestReviewDto.getStatusRecovery().equals(StatusRecovery.APPROVED)) {
             applyClaimToItem(recovery);
+            notificationToItemService.sendNotificationToRequester(recovery);
+        }else {
+            notificationToItemService.recoveryRejected(recovery, false);
+        }
 
         log.debug("[finish] ItemApplicationService - recoveryReview");
     }
@@ -265,6 +270,7 @@ public class ItemApplicationService implements ItemService {
         itemRepository.findByDonationDateLessThanEqualAndStatus(LocalDate.now(), Status.DISPONIBLE).forEach(item -> {
             recoveryRepository.findAllByItem(item).forEach(this::rejectAndSaveRecovery);
             item.setToCharity();
+            notificationToItemService.newItemOnCharity(item);
         });
         log.debug("[finish] ItemApplicationService - refreshItemToCharity");
     }
@@ -285,6 +291,7 @@ public class ItemApplicationService implements ItemService {
     private void rejectAndSaveRecovery(Recovery recovery) {
         recovery.processRequestAcceptance(StatusRecovery.REFUSED);
         recoveryRepository.save(recovery);
+        notificationToItemService.recoveryRejected(recovery, true);
     }
 
     private void validateRecoveryRequest(User user, Item item) {

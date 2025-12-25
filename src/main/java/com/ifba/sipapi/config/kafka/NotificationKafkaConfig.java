@@ -1,6 +1,6 @@
 package com.ifba.sipapi.config.kafka;
 
-import com.ifba.sipapi.notification.application.UserNotificationDto;
+import com.ifba.sipapi.notification.dto.UserNotificationDto;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -61,7 +61,7 @@ public class NotificationKafkaConfig {
 
         props.put(JsonDeserializer.TRUSTED_PACKAGES, "com.ifba.sipapi.*");
         props.put(JsonDeserializer.VALUE_DEFAULT_TYPE,
-                "com.ifba.sipapi.notification.application.UserNotificationDto");
+                "com.ifba.sipapi.notification.dto.UserNotificationDto");
         props.put(JsonDeserializer.USE_TYPE_INFO_HEADERS, false);
 
         return new DefaultKafkaConsumerFactory<>(props);

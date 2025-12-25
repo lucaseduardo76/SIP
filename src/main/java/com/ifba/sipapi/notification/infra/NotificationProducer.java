@@ -1,6 +1,6 @@
 package com.ifba.sipapi.notification.infra;
 
-import com.ifba.sipapi.notification.application.UserNotificationDto;
+import com.ifba.sipapi.notification.dto.UserNotificationDto;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
