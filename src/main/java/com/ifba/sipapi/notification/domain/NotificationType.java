@@ -1,4 +1,4 @@
-package com.ifba.sipapi.notification.application;
+package com.ifba.sipapi.notification.domain;
 
 public enum NotificationType {
     NEW_REQUEST("new_request"),

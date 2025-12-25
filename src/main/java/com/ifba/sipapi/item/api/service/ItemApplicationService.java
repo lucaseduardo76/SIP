@@ -175,7 +175,7 @@ public class ItemApplicationService implements ItemService {
         Recovery recovery = new Recovery(itemRecoveryRequest, user, item);
         recoveryRepository.save(recovery);
 
-        notificationToItemService.requestCreated(item);
+        notificationToItemService.requestCreated(item, user);
         log.debug("[finish] ItemApplicationService - recoveryItem");
     }
 
