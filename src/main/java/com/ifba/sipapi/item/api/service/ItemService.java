@@ -30,4 +30,5 @@ public interface ItemService {
     RecoveryResponseByItem getRecoveriesByItem(UUID idItem);
     RecoveryResponseByUser getRecoveriesByUser(UUID idUser);
     RecoveryResponseByUser getSelfRecoveriesByUser(String token, String email, StatusRecovery status);
+    void refreshItemToCharity();
 }

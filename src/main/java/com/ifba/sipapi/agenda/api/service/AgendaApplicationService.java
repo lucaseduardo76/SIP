@@ -1,6 +1,7 @@
 package com.ifba.sipapi.agenda.api.service;
 
 import com.ifba.sipapi.agenda.domain.AvailableDay;
+import com.ifba.sipapi.agenda.domain.DayOfWeekEnum;
 import com.ifba.sipapi.agenda.dto.AgendaEditRequestDto;
 import com.ifba.sipapi.agenda.dto.AvailableDayResponse;
 import com.ifba.sipapi.agenda.repository.AvailableDayRepository;
@@ -43,11 +44,20 @@ public class AgendaApplicationService implements AgendaService {
         return availableDayRepository.findAll().stream().map(AvailableDayResponse::new).toList();
     }
 
+    @Transactional
+    @Override
+    public void deleteDay(DayOfWeekEnum dayOfWeek) {
+        log.info("[start] AgendaApplicationService - deleteDay");
+        availableDayRepository.deleteByAvailableDay(dayOfWeek);
+        cleanupOrphanTimes();
+        log.debug("[finish] AgendaApplicationService - deleteDay");
+    }
+
     private void cleanupOrphanTimes() {
         availableTimeRepository.findAll().forEach(time -> {
-            if (time.getAvailableDays() == null || time.getAvailableDays().isEmpty()) {
+            if (time.getAvailableDays() == null || time.getAvailableDays().isEmpty())
                 availableTimeRepository.delete(time);
-            }
+
         });
     }
 

@@ -1,5 +1,8 @@
 package com.ifba.sipapi.config.websocket;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ifba.sipapi.notification.dto.ContentNotificationDto;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
@@ -13,7 +16,10 @@ import java.util.function.Predicate;
 
 @Log4j2
 @Component
+@RequiredArgsConstructor
 public class WebSocketBroadcaster {
+
+    private final ObjectMapper objectMapper;
 
     private static final class SessionInfo {
         final WebSocketSession session;
@@ -44,38 +50,51 @@ public class WebSocketBroadcaster {
         log.debug("[finish] WebSocketBroadcaster - unregister");
     }
 
-    public void broadcast(String payload) {
+    public void broadcast(ContentNotificationDto payload) {
         log.info("[start] WebSocketBroadcaster - broadcast");
         sendWhere(payload, info -> true);
         log.debug("[finish] WebSocketBroadcaster - broadcast");
     }
 
-    public void broadcastToChannel(String channel, String payload) {
+    public void broadcastToChannel(String channel, ContentNotificationDto payload) {
         log.info("[start] WebSocketBroadcaster - broadcastToChannel");
         sendWhere(payload, info -> channel.equals(info.channel));
         log.debug("[finish] WebSocketBroadcaster - broadcastToChannel");
     }
 
-    public void broadcastToRoleInChannel(String role, String channel, String payload) {
+    public void broadcastToRoleInChannel(String role, String channel, ContentNotificationDto payload) {
         log.info("[start] WebSocketBroadcaster - broadcastToRoleInChannel");
         sendWhere(payload, info -> channel.equals(info.channel) && info.roles.contains(role));
         log.debug("[finish] WebSocketBroadcaster - broadcastToRoleInChannel");
     }
 
-    public void broadcastToUser(String username, String payload) {
+    public void broadcastToUser(String username, ContentNotificationDto payload) {
         log.info("[start] WebSocketBroadcaster - broadcastToUser");
         sendWhere(payload, info -> Objects.equals(info.username, username));
         log.debug("[finish] WebSocketBroadcaster - broadcastToUser");
     }
 
-    private void sendWhere(String payload, Predicate<SessionInfo> test) {
+    private void sendWhere(ContentNotificationDto payload, Predicate<SessionInfo> sessionInfoPredicate) {
         log.info("[start] WebSocketBroadcaster - sendWhere");
-        var msg = new TextMessage(payload);
-        sessions.stream().filter(test).forEach(info -> {
-            if (info.session.isOpen()) {
-                try { info.session.sendMessage(msg); } catch (java.io.IOException ignored) {}
-            }
-        });
+        try {
+            String jsonPayload = objectMapper.writeValueAsString(payload);
+            TextMessage msg = new TextMessage(jsonPayload);
+
+            sessions.stream()
+                    .filter(sessionInfoPredicate)
+                    .forEach(info -> {
+                        if (info.session.isOpen()) {
+                            try {
+                                info.session.sendMessage(msg); // envia a mensagem JSON
+                            } catch (java.io.IOException ignored) {
+                                log.info("[ignored] erro ao enviar mensagem JSON");
+                            }
+                        }
+                    });
+
+        } catch (Exception e) {
+            log.error("Erro ao serializar ContentNotificationDto para JSON", e);
+        }
         log.debug("[finish] WebSocketBroadcaster - sendWhere");
     }
 }

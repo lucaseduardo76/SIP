@@ -60,9 +60,8 @@ public class AvailableDay {
                         availableTimeSlotRequest.getEndTime().isAfter(availableTime.getStartTime())
         );
 
-        if (areThereConflicts) {
+        if (areThereConflicts)
             throw APIException.build(HttpStatus.BAD_REQUEST, "Horários conflitantes, verifique a requisição e tente novamente");
-        }
 
         availableTimeList.add(new AvailableTime(availableTimeSlotRequest));
     }
