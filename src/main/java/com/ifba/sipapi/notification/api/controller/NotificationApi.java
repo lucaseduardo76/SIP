@@ -18,8 +18,8 @@ public interface NotificationApi {
             @RequestHeader(name = "Authorization", required = true) String token
     );
 
-    //TODO CHANGE NAME
-    @NotificationAPIDocs.getNotificationByUser
+
+    @NotificationAPIDocs.readNotifications
     @PatchMapping("/read")
     @ResponseStatus(HttpStatus.OK)
     void readNotification(
