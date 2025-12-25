@@ -15,7 +15,7 @@ public @interface UserAPIDocs {
 
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
-    @Operation(summary = "Verifica a conta após Registro", description = "Metodo quando bem sucedido retorna códgio 200 e habilita a conta do usuário")
+    @Operation(summary = "Verifica a conta após Registro", description = "Metodo quando bem sucedido retorna código 200 e habilita a conta do usuário")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Verificação feita com sucesso."),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"message\": \"mensagem qualquer.\" }"))),

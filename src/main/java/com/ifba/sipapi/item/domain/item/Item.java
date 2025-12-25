@@ -7,6 +7,7 @@ import com.ifba.sipapi.item.domain.recoveryRequest.StatusRecovery;
 import com.ifba.sipapi.item.dto.ItemEditRequestDto;
 import com.ifba.sipapi.item.dto.ItemRequestDto;
 import com.ifba.sipapi.item.domain.recoveryRequest.Recovery;
+import com.ifba.sipapi.notification.domain.Notification;
 import com.ifba.sipapi.user.domain.User;
 import com.ifba.sipapi.util.HandleString;
 import com.ifba.sipapi.util.ItemHelper;
@@ -70,6 +71,9 @@ public class Item extends Auditable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id")
     private User owner;
+
+    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Notification> notifications;
 
     @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Recovery> recoveries;

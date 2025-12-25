@@ -4,6 +4,7 @@ import com.ifba.sipapi.Auditable;
 import com.ifba.sipapi.config.handler.APIException;
 import com.ifba.sipapi.item.domain.item.Item;
 import com.ifba.sipapi.item.domain.recoveryRequest.Recovery;
+import com.ifba.sipapi.notification.domain.Notification;
 import com.ifba.sipapi.user.api.authentication.service.LoginType;
 import com.ifba.sipapi.user.dto.*;
 import jakarta.persistence.*;
@@ -18,7 +19,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.*;
 
 @Getter
-@Setter
 @EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
@@ -60,8 +60,6 @@ public class User extends Auditable implements UserDetails {
     @Column(nullable = false)
     private boolean isFromGoogleAccount;
 
-
-
     private String profileImageUrl;
 
     @OneToMany(mappedBy = "owner")
@@ -69,6 +67,9 @@ public class User extends Auditable implements UserDetails {
 
     @OneToMany(mappedBy = "user")
     private List<Recovery> recoveries;
+
+    @OneToMany(mappedBy = "owner")
+    private List<Notification> notifications;
 
     public User(UserCommomRegisterDto userCommomRegisterDto) {
         this.createBasicUser(userCommomRegisterDto);
