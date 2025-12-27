@@ -21,8 +21,6 @@ public class NotificationHandler extends TextWebSocketHandler {
         var channel = (String) session.getAttributes().getOrDefault("channel", "common");
         log.info("WS connected id={} channel={}", session.getId(), channel);
         broadcaster.register(session);
-        try { session.sendMessage(new org.springframework.web.socket.TextMessage(
-                "{\"content\":\"connected to " + channel + "\"}")); } catch (Exception ignored) {}
         log.debug("[finish] NotificationHandler - afterConnectionEstablished");
     }
 

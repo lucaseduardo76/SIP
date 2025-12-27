@@ -188,7 +188,8 @@ public class ItemApplicationService implements ItemService {
         AtomicReference<AvailableTime> availableTime = new AtomicReference<>();
 
         availableDay.getAvailableTimeList().forEach(dbTime -> {
-            if (time.isAfter(dbTime.getStartTime()) && time.isBefore(dbTime.getEndTime()))
+            if ( (time.isAfter(dbTime.getStartTime()) || time.equals(dbTime.getStartTime())) &&
+                    (time.isBefore(dbTime.getEndTime())) || time.equals(dbTime.getEndTime()))
                 availableTime.set(dbTime);
         });
 
@@ -368,7 +369,7 @@ public class ItemApplicationService implements ItemService {
     }
 
     private LocalDate checkIfDonationFilterIsActive(Boolean aboutToBeDonated) {
-        return aboutToBeDonated ? LocalDate.now().plusDays(TIME_TO_DONATE) : null;
+        return aboutToBeDonated != null &&  aboutToBeDonated ? LocalDate.now().plusDays(TIME_TO_DONATE) : null;
     }
 
     private LocalDate calculateDateCloseToDonation(Boolean aboutToBeDonated) {

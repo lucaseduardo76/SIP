@@ -1,6 +1,7 @@
 package com.ifba.sipapi.notification.domain;
 
 
+import com.ifba.sipapi.Auditable;
 import com.ifba.sipapi.item.domain.item.Item;
 import com.ifba.sipapi.notification.application.KindOfuser;
 import com.ifba.sipapi.notification.dto.ContentNotificationDto;
@@ -18,7 +19,7 @@ import java.util.UUID;
 @Entity
 @ToString
 @Table(name = "notification")
-public class Notification {
+public class Notification extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -48,8 +49,11 @@ public class Notification {
         this.claimScheduledTime = claimScheduledTime;
         this.item = item;
         this.status = StatusNotification.PENDING;
-        this.claimer = claimer.getName();
         this.owner = owner;
+
+        if (claimer != null) {
+            this.claimer = claimer.getName();
+        }
 
     }
 
