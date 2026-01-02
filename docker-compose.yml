@@ -73,7 +73,7 @@ services:
     container_name: minio-init
     depends_on:
       - minio
-    entrypoint: [ "/bin/sh", "/init.sh" ]
+    entrypoint: [ "/bin/sh", "-c", "/init.sh" ]
     volumes:
       - ./init.sh:/init.sh
       - minio-data:/data
