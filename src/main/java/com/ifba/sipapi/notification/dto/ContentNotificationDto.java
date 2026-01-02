@@ -2,6 +2,7 @@ package com.ifba.sipapi.notification.dto;
 
 import com.ifba.sipapi.notification.domain.Notification;
 import com.ifba.sipapi.notification.domain.NotificationType;
+import com.ifba.sipapi.notification.domain.StatusNotification;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,6 +19,8 @@ public class ContentNotificationDto {
     private LocalDateTime claimScheduledTime;
     private String claimer;
     private String itemName;
+    private StatusNotification status;
+    private LocalDateTime createdAt;
 
     public ContentNotificationDto(Notification notification){
         this.notificationId = notification.getId();
@@ -26,5 +29,7 @@ public class ContentNotificationDto {
         this.claimScheduledTime = notification.getClaimScheduledTime();
         this.itemName = notification.getItem().getDescription();
         this.claimer = notification.getClaimer();
+        this.status = notification.getStatus();
+        this.createdAt = notification.getCreatedAt();
     }
 }

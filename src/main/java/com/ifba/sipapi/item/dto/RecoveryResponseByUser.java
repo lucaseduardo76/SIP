@@ -32,6 +32,7 @@ public class RecoveryResponseByUser {
         private final UUID id;
         private final String description;
         private final StatusRecovery status;
+        private final LocalDateTime pickupDate;
         private final LocalDateTime requestDate;
         private final ItemResponseDto item;
 
@@ -40,6 +41,7 @@ public class RecoveryResponseByUser {
             this.description = recovery.getDescription();
             this.status = recovery.getStatus();
             this.requestDate = recovery.getRequestDate();
+            this.pickupDate = recovery.getRecoveryDateTime();
             this.item = new ItemResponseDto(recovery.getItem());
         }
     }
