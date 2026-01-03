@@ -7,8 +7,12 @@ import com.ifba.sipapi.user.dto.UserPasswordUpdateDto;
 import com.ifba.sipapi.user.dto.UserUpdateDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -87,4 +91,12 @@ public class UserApplicationApi implements  UserApi{
         log.debug("[finish] UserApplicationApi - userDetails");
         return userDetailsResponse;
     };
+
+    @Override
+    public List<UserDetailsResponseDto> adminUsers(String token, String email) {
+        log.info("[start] UserApplicationApi - adminUsers");
+        List<UserDetailsResponseDto> userAdminsResponseDtos = userService.getUserAdmins(email, token);
+        log.debug("[finish] UserApplicationApi - adminUsers");
+        return userAdminsResponseDtos;
+    }
 }

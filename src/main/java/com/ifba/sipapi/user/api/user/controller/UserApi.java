@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/user")
 @Tag(name = "UserApi", description = "Controle responsavel pelas requisições do usuario.")
@@ -66,6 +68,13 @@ public interface UserApi {
             @RequestHeader(name = "Authorization", required = true) String token,
             @PathVariable String email,
             @RequestParam("profileImage") MultipartFile profileImage);
+
+    @UserAPIDocs.AdminUsers
+    @GetMapping("/root/admin-users/{email}")
+    @ResponseStatus(HttpStatus.OK)
+    List<UserDetailsResponseDto> adminUsers(
+            @RequestHeader(name = "Authorization", required = true) String token,
+            @PathVariable String email);
 
     @UserAPIDocs.UserDetails
     @GetMapping("/user-details/{email}")

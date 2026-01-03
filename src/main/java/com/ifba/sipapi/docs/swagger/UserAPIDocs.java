@@ -70,6 +70,16 @@ public @interface UserAPIDocs {
 
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
+    @Operation(summary = "Retorna os usuários admin para o ROOT", description = "Método criado para o front-end autenticado como ROOT ter acesso aos usuários admins")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Usuários retornados"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"message\": \"mensagem qualquer.\" }"))),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"description\": \"INTERNAL SERVER ERROR!\", \"message\": \"POR FAVOR INFORME AO ADMINISTRADOR DO SISTEMA!\" }")))})
+    public @interface AdminUsers {
+    }
+
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
     @Operation(summary = "Retorna os dados cadastrais do usuário", description = "Método criado para o front-end ter acesso aos dados cadastrais do usuário autenticado")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Email enviado"),

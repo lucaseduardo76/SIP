@@ -8,6 +8,7 @@ import com.ifba.sipapi.mail.domain.EmailSender;
 import com.ifba.sipapi.mail.domain.EmailType;
 import com.ifba.sipapi.mail.infra.KafkaApplicationEmailProducer;
 import com.ifba.sipapi.minio.api.service.MinioClient;
+import com.ifba.sipapi.user.domain.Role;
 import com.ifba.sipapi.user.domain.StatusMember;
 import com.ifba.sipapi.user.domain.User;
 import com.ifba.sipapi.user.dto.*;
@@ -18,6 +19,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+
 @Service
 @Log4j2
 @RequiredArgsConstructor
@@ -171,5 +175,19 @@ public class UserApplicationService implements UserService {
         log.info("[start] UserApplicationService - generatePasswordHash");
         userPasswordUpdateDto.updateHashedPassword(passwordEncoder.encode(userPasswordUpdateDto.getNewPassword()));
         log.debug("[finish] UserApplicationService - generatePasswordHash");
+    }
+
+    public List<UserDetailsResponseDto> getUserAdmins(String email, String token) {
+        log.info("[start] UserApplicationService - getUserAdmins");
+
+        assertEmailBelongsToAndReturnUser(token, email);
+
+        List<UserDetailsResponseDto> admins = userRepository.findByRole(Role.ADMIN)
+                .stream()
+                .map(UserDetailsResponseDto::new)
+                .toList();
+
+        log.info("[finish] UserApplicationService - getUserAdmins");
+        return admins;
     }
 }
