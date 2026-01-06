@@ -68,7 +68,7 @@ public class User extends Auditable implements UserDetails {
     @OneToMany(mappedBy = "user")
     private List<Recovery> recoveries;
 
-    @OneToMany(mappedBy = "owner")
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Notification> notifications;
 
     public User(UserCommomRegisterDto userCommomRegisterDto) {

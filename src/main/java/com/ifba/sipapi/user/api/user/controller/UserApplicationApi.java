@@ -57,6 +57,13 @@ public class UserApplicationApi implements  UserApi{
     }
 
     @Override
+    public void updateAdminUserByRoot(String email, UserUpdateDto userUpdateDto) {
+        log.info("[start] UserApplicationApi - updateAdminUserByRoot");
+        userService.updateUserByRoot(userUpdateDto, email);
+        log.debug("[finish] UserApplicationApi - updateAdminUserByRoot");
+    }
+
+    @Override
     public void resetPassword(UserPasswordRecoveryDto userPasswordRecoveryDto) {
         log.info("[start] UserApplicationApi - resetPassword");
         userService.resetPassword(userPasswordRecoveryDto);
@@ -85,6 +92,13 @@ public class UserApplicationApi implements  UserApi{
     }
 
     @Override
+    public void updateProfileImageByRoot(String email, MultipartFile profileImage) {
+        log.info("[start] UserApplicationApi - updateProfileImageByRoot");
+        userService.updateProfileImageByRoot(profileImage, email);
+        log.debug("[finish] UserApplicationApi - updateProfileImageByRoot");
+    }
+
+    @Override
     public UserDetailsResponseDto userDetails(String token, String email) {
         log.info("[start] UserApplicationApi - userDetails");
         UserDetailsResponseDto userDetailsResponse = userService.getUserDetails(email, token);
@@ -98,5 +112,20 @@ public class UserApplicationApi implements  UserApi{
         List<UserDetailsResponseDto> userAdminsResponseDtos = userService.getUserAdmins(email, token);
         log.debug("[finish] UserApplicationApi - adminUsers");
         return userAdminsResponseDtos;
+    }
+
+    @Override
+    public void deleteAdmin(String email) {
+        log.info("[start] UserApplicationApi - deleteAdmin");
+        userService.deleteAdmin(email);
+        log.debug("[finish] UserApplicationApi - deleteAdmin");
+    }
+
+    @Override
+    public UserDetailsResponseDto adminUserDetail(String email) {
+        log.info("[start] UserApplicationApi - adminUserDetail");
+        UserDetailsResponseDto userAdminsResponseDto = userService.getAdminDetail(email);
+        log.debug("[finish] UserApplicationApi - adminUserDetail");
+        return userAdminsResponseDto;
     }
 }

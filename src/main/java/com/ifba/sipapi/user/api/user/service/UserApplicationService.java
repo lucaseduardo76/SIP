@@ -13,6 +13,7 @@ import com.ifba.sipapi.user.domain.StatusMember;
 import com.ifba.sipapi.user.domain.User;
 import com.ifba.sipapi.user.dto.*;
 import com.ifba.sipapi.user.infra.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
@@ -118,6 +119,16 @@ public class UserApplicationService implements UserService {
     }
 
     @Override
+    public void updateUserByRoot(UserUpdateDto userUpdateDto, String email) {
+        log.info("[start] UserApplicationService - updateUserRoot");
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
+        user.updateUser(userUpdateDto);
+        userRepository.save(user);
+        log.debug("[finish] UserApplicationService - updateUserRoot");
+    }
+
+    @Override
     public void updatePassword(String email, UserPasswordUpdateDto userPasswordUpdateDto, String token) {
         log.info("[start] UserApplicationService - updatePassword");
         User user = assertEmailBelongsToAndReturnUser(token, email);
@@ -134,6 +145,26 @@ public class UserApplicationService implements UserService {
         user.updateProfileImage(minioClient.uploadUserProfileImage(profileImage, user));
         userRepository.save(user);
         log.debug("[finish] UserApplicationService - updateProfileImage");
+    }
+
+    @Override
+    public void updateProfileImageByRoot(MultipartFile profileImage, String email) {
+        log.info("[start] UserApplicationService - updateProfileImageByRoot");
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
+        user.updateProfileImage(minioClient.uploadUserProfileImage(profileImage, user));
+        userRepository.save(user);
+        log.debug("[finish] UserApplicationService - updateProfileImageByRoot");
+    }
+
+    @Override
+    @Transactional
+    public void deleteAdmin(String email) {
+        log.info("[start] UserApplicationService - deleteAdmin");
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
+        userRepository.delete(user);
+        log.debug("[finish] UserApplicationService - deleteAdmin");
     }
 
     @Override
@@ -190,4 +221,15 @@ public class UserApplicationService implements UserService {
         log.info("[finish] UserApplicationService - getUserAdmins");
         return admins;
     }
+
+    public UserDetailsResponseDto getAdminDetail(String email) {
+        log.info("[start] UserApplicationService - getAdminDetail email={}", email);
+        if (email == null || email.isBlank())
+            throw APIException.build(HttpStatus.BAD_REQUEST, "Email é obrigatório");
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
+        log.info("[finish] UserApplicationService - getAdminDetail email={}", email);
+        return new UserDetailsResponseDto(user);
+    }
+
 }

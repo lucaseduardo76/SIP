@@ -53,6 +53,13 @@ public interface UserApi {
             @PathVariable String email,
             @RequestBody @Valid UserUpdateDto userUpdateDto);
 
+    @UserAPIDocs.Update
+    @PutMapping("/root/update/{email}")
+    @ResponseStatus(HttpStatus.OK)
+    void updateAdminUserByRoot(
+            @PathVariable String email,
+            @RequestBody @Valid UserUpdateDto userUpdateDto);
+
     @UserAPIDocs.UpdatePassword
     @PatchMapping("/update-password/{email}")
     @ResponseStatus(HttpStatus.OK)
@@ -69,11 +76,30 @@ public interface UserApi {
             @PathVariable String email,
             @RequestParam("profileImage") MultipartFile profileImage);
 
+    @UserAPIDocs.UpdateProfileImageByRoot
+    @PatchMapping("/root/update-profile/{email}")
+    @ResponseStatus(HttpStatus.OK)
+    void updateProfileImageByRoot(
+            @PathVariable String email,
+            @RequestParam("profileImage") MultipartFile profileImage);
+
     @UserAPIDocs.AdminUsers
     @GetMapping("/root/admin-users/{email}")
     @ResponseStatus(HttpStatus.OK)
     List<UserDetailsResponseDto> adminUsers(
             @RequestHeader(name = "Authorization", required = true) String token,
+            @PathVariable String email);
+
+    @UserAPIDocs.DeleteAdmin
+    @DeleteMapping("/root/delete-admin/{email}")
+    @ResponseStatus(HttpStatus.OK)
+    void deleteAdmin(
+            @PathVariable String email);
+
+    @UserAPIDocs.AdminDetail
+    @GetMapping("/root/admin-detail/{email}")
+    @ResponseStatus(HttpStatus.OK)
+    UserDetailsResponseDto adminUserDetail(
             @PathVariable String email);
 
     @UserAPIDocs.UserDetails

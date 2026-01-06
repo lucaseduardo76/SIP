@@ -25,4 +25,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     long countByRole(Role role);
 
     List<User> findByRole(Role role);
+
+    @Transactional
+    void deleteById(UUID id);
 }
