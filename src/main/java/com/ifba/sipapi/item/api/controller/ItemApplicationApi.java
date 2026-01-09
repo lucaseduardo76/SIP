@@ -1,16 +1,15 @@
 package com.ifba.sipapi.item.api.controller;
 
-import com.ifba.sipapi.item.domain.recoveryRequest.StatusRecovery;
-import com.ifba.sipapi.item.dto.ItemRecoveryRequestDto;
-import com.ifba.sipapi.item.dto.*;
 import com.ifba.sipapi.item.api.service.ItemService;
+import com.ifba.sipapi.item.domain.item.Category;
+import com.ifba.sipapi.item.domain.recoveryRequest.StatusRecovery;
+import com.ifba.sipapi.item.dto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
 
 import java.util.List;
 import java.util.UUID;
@@ -49,9 +48,9 @@ public class ItemApplicationApi implements ItemApi {
     }
 
     @Override
-    public Page<RecoveryResponseByUser> getAllSelfUserRecoveries(String token, Pageable pageable, String email, StatusRecovery status) {
+    public Page<RecoveryResponseByUser> getAllSelfUserRecoveries(String token, Pageable pageable, Category category,  String email, StatusRecovery status) {
         log.info("[start] ItemApplicationApi - getAllSelfUserRecoveries");
-        Page<RecoveryResponseByUser> recoveryResponse = itemService.getSelfRecoveriesByUser(token, pageable, email, status);
+        Page<RecoveryResponseByUser> recoveryResponse = itemService.getSelfRecoveriesByUser(token, category, pageable, email, status);
         log.debug("[finish] ItemApplicationApi - getAllSelfUserRecoveries");
         return recoveryResponse;
     }

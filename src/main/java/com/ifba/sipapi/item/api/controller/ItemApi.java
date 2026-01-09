@@ -2,6 +2,7 @@ package com.ifba.sipapi.item.api.controller;
 
 
 import com.ifba.sipapi.docs.swagger.ItemsAPIDocs;
+import com.ifba.sipapi.item.domain.item.Category;
 import com.ifba.sipapi.item.domain.recoveryRequest.StatusRecovery;
 import com.ifba.sipapi.item.dto.ItemRecoveryRequestDto;
 import com.ifba.sipapi.item.dto.*;
@@ -115,6 +116,7 @@ public interface ItemApi {
     @ResponseStatus(HttpStatus.OK)
     Page<RecoveryResponseByUser> getAllSelfUserRecoveries(@RequestHeader(name = "Authorization", required = true) String token,
                                                     Pageable pageable,
+                                                    @RequestParam(required = false) Category category,
                                                     @RequestParam String email,
                                                     @RequestParam(required = false) StatusRecovery status);
 }
