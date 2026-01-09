@@ -64,7 +64,7 @@ public interface ItemApi {
     );
 
     @ItemsAPIDocs.DeleteItem
-    @DeleteMapping(value = "/admin/delete/{itemId}")
+    @DeleteMapping(value = "/root/delete/{itemId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void deleteItem(
             @PathVariable UUID itemId
