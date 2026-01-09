@@ -1,7 +1,6 @@
 package com.ifba.sipapi.user.api.authentication.service;
 
 import com.ifba.sipapi.config.handler.APIException;
-import com.ifba.sipapi.config.security.GoogleTokenVerifier;
 import com.ifba.sipapi.config.security.TokenService;
 import com.ifba.sipapi.mail.domain.EmailSender;
 import com.ifba.sipapi.mail.domain.EmailType;
@@ -10,7 +9,10 @@ import com.ifba.sipapi.user.api.authentication.controller.AuthenticationResponse
 import com.ifba.sipapi.user.api.authentication.controller.TokenType;
 import com.ifba.sipapi.user.domain.StatusMember;
 import com.ifba.sipapi.user.domain.User;
-import com.ifba.sipapi.user.dto.*;
+import com.ifba.sipapi.user.dto.UserAdminRegisterDto;
+import com.ifba.sipapi.user.dto.UserCommomRegisterDto;
+import com.ifba.sipapi.user.dto.UserLoginDto;
+import com.ifba.sipapi.user.dto.UserRegisterDto;
 import com.ifba.sipapi.user.infra.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -22,7 +24,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -33,7 +34,6 @@ public class AuthenticationApplicationService implements AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final KafkaApplicationEmailProducer kafkaApplicationEmailProducer;
     private final TokenService tokenService;
-    private final GoogleTokenVerifier googleTokenVerifier;
 
     @Value("${security.token.jwt.expiration}")
     private Long expiration;
@@ -55,24 +55,6 @@ public class AuthenticationApplicationService implements AuthenticationService {
         User user = userRepository.save(new User(userAdminRegisterDto));
         sendEmail(user.getEmail(), EmailType.VERIFICATION);
         log.debug("[finish] AuthenticationApplicationService - createNewAdminUser");
-    }
-
-    @Override
-    public AuthenticationResponseDto googleAuthentication(Map<String, String> payload) {
-        log.info("[start] AuthenticationApplicationService - googleAuthentication");
-        String googleToken = payload.get("token");
-
-        GoogleUserDto googleUserDto = googleTokenVerifier.verify(googleToken);
-        if (googleUserDto == null)
-            throw APIException.build(HttpStatus.UNAUTHORIZED, "Token invalido");
-
-        var user = userRepository.findByEmail(googleUserDto.getEmail())
-                .orElseGet(() -> userRepository.save(new User(googleUserDto)));
-
-        String token = tokenService.generateTokenUser(user);
-
-        log.debug("[finish] AuthenticationApplicationService - googleAuthentication");
-        return new AuthenticationResponseDto(TokenType.BEARER, LocalDateTime.now().plusHours(expiration), token);
     }
 
     private void verifyUserInternal(UserRegisterDto userRegisterDto) {

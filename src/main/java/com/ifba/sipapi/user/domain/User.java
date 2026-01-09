@@ -33,7 +33,7 @@ public class User extends Auditable implements UserDetails {
     @Column(nullable = false)
     private String name;
 
-    @Column(unique = true)
+    @Column(nullable = false, unique = true)
     private String cpf;
 
     @Column(nullable = false, unique = true)
@@ -56,9 +56,6 @@ public class User extends Auditable implements UserDetails {
 
     @Column(nullable = false)
     private String accountCode;
-
-    @Column(nullable = false)
-    private boolean isFromGoogleAccount;
 
     private String profileImageUrl;
 
@@ -87,18 +84,6 @@ public class User extends Auditable implements UserDetails {
         this.role = Role.ADMIN;
     }
 
-    public User (GoogleUserDto googleUser) {
-        this.createBasicUser(googleUser);
-        this.profileImageUrl = googleUser.getPicture() != null ? googleUser.getPicture() : "";
-        this.isFromGoogleAccount = true;
-        this.role = Role.COMMON;
-
-        if(googleUser.isEmailVerified())
-            this.statusMember = StatusMember.ACTIVE;
-        else
-            this.statusMember = StatusMember.NOT_VERIFIED;
-    }
-
     private void createBasicUser(UserRegisterDto dto) {
         this.name = dto.getName();
         this.cpf = dto.getCpf();
@@ -107,7 +92,6 @@ public class User extends Auditable implements UserDetails {
         this.phone = dto.getPhone();
         this.failedLoginAttempts = 0;
         this.accountCode = GenerateNumber.generateCode();
-        this.isFromGoogleAccount = false;
         this.statusMember = StatusMember.NOT_VERIFIED;
         this.profileImageUrl = "";
     }
@@ -152,15 +136,13 @@ public class User extends Auditable implements UserDetails {
     }
 
     public void checkLoginType(LoginType loginType) {
-        if (loginType == LoginType.FAILED) {
+        if (loginType == LoginType.FAILED)
             incrementFailedLoginAttempts();
-        } else {
+         else
             resetFailedLoginAttempts();
-        }
 
-        if (hasExceededLoginAttempts()) {
+        if (hasExceededLoginAttempts())
             blockUser();
-        }
     }
 
     public void handleAccountVerification(String verificationCode) {
@@ -241,6 +223,4 @@ public class User extends Auditable implements UserDetails {
     private void blockUser() {
         this.statusMember = StatusMember.BLOCKED;
     }
-
-
 }
