@@ -113,8 +113,8 @@ public interface ItemApi {
     @ItemsAPIDocs.GetAllSelfUserRecoveries
     @GetMapping(value = "/recovery-self")
     @ResponseStatus(HttpStatus.OK)
-    RecoveryResponseByUser getAllSelfUserRecoveries(@RequestHeader(name = "Authorization", required = true) String token,
+    Page<RecoveryResponseByUser> getAllSelfUserRecoveries(@RequestHeader(name = "Authorization", required = true) String token,
+                                                    Pageable pageable,
                                                     @RequestParam String email,
-                                                    @RequestParam(required = false) StatusRecovery status
-    );
+                                                    @RequestParam(required = false) StatusRecovery status);
 }
