@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -228,7 +229,6 @@ public class ItemApplicationService implements ItemService {
         else
             recoveryPage = recoveryRepository.findAllByStatus(statusRecovery, pageable);
 
-
         Page<RecoveryResponse> recoveryResponsePage = recoveryPage.map(RecoveryResponse::new);
 
         log.debug("[finish] ItemApplicationService - getAllRecoveries");
@@ -254,19 +254,22 @@ public class ItemApplicationService implements ItemService {
     }
 
     @Override
-    public Page<RecoveryResponseByUser> getSelfRecoveriesByUser(String token, Pageable pageable, String email, StatusRecovery status) {
+    public Page<RecoveryResponseByUser> getSelfRecoveriesByUser(String token, Category category, Pageable pageable, String email, StatusRecovery status) {
         log.info("[start] ItemApplicationService - getSelfRecoveriesByUser");
         User user = assertEmailBelongsToAndReturnUser(token, email);
-        Page<Recovery> recoveryPage;
+        List<Recovery> recoveryPage;
 
         if (status != null)
-            recoveryPage = recoveryRepository.findAllByUserAndStatus(user, status, pageable);
+            recoveryPage = recoveryRepository.findAllByUserAndStatus(user, status);
         else
-            recoveryPage = recoveryRepository.findAllByUser(user, pageable);
+            recoveryPage = recoveryRepository.findAllByUser(user);
 
-        RecoveryResponseByUser response = new RecoveryResponseByUser(recoveryPage.getContent(), user);
+        if(category != null)
+            recoveryPage = recoveryPage.stream().filter(r -> r.getItem().getCategory().equals(category)).collect(Collectors.toList());
+
+        RecoveryResponseByUser response = new RecoveryResponseByUser(recoveryPage, user);
         log.debug("[finish] ItemApplicationService - getSelfRecoveriesByUser");
-        return new PageImpl<>(List.of(response), pageable, recoveryPage.getTotalElements());
+        return new PageImpl<>(List.of(response), pageable, recoveryPage.size());
     }
 
     @Override

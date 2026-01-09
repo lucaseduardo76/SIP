@@ -13,10 +13,9 @@ import java.util.UUID;
 
 public interface RecoveryRepository extends JpaRepository<Recovery, UUID> {
     List<Recovery> findAllByItem(Item item);
-    Page<Recovery>findAllByUser(User user, Pageable pageable);
     List<Recovery>findAllByUser(User user);
     long countByUserAndStatus(User user, StatusRecovery statusRecovery);
     boolean existsByUserAndItemAndStatusNot(User user, Item item, StatusRecovery statusRecovery);
     Page<Recovery> findAllByStatus(StatusRecovery status, Pageable pageable);
-    Page<Recovery> findAllByUserAndStatus(User user, StatusRecovery status, Pageable pageable);
+    List<Recovery> findAllByUserAndStatus(User user, StatusRecovery status);
 }

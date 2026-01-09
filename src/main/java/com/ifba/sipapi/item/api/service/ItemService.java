@@ -2,6 +2,7 @@ package com.ifba.sipapi.item.api.service;
 
 
 
+import com.ifba.sipapi.item.domain.item.Category;
 import com.ifba.sipapi.item.domain.recoveryRequest.StatusRecovery;
 import com.ifba.sipapi.item.dto.ItemRecoveryRequestDto;
 import com.ifba.sipapi.item.dto.*;
@@ -29,6 +30,6 @@ public interface ItemService {
     Page<RecoveryResponse> getAllRecoveries(Pageable pageable, StatusRecovery statusRecovery);
     RecoveryResponseByItem getRecoveriesByItem(UUID idItem);
     RecoveryResponseByUser getRecoveriesByUser(UUID idUser);
-    Page<RecoveryResponseByUser> getSelfRecoveriesByUser(String token, Pageable pageable, String email, StatusRecovery status);
+    Page<RecoveryResponseByUser> getSelfRecoveriesByUser(String token, Category category, Pageable pageable, String email, StatusRecovery status);
     void refreshItemToCharity();
 }
