@@ -35,8 +35,4 @@ public interface AuthenticationApi {
     @GetMapping("/token-teste")
     @ResponseStatus(code = HttpStatus.OK)
     Map<String, String> tokenTeste();
-
-    @AuthenticationAPIDocs.Login
-    @PostMapping("/google")
-    AuthenticationResponseDto authenticateWithGoogle(@RequestBody Map<String, String> payload);
 }

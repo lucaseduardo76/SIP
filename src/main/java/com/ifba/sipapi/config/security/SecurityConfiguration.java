@@ -40,18 +40,13 @@ public class SecurityConfiguration {
                                 "swagger-ui.html",
                                 "v3/api-docs/swagger-config",
                                 "v3/api-docs",
-                                "user/account/**",
-                                "oauth2/**"
+                                "user/account/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.POST, "authentication/register-admin").hasRole("ROOT")
                         .requestMatchers(HttpMethod.POST, "items/admin/**").hasRole("ADMIN")
                         .requestMatchers("user/root/**").hasRole("ROOT")
                         .requestMatchers(HttpMethod.POST, "authentication/**").permitAll()
                         .anyRequest().authenticated()
-                )
-                .oauth2Login(oauth2 -> oauth2
-                        .defaultSuccessUrl("/authentication/oauth2/success", true)
-                        .failureUrl("/authentication/oauth2/failure")
                 )
                 .addFilterBefore(wsFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)

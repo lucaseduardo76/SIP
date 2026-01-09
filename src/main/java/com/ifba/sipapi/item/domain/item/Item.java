@@ -91,7 +91,7 @@ public class Item extends Auditable {
 
     public void update(ItemEditRequestDto itemEditRequestDto) {
         this.area = itemEditRequestDto.getArea() != null ? itemEditRequestDto.getArea() : this.area;
-        this.description = HandleString.capitalize(ItemHelper.getOrDefault(itemEditRequestDto.getDescription(), this.description));
+        this.description = HandleString.capitalize(ItemHelper.getNewDescriptionOrDefault(itemEditRequestDto.getDescription(), this.description));
         this.category = itemEditRequestDto.getCategory() != null ? itemEditRequestDto.getCategory() : this.category;
     }
 

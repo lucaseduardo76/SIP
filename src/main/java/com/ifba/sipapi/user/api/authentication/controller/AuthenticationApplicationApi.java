@@ -6,7 +6,6 @@ import com.ifba.sipapi.user.dto.UserCommomRegisterDto;
 import com.ifba.sipapi.user.dto.UserLoginDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
@@ -39,14 +38,6 @@ public class AuthenticationApplicationApi implements AuthenticationApi {
         String message = "Token valido!";
         log.debug("[finish] AuthenticationAPI - tokenTeste");
         return Map.of("message", message);
-    }
-
-    @Override
-    public AuthenticationResponseDto authenticateWithGoogle(@RequestBody Map<String, String> payload) {
-        log.info("[start] AuthenticationApplicationApi - authenticateWithGoogle");
-        AuthenticationResponseDto authenticationResponseDto = authenticationService.googleAuthentication(payload);
-        log.debug("[finish] AuthenticationApplicationApi - authenticateWithGoogle");
-        return authenticationResponseDto;
     }
 
     @Override
