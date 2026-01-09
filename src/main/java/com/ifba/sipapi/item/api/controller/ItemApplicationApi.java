@@ -49,9 +49,9 @@ public class ItemApplicationApi implements ItemApi {
     }
 
     @Override
-    public RecoveryResponseByUser getAllSelfUserRecoveries(String token, String email, StatusRecovery status) {
+    public Page<RecoveryResponseByUser> getAllSelfUserRecoveries(String token, Pageable pageable, String email, StatusRecovery status) {
         log.info("[start] ItemApplicationApi - getAllSelfUserRecoveries");
-        RecoveryResponseByUser recoveryResponse = itemService.getSelfRecoveriesByUser(token, email, status);
+        Page<RecoveryResponseByUser> recoveryResponse = itemService.getSelfRecoveriesByUser(token, pageable, email, status);
         log.debug("[finish] ItemApplicationApi - getAllSelfUserRecoveries");
         return recoveryResponse;
     }

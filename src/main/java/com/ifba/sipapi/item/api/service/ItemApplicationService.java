@@ -27,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -253,16 +254,19 @@ public class ItemApplicationService implements ItemService {
     }
 
     @Override
-    public RecoveryResponseByUser getSelfRecoveriesByUser(String token, String email, StatusRecovery status) {
+    public Page<RecoveryResponseByUser> getSelfRecoveriesByUser(String token, Pageable pageable, String email, StatusRecovery status) {
         log.info("[start] ItemApplicationService - getSelfRecoveriesByUser");
         User user = assertEmailBelongsToAndReturnUser(token, email);
-        List<Recovery> recoveryList = recoveryRepository.findAllByUser(user);
+        Page<Recovery> recoveryPage;
 
         if (status != null)
-            recoveryList = recoveryList.stream().filter(r -> r.getStatus().equals(status)).toList();
+            recoveryPage = recoveryRepository.findAllByUserAndStatus(user, status, pageable);
+        else
+            recoveryPage = recoveryRepository.findAllByUser(user, pageable);
 
+        RecoveryResponseByUser response = new RecoveryResponseByUser(recoveryPage.getContent(), user);
         log.debug("[finish] ItemApplicationService - getSelfRecoveriesByUser");
-        return new RecoveryResponseByUser(recoveryList, user);
+        return new PageImpl<>(List.of(response), pageable, recoveryPage.getTotalElements());
     }
 
     @Override

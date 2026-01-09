@@ -15,16 +15,12 @@ import java.util.UUID;
 @Getter
 public class RecoveryResponseByUser {
 
-
-    private final UserDetailsResponseDto user;
     private final List<RecoveryResp> recovery;
 
     public RecoveryResponseByUser(List<Recovery> recovery, User user) {
         this.recovery = recovery.stream().map(RecoveryResp::new).toList();
         if(!this.recovery.isEmpty() && !recovery.get(0).getUser().equals(user))
             throw APIException.build(HttpStatus.CONFLICT, "Usuarios não são iguais, procure suporte");
-
-        this.user = new UserDetailsResponseDto(user);
     }
 
     @Getter
