@@ -70,12 +70,42 @@ public @interface UserAPIDocs {
 
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
+    @Operation(summary = "Retorna os usuários admin para o ROOT", description = "Método criado para o front-end autenticado como ROOT ter acesso aos usuários admins")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Usuários retornados"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"message\": \"mensagem qualquer.\" }"))),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"description\": \"INTERNAL SERVER ERROR!\", \"message\": \"POR FAVOR INFORME AO ADMINISTRADOR DO SISTEMA!\" }")))})
+    public @interface AdminUsers {
+    }
+
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
     @Operation(summary = "Retorna os dados cadastrais do usuário", description = "Método criado para o front-end ter acesso aos dados cadastrais do usuário autenticado")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Email enviado"),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"message\": \"mensagem qualquer.\" }"))),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"description\": \"INTERNAL SERVER ERROR!\", \"message\": \"POR FAVOR INFORME AO ADMINISTRADOR DO SISTEMA!\" }")))})
     public @interface UserDetails {
+    }
+
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @Operation(summary = "Retorna os dados cadastrais do usuário ADMIN", description = "Método criado para o front-end ter acesso aos dados cadastrais do usuário ADMIN para o usuário ROOT autenticado")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Email enviado"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"message\": \"mensagem qualquer.\" }"))),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"description\": \"INTERNAL SERVER ERROR!\", \"message\": \"POR FAVOR INFORME AO ADMINISTRADOR DO SISTEMA!\" }")))})
+    public @interface AdminDetail {
+    }
+
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @Operation(summary = "Retorna os dados cadastrais do usuário ADMIN", description = "Método criado para o front-end ter acesso aos dados cadastrais do usuário ADMIN para o usuário ROOT autenticado")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Email enviado"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"message\": \"mensagem qualquer.\" }"))),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"description\": \"INTERNAL SERVER ERROR!\", \"message\": \"POR FAVOR INFORME AO ADMINISTRADOR DO SISTEMA!\" }")))})
+    public @interface DeleteAdmin {
     }
 
     @Target(ElementType.METHOD)
@@ -88,4 +118,16 @@ public @interface UserAPIDocs {
 
     public @interface UpdateProfileImage {
     }
+
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @Operation(summary = "Edita Foto de Perfil de ADMIN pelo ROOT", description = "Metodo criado para editar foto de perfil do ADMIN pelo ROOT")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Foto alterada"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"message\": \"mensagem qualquer.\" }"))),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{ \"description\": \"INTERNAL SERVER ERROR!\", \"message\": \"POR FAVOR INFORME AO ADMINISTRADOR DO SISTEMA!\" }")))})
+
+    public @interface UpdateProfileImageByRoot {
+    }
+
 }

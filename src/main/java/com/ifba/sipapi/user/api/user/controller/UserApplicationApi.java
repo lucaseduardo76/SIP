@@ -7,8 +7,12 @@ import com.ifba.sipapi.user.dto.UserPasswordUpdateDto;
 import com.ifba.sipapi.user.dto.UserUpdateDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -53,6 +57,13 @@ public class UserApplicationApi implements  UserApi{
     }
 
     @Override
+    public void updateAdminUserByRoot(String email, UserUpdateDto userUpdateDto) {
+        log.info("[start] UserApplicationApi - updateAdminUserByRoot");
+        userService.updateUserByRoot(userUpdateDto, email);
+        log.debug("[finish] UserApplicationApi - updateAdminUserByRoot");
+    }
+
+    @Override
     public void resetPassword(UserPasswordRecoveryDto userPasswordRecoveryDto) {
         log.info("[start] UserApplicationApi - resetPassword");
         userService.resetPassword(userPasswordRecoveryDto);
@@ -81,10 +92,40 @@ public class UserApplicationApi implements  UserApi{
     }
 
     @Override
+    public void updateProfileImageByRoot(String email, MultipartFile profileImage) {
+        log.info("[start] UserApplicationApi - updateProfileImageByRoot");
+        userService.updateProfileImageByRoot(profileImage, email);
+        log.debug("[finish] UserApplicationApi - updateProfileImageByRoot");
+    }
+
+    @Override
     public UserDetailsResponseDto userDetails(String token, String email) {
         log.info("[start] UserApplicationApi - userDetails");
         UserDetailsResponseDto userDetailsResponse = userService.getUserDetails(email, token);
         log.debug("[finish] UserApplicationApi - userDetails");
         return userDetailsResponse;
     };
+
+    @Override
+    public List<UserDetailsResponseDto> adminUsers(String token, String email) {
+        log.info("[start] UserApplicationApi - adminUsers");
+        List<UserDetailsResponseDto> userAdminsResponseDtos = userService.getUserAdmins(email, token);
+        log.debug("[finish] UserApplicationApi - adminUsers");
+        return userAdminsResponseDtos;
+    }
+
+    @Override
+    public void deleteAdmin(String email) {
+        log.info("[start] UserApplicationApi - deleteAdmin");
+        userService.deleteAdmin(email);
+        log.debug("[finish] UserApplicationApi - deleteAdmin");
+    }
+
+    @Override
+    public UserDetailsResponseDto adminUserDetail(String email) {
+        log.info("[start] UserApplicationApi - adminUserDetail");
+        UserDetailsResponseDto userAdminsResponseDto = userService.getAdminDetail(email);
+        log.debug("[finish] UserApplicationApi - adminUserDetail");
+        return userAdminsResponseDto;
+    }
 }
