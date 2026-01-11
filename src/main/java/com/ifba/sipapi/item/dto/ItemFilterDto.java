@@ -13,10 +13,6 @@ import java.util.List;
 @AllArgsConstructor
 public class ItemFilterDto {
 
-    @Schema(description = "Quantidade de dias para filtrar itens criados recentemente",
-            example = "7")
-    private Long lastDays;
-
     @Schema(description = "Categorias para filtrar os itens",
             example = "BOOK")
     private List<Category> category;
@@ -42,6 +38,6 @@ public class ItemFilterDto {
     private Status status;
 
     public boolean isEmpty() {
-        return lastDays == null && category == null && aboutToBeDonated == null && startPeriod == null && endPeriod == null && itemName == null && status == null;
+        return category == null && aboutToBeDonated == null && startPeriod == null && endPeriod == null && itemName == null && status == null;
     }
 }

@@ -40,7 +40,6 @@ public class Item extends Auditable {
     @Column(nullable = false)
     private String description;
 
-
     @Column(nullable = false)
     private LocalDate findingAt;
 

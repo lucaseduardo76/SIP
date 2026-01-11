@@ -116,7 +116,5 @@ public interface ItemApi {
     @ResponseStatus(HttpStatus.OK)
     Page<RecoveryResponseByUser> getAllSelfUserRecoveries(@RequestHeader(name = "Authorization", required = true) String token,
                                                     Pageable pageable,
-                                                    @RequestParam(required = false) Category category,
-                                                    @RequestParam String email,
-                                                    @RequestParam(required = false) StatusRecovery status);
+                                                    @ModelAttribute RecoveryFilterDto recoveryFilterDto);
 }
