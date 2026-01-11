@@ -4,6 +4,7 @@ import com.ifba.sipapi.item.domain.recoveryRequest.Recovery;
 import com.ifba.sipapi.item.domain.recoveryRequest.StatusRecovery;
 import com.ifba.sipapi.user.dto.UserDetailsResponseDto;
 import lombok.Getter;
+import org.springframework.cglib.core.Local;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -15,6 +16,7 @@ public class RecoveryResponse {
     private final String description;
     private final StatusRecovery status;
     private final LocalDateTime requestDate;
+    private final LocalDateTime pickupDate;
     private final ItemResponseDto item;
     private final UserDetailsResponseDto user;
 
@@ -23,6 +25,7 @@ public class RecoveryResponse {
         this.description = recovery.getDescription();
         this.status = recovery.getStatus();
         this.requestDate = recovery.getRequestDate();
+        this.pickupDate = recovery.getRecoveryDateTime();
         this.item = new ItemResponseDto(recovery.getItem());
         this.user = new UserDetailsResponseDto(recovery.getUser());
     }
