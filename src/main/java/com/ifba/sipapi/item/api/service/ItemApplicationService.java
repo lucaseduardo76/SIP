@@ -254,23 +254,43 @@ public class ItemApplicationService implements ItemService {
     }
 
     @Override
-    public Page<RecoveryResponseByUser> getSelfRecoveriesByUser(String token, Category category, Pageable pageable, String email, StatusRecovery status) {
+    public Page<RecoveryResponseByUser> getSelfRecoveriesByUser(
+            String token,
+            Pageable pageable,
+            RecoveryFilterDto recoveryFilterDto
+    ) {
         log.info("[start] ItemApplicationService - getSelfRecoveriesByUser");
-        User user = assertEmailBelongsToAndReturnUser(token, email);
-        List<Recovery> recoveryPage;
-
-        if (status != null)
-            recoveryPage = recoveryRepository.findAllByUserAndStatus(user, status);
-        else
-            recoveryPage = recoveryRepository.findAllByUser(user);
-
-        if(category != null)
-            recoveryPage = recoveryPage.stream().filter(r -> r.getItem().getCategory().equals(category)).collect(Collectors.toList());
-
-        RecoveryResponseByUser response = new RecoveryResponseByUser(recoveryPage, user);
+        User user = assertEmailBelongsToAndReturnUser(token, recoveryFilterDto.getEmail());
+        validateSearchPeriod(recoveryFilterDto.getStartDate(), recoveryFilterDto.getEndDate());
+        List<Category> categories =
+                (recoveryFilterDto.getCategory() != null && !recoveryFilterDto.getCategory().isEmpty())
+                        ? recoveryFilterDto.getCategory()
+                        : null;
+        StatusRecovery status = recoveryFilterDto.getStatus();
+        LocalDateTime startDateTime = recoveryFilterDto.getStartDate() != null
+                ? recoveryFilterDto.getStartDate().atStartOfDay()
+                : null;
+        LocalDateTime endDateTime = recoveryFilterDto.getEndDate() != null
+                ? recoveryFilterDto.getEndDate().atTime(23, 59, 59, 999_999_999)
+                : null;
+        String itemNamePattern =
+                (recoveryFilterDto.getItemName() != null && !recoveryFilterDto.getItemName().isBlank())
+                        ? "%" + recoveryFilterDto.getItemName().trim() + "%"
+                        : null;
+        Page<Recovery> page = recoveryRepository.findSelfRecoveriesByFilter(
+                user,
+                status,
+                categories,
+                startDateTime,
+                endDateTime,
+                itemNamePattern,
+                pageable
+        );
+        RecoveryResponseByUser response = new RecoveryResponseByUser(page.getContent(), user);
         log.debug("[finish] ItemApplicationService - getSelfRecoveriesByUser");
-        return new PageImpl<>(List.of(response), pageable, recoveryPage.size());
+        return new PageImpl<>(List.of(response), pageable, page.getTotalElements());
     }
+
 
     @Override
     public void refreshItemToCharity() {

@@ -30,6 +30,6 @@ public interface ItemService {
     Page<RecoveryResponse> getAllRecoveries(Pageable pageable, StatusRecovery statusRecovery);
     RecoveryResponseByItem getRecoveriesByItem(UUID idItem);
     RecoveryResponseByUser getRecoveriesByUser(UUID idUser);
-    Page<RecoveryResponseByUser> getSelfRecoveriesByUser(String token, Category category, Pageable pageable, String email, StatusRecovery status);
+    Page<RecoveryResponseByUser> getSelfRecoveriesByUser(String token, Pageable pageable, RecoveryFilterDto recoveryFilterDto);
     void refreshItemToCharity();
 }
