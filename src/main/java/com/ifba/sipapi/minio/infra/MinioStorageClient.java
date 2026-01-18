@@ -120,7 +120,7 @@ public class MinioStorageClient implements MinioClient {
     }
 
     private String buildPublicImageUrl(String filename, String bucket) {
-        return String.format("%s/%s/%s", minioEndpoint, bucket, filename);
+        return String.format("/%s/%s", bucket, filename);
     }
 
     private void validateIsImage(MultipartFile file) {
@@ -134,14 +134,12 @@ public class MinioStorageClient implements MinioClient {
 
     private void validateExtension(MultipartFile file) {
         String originalFilename = file.getOriginalFilename();
-        if (originalFilename == null) {
+        if (originalFilename == null)
             throw APIException.build(HttpStatus.BAD_REQUEST, "Arquivo inválido.");
-        }
 
         String lowerName = originalFilename.toLowerCase();
-        if (!(lowerName.endsWith(".png") || lowerName.endsWith(".jpg") || lowerName.endsWith(".jpeg") || lowerName.endsWith(".gif"))) {
+        if (!(lowerName.endsWith(".png") || lowerName.endsWith(".jpg") || lowerName.endsWith(".jpeg") || lowerName.endsWith(".gif")))
             throw APIException.build(HttpStatus.BAD_REQUEST, "Extensão de arquivo não suportada.");
-        }
 
         validateImageContent(file);
     }
