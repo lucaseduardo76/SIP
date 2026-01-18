@@ -85,6 +85,13 @@ public class UserApplicationApi implements  UserApi{
     }
 
     @Override
+    public void updateProfileImageWithOutLogin(String email, MultipartFile profileImage) {
+        log.info("[start] UserApplicationApi - updateProfileImageWithOutLogin");
+        userService.updateProfileImage(profileImage, null, email);
+        log.debug("[finish] UserApplicationApi - updateProfileImageWithOutLogin");
+    }
+
+    @Override
     public void updateProfileImage(String token, String email, MultipartFile profileImage) {
         log.info("[start] UserApplicationApi - updateProfileImage");
         userService.updateProfileImage(profileImage, token, email);

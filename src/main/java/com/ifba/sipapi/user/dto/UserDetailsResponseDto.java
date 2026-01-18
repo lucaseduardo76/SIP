@@ -26,7 +26,7 @@ public class UserDetailsResponseDto {
     private StatusMember statusMember;
     @Schema(example = "71999998888")
     private String phone;
-    @Schema(example = "sip.edu.br/3b766f4e-54a8-4065-93bf-6602b9d64e4b")
+    @Schema(example = "/profimage/6359de79-1934-4e6c-96cd-ca080bd80ed2_profile.jpg")
     private String profileImageUrl;
     @Schema(example = "04-29-2001T21:45:12.345")
     private LocalDateTime registrationDate;

@@ -69,6 +69,13 @@ public interface UserApi {
             @RequestBody @Valid UserPasswordUpdateDto userPasswordUpdateDto);
 
     @UserAPIDocs.UpdateProfileImage
+    @PatchMapping("account/update-profile/{email}")
+    @ResponseStatus(HttpStatus.OK)
+    void updateProfileImageWithOutLogin(
+            @PathVariable String email,
+            @RequestParam("profileImage") MultipartFile profileImage);
+
+    @UserAPIDocs.UpdateProfileImage
     @PatchMapping("/update-profile/{email}")
     @ResponseStatus(HttpStatus.OK)
     void updateProfileImage(
