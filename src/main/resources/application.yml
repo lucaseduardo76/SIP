@@ -62,6 +62,7 @@ security:
       secret: ${SECURITY_JWT_SECRET:1234567abcdeABCDE}
 
 server:
+  forward-headers-strategy: framework
   servlet:
     context-path: /sip/api
 
