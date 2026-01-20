@@ -183,6 +183,7 @@ public class ItemApplicationService implements ItemService {
 
     private void validateAgenda(LocalDateTime dateTime) {
         log.info("[start] ItemApplicationService - validateAgenda");
+        verifyIfDayIsBeforeToday(dateTime);
         AvailableDay availableDay = availableDayRepository.findAllByAvailableDay(DayOfWeekEnum.valueOf(dateTime.getDayOfWeek().name())).orElseThrow(
                 () -> APIException.build(HttpStatus.BAD_REQUEST, "Dia escolhido não está disponivel"));
 
@@ -199,6 +200,11 @@ public class ItemApplicationService implements ItemService {
             throw APIException.build(HttpStatus.BAD_REQUEST, "O horário selecionado não está disponível");
 
         log.debug("[finish] ItemApplicationService - validateAgenda");
+    }
+
+    private void verifyIfDayIsBeforeToday(LocalDateTime dateTime) {
+        if(dateTime.isBefore(LocalDateTime.now()))
+            throw APIException.build(HttpStatus.BAD_REQUEST, "Recovery precisa ser em uma data futura");
     }
 
     @Override
