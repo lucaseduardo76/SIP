@@ -1,6 +1,7 @@
 package com.ifba.sipapi.agenda.domain;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -10,24 +11,27 @@ public enum DayOfWeekEnum {
 
 
     public static String nextAvailableDay(LocalDateTime dateTime, List<AvailableDay> allAvailableDay) {
-        if (allAvailableDay == null || allAvailableDay.isEmpty())
-            return "Nenhum dia disponivel";
-
-        DayOfWeekEnum currentDay = DayOfWeekEnum.valueOf(dateTime.getDayOfWeek().name());
-        Set<DayOfWeekEnum> availableDays = allAvailableDay.stream().map(AvailableDay::getAvailableDay).collect(Collectors.toSet());
-        DayOfWeekEnum nextDay = currentDay;
-
-        for (int i = 0; i < 7; i++) {
-            nextDay = DayOfWeekEnum.values()[(nextDay.ordinal() + 1) % DayOfWeekEnum.values().length];
-
-            if (availableDays.contains(nextDay)) {
-                return availableToString(nextDay);
-            }
+        if (allAvailableDay == null || allAvailableDay.isEmpty()) {
+            return "Nenhum dia disponível";
         }
 
-        return "";
-    }
+        Set<DayOfWeekEnum> availableDays = allAvailableDay.stream()
+                .map(AvailableDay::getAvailableDay)
+                .collect(Collectors.toSet());
 
+        LocalDateTime nextDate = dateTime;
+
+        for (int i = 0; i < 7; i++) {
+            nextDate = nextDate.plusDays(1);
+
+            DayOfWeekEnum nextDay = DayOfWeekEnum.valueOf(nextDate.getDayOfWeek().name());
+
+            if (availableDays.contains(nextDay))
+                return availableToString(nextDay) + " " + formatDate(nextDate);
+        }
+
+        return "Nenhum dia disponível";
+    }
     private static String availableToString(DayOfWeekEnum nextDay) {
         if (nextDay == null) {
             return "";
@@ -51,6 +55,11 @@ public enum DayOfWeekEnum {
             default:
                 return "";
         }
+    }
+
+    private static String formatDate(LocalDateTime dateTime) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        return dateTime.format(formatter);
     }
 
 }
