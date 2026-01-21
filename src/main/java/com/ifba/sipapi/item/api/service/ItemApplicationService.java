@@ -185,7 +185,7 @@ public class ItemApplicationService implements ItemService {
         log.info("[start] ItemApplicationService - validateAgenda");
         verifyIfDayIsBeforeToday(dateTime);
         AvailableDay availableDay = availableDayRepository.findAllByAvailableDay(DayOfWeekEnum.valueOf(dateTime.getDayOfWeek().name())).orElseThrow(
-                () -> APIException.build(HttpStatus.BAD_REQUEST, "Dia escolhido não está disponivel"));
+                () -> APIException.build(HttpStatus.BAD_REQUEST, "Dia escolhido não está disponivel, o próximo dia disponível é: " + DayOfWeekEnum.nextAvailableDay(dateTime, availableDayRepository.findAll())));
 
         LocalTime time = LocalTime.of(dateTime.getHour(), dateTime.getMinute(), dateTime.getSecond());
         AtomicReference<AvailableTime> availableTime = new AtomicReference<>();
@@ -260,38 +260,21 @@ public class ItemApplicationService implements ItemService {
     }
 
     @Override
-    public Page<RecoveryResponseByUser> getSelfRecoveriesByUser(
-            String token,
-            Pageable pageable,
-            RecoveryFilterDto recoveryFilterDto
-    ) {
+    public Page<RecoveryResponseByUser> getSelfRecoveriesByUser(String token, Pageable pageable, RecoveryFilterDto recoveryFilterDto) {
         log.info("[start] ItemApplicationService - getSelfRecoveriesByUser");
         User user = assertEmailBelongsToAndReturnUser(token, recoveryFilterDto.getEmail());
         validateSearchPeriod(recoveryFilterDto.getStartDate(), recoveryFilterDto.getEndDate());
-        List<Category> categories =
-                (recoveryFilterDto.getCategory() != null && !recoveryFilterDto.getCategory().isEmpty())
-                        ? recoveryFilterDto.getCategory()
-                        : null;
+        List<Category> categories = (recoveryFilterDto.getCategory() != null && !recoveryFilterDto.getCategory().isEmpty()) ? recoveryFilterDto.getCategory() : null;
         StatusRecovery status = recoveryFilterDto.getStatus();
-        LocalDateTime startDateTime = recoveryFilterDto.getStartDate() != null
-                ? recoveryFilterDto.getStartDate().atStartOfDay()
-                : null;
-        LocalDateTime endDateTime = recoveryFilterDto.getEndDate() != null
-                ? recoveryFilterDto.getEndDate().atTime(23, 59, 59, 999_999_999)
-                : null;
-        String itemNamePattern =
-                (recoveryFilterDto.getItemName() != null && !recoveryFilterDto.getItemName().isBlank())
+
+        LocalDateTime startDateTime = recoveryFilterDto.getStartDate() != null ? recoveryFilterDto.getStartDate().atStartOfDay() : null;
+        LocalDateTime endDateTime = recoveryFilterDto.getEndDate() != null ? recoveryFilterDto.getEndDate().atTime(23, 59, 59, 999_999_999) : null;
+
+        String itemNamePattern = (recoveryFilterDto.getItemName() != null && !recoveryFilterDto.getItemName().isBlank())
                         ? "%" + recoveryFilterDto.getItemName().trim() + "%"
                         : null;
-        Page<Recovery> page = recoveryRepository.findSelfRecoveriesByFilter(
-                user,
-                status,
-                categories,
-                startDateTime,
-                endDateTime,
-                itemNamePattern,
-                pageable
-        );
+
+        Page<Recovery> page = recoveryRepository.findSelfRecoveriesByFilter(user, status, categories, startDateTime, endDateTime, itemNamePattern, pageable);
         RecoveryResponseByUser response = new RecoveryResponseByUser(page.getContent(), user);
         log.debug("[finish] ItemApplicationService - getSelfRecoveriesByUser");
         return new PageImpl<>(List.of(response), pageable, page.getTotalElements());
