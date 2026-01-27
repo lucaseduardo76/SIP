@@ -95,14 +95,13 @@ public class ItemApplicationService implements ItemService {
 
 
     @Override
-    @Transactional
-    public List<ImageUrlResponseDto> uploadImages(UUID itemId, List<MultipartFile> itemImages) {
+    public List<ImageUrlResponseDto> uploadImages(UUID itemId, String edit, List<MultipartFile> itemImages) {
         log.info("[start] ItemApplicationService - uploadImages itemId={}", itemId);
         Item item = itemRepository.findById(itemId).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Item not found"));
 
         validateMaxImagesPerItem(item, itemImages);
 
-        List<Picture> savedPictures = itemImages.stream().map(file -> uploadAndSave(file, item)).toList();
+        List<Picture> savedPictures = itemImages.stream().map(file -> uploadAndSave(file, edit, item)).toList();
         log.debug("[finish] ItemApplicationService - uploadImages itemId={}, savedImages={}", itemId, savedPictures.size());
         return savedPictures.stream().map(ImageUrlResponseDto::new).toList();
     }
@@ -131,9 +130,17 @@ public class ItemApplicationService implements ItemService {
     @Override
     public void deleteItem(UUID itemId) {
         log.info("[start] ItemApplicationService - deleteItem");
+        Item item = itemRepository.findById(itemId).orElseThrow(() -> APIException.build(HttpStatus.BAD_REQUEST, "Item não encontrado"));
+        verifyItemIsClaimed(item);
         this.deleteAllImages(itemId);
+
         itemRepository.deleteById(itemId);
         log.debug("[finish] ItemApplicationService - deleteItem");
+    }
+
+    private void verifyItemIsClaimed(Item item) {
+        if(item.getStatus() != Status.DISPONIBLE)
+            throw APIException.build(HttpStatus.CONFLICT, "Item não está mais disponivel, não pode ser deletado");
     }
 
     @Override
@@ -410,8 +417,8 @@ public class ItemApplicationService implements ItemService {
             throw APIException.build(HttpStatus.BAD_REQUEST, "Você pode enviar no máximo " + MAX_IMAGES + " imagens");
     }
 
-    private Picture uploadAndSave(MultipartFile multipartFile, Item item) {
-        String urlImage = minioClient.uploadItemsImage(multipartFile, item);
+    private Picture uploadAndSave(MultipartFile multipartFile, String edit, Item item) {
+        String urlImage = minioClient.uploadItemsImage(multipartFile, edit, item);
         Picture picture = new Picture(urlImage, item);
         return pictureRepository.save(picture);
     }

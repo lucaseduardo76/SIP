@@ -103,7 +103,6 @@ public class UserApplicationService implements UserService {
         EmailData emailData = extractPayloadFromToken(token);
         User user = userRepository.findByEmail(emailData.to())
                 .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
-        log.info(emailData.code());
         user.handleAccountReactivation(emailData.code());
         userRepository.save(user);
         log.debug("[finish] UserApplicationService - accountReactivation");

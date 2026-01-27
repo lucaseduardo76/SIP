@@ -56,9 +56,9 @@ public class ItemApplicationApi implements ItemApi {
     }
 
     @Override
-    public List<ImageUrlResponseDto> uploadImages(UUID itemId, List<MultipartFile> itemImages) {
+    public List<ImageUrlResponseDto> uploadImages(UUID itemId, String edit,List<MultipartFile> itemImages) {
         log.info("[start] ItemApplicationApi - uploadImages");
-        List<ImageUrlResponseDto> imageList =  itemService.uploadImages(itemId, itemImages);
+        List<ImageUrlResponseDto> imageList =  itemService.uploadImages(itemId, edit, itemImages);
         log.debug("[finish] ItemApplicationApi - uploadImages");
         return imageList;
     }

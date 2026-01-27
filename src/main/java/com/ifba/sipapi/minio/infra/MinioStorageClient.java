@@ -2,21 +2,24 @@ package com.ifba.sipapi.minio.infra;
 
 import com.ifba.sipapi.config.handler.APIException;
 import com.ifba.sipapi.item.domain.item.Item;
+import com.ifba.sipapi.item.domain.item.Status;
+import com.ifba.sipapi.item.infra.item.ItemRepository;
 import com.ifba.sipapi.minio.api.service.MinioClient;
 import com.ifba.sipapi.minio.dto.BucketFileDto;
 import com.ifba.sipapi.user.domain.User;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
-import javax.imageio.ImageIO;
 import java.io.IOException;
 import java.util.UUID;
 
@@ -26,6 +29,7 @@ import java.util.UUID;
 public class MinioStorageClient implements MinioClient {
 
     private final S3Client s3Client;
+    private final ItemRepository itemRepository;
 
     @Value("${minio.bucketItems}")
     private String itemsBucket;
@@ -33,20 +37,54 @@ public class MinioStorageClient implements MinioClient {
     @Value("${minio.bucketProfile}")
     private String profileBucket;
 
-    @Value("${minio.endpoint}")
-    private String minioEndpoint;
-
     @Override
-    public String uploadItemsImage(MultipartFile profileImage, Item item) {
+    public String uploadItemsImage(MultipartFile itemImage, String edit, Item item) {
         log.info("[start] MinioStorageClient - uploadItemsImage");
-        ensureBucketExists(itemsBucket);
-        validateIsImage(profileImage);
+        String filename = "";
+        try {
+            ensureBucketExists(itemsBucket);
+            validateIsImage(itemImage);
+            String prefix = item.getCode() + "_" + UUID.randomUUID() + "_item";
+            filename = generateProfileImageFilename(prefix, itemImage);
+            uploadFileToBucket(itemImage, filename, itemsBucket);
+        } catch (APIException e) {
+            if (edit != null)
+                throw APIException.build(HttpStatus.BAD_REQUEST, e.getMessage());
 
-        String prefix = item.getCode() + "_" + UUID.randomUUID() + "_item";
-        String filename = generateProfileImageFilename(prefix, profileImage);
-        uploadFileToBucket(profileImage, filename, itemsBucket);
+            deleteItem(item.getId());
+            throw APIException.build(HttpStatus.BAD_REQUEST, e.getMessage());
+        } catch (Exception e) {
+            if (edit != null)
+                throw APIException.build(HttpStatus.BAD_REQUEST, "Erro ao tentar criar item, imagem inconsistente, tente novamente ou troque a imagem");
+
+            deleteItem(item.getId());
+            throw APIException.build(HttpStatus.BAD_REQUEST, "Erro ao tentar criar item, imagem inconsistente, tente novamente ou troque a imagem");
+        }
         log.debug("[finish] MinioStorageClient - uploadItemsImage");
         return buildPublicImageUrl(filename, itemsBucket);
+    }
+
+    private void deleteAllImagesByItem(Item item) {
+        log.info("[start] MinioStorageClient - deleteAllImagesByItem");
+        item.getPictures().forEach(picture -> this.deleteItemImage(picture.getUrl()));
+        item.getPictures().clear();
+        itemRepository.save(item);
+        log.debug("[finish] MinioStorageClient - deleteAllImagesByItem");
+    }
+
+    public void deleteItem(UUID itemId) {
+        log.info("[start] MinioStorageClient - deleteItem");
+        Item item = itemRepository.findById(itemId).orElseThrow(() -> APIException.build(HttpStatus.BAD_REQUEST, "Item não encontrado"));
+        verifyItemIsClaimed(item);
+        this.deleteAllImagesByItem(item);
+
+        itemRepository.deleteById(itemId);
+        log.debug("[finish] MinioStorageClient - deleteItem");
+    }
+
+    private void verifyItemIsClaimed(Item item) {
+        if (item.getStatus() != Status.DISPONIBLE)
+            throw APIException.build(HttpStatus.CONFLICT, "Item não está mais disponivel, não pode ser deletado");
     }
 
     @Override
@@ -76,9 +114,13 @@ public class MinioStorageClient implements MinioClient {
     }
 
     private BucketFileDto extractBucketAndFilenameFromUrl(String imageUrl) {
-        String relativePath = imageUrl.replace(minioEndpoint + "/", "");
-        String bucket = relativePath.substring(0, relativePath.indexOf("/"));
-        String filename = relativePath.substring(relativePath.indexOf("/") + 1);
+        String path = imageUrl.startsWith("/") ? imageUrl.substring(1) : imageUrl;
+
+        String[] parts = path.split("/", 2);
+
+        String bucket = parts[0];
+        String filename = parts[1];
+
         return new BucketFileDto(bucket, filename);
     }
 
@@ -138,22 +180,9 @@ public class MinioStorageClient implements MinioClient {
             throw APIException.build(HttpStatus.BAD_REQUEST, "Arquivo inválido.");
 
         String lowerName = originalFilename.toLowerCase();
-        if (!(lowerName.endsWith(".png") || lowerName.endsWith(".jpg") || lowerName.endsWith(".jpeg") || lowerName.endsWith(".gif")))
+        if ((lowerName.endsWith(".png") || lowerName.endsWith(".jpg") || lowerName.endsWith(".jpeg") || lowerName.endsWith(".gif")))
             throw APIException.build(HttpStatus.BAD_REQUEST, "Extensão de arquivo não suportada.");
-
-        validateImageContent(file);
     }
-
-    private void validateImageContent(MultipartFile file) {
-        try {
-            if (ImageIO.read(file.getInputStream()) == null) {
-                throw APIException.build(HttpStatus.BAD_REQUEST, "Arquivo enviado não é uma imagem válida.");
-            }
-        } catch (IOException e) {
-            throw APIException.build(HttpStatus.BAD_REQUEST, "Não foi possível processar o arquivo de imagem.");
-        }
-    }
-
 
 
 }

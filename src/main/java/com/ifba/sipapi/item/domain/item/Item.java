@@ -85,7 +85,7 @@ public class Item extends Auditable {
         this.category = itemRequestDto.getCategory();
         this.area = itemRequestDto.getArea();
         this.code = code;
-        this.donationDate =  LocalDate.now().plusDays(donationTime);
+        this.donationDate =  itemRequestDto.getFinding_date().plusDays(donationTime);
     }
 
     public void update(ItemEditRequestDto itemEditRequestDto) {
