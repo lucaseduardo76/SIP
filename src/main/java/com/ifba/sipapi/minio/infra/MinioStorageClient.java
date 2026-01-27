@@ -7,13 +7,11 @@ import com.ifba.sipapi.item.infra.item.ItemRepository;
 import com.ifba.sipapi.minio.api.service.MinioClient;
 import com.ifba.sipapi.minio.dto.BucketFileDto;
 import com.ifba.sipapi.user.domain.User;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -40,7 +38,7 @@ public class MinioStorageClient implements MinioClient {
     @Override
     public String uploadItemsImage(MultipartFile itemImage, String edit, Item item) {
         log.info("[start] MinioStorageClient - uploadItemsImage");
-        String filename = "";
+        String filename;
         try {
             ensureBucketExists(itemsBucket);
             validateIsImage(itemImage);
@@ -180,7 +178,7 @@ public class MinioStorageClient implements MinioClient {
             throw APIException.build(HttpStatus.BAD_REQUEST, "Arquivo inválido.");
 
         String lowerName = originalFilename.toLowerCase();
-        if ((lowerName.endsWith(".png") || lowerName.endsWith(".jpg") || lowerName.endsWith(".jpeg") || lowerName.endsWith(".gif")))
+        if (!(lowerName.endsWith(".png") || lowerName.endsWith(".jpg") || lowerName.endsWith(".jpeg") || lowerName.endsWith(".gif")))
             throw APIException.build(HttpStatus.BAD_REQUEST, "Extensão de arquivo não suportada.");
     }
 
