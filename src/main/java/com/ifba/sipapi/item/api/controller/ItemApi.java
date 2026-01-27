@@ -47,6 +47,7 @@ public interface ItemApi {
     @ResponseStatus(HttpStatus.CREATED)
     List<ImageUrlResponseDto> uploadImages(
             @PathVariable UUID itemId,
+            @RequestParam(name = "edit", required = false)  String edit,
             @RequestPart("itemImages") List<MultipartFile> itemImages
     );
 
