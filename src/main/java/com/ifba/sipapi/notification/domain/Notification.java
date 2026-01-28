@@ -36,12 +36,12 @@ public class Notification extends Auditable {
     @Column(nullable = false)
     private StatusNotification status;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "item")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "item_id", nullable = false)
     private Item item;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User owner;
 
     public Notification(NotificationType notificationType, LocalDateTime claimScheduledTime, Item item, User claimer, User owner) {

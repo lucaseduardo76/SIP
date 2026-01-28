@@ -95,14 +95,13 @@ public class ItemApplicationService implements ItemService {
 
 
     @Override
-    @Transactional
-    public List<ImageUrlResponseDto> uploadImages(UUID itemId, List<MultipartFile> itemImages) {
+    public List<ImageUrlResponseDto> uploadImages(UUID itemId, String edit, List<MultipartFile> itemImages) {
         log.info("[start] ItemApplicationService - uploadImages itemId={}", itemId);
         Item item = itemRepository.findById(itemId).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Item not found"));
 
         validateMaxImagesPerItem(item, itemImages);
 
-        List<Picture> savedPictures = itemImages.stream().map(file -> uploadAndSave(file, item)).toList();
+        List<Picture> savedPictures = itemImages.stream().map(file -> uploadAndSave(file, edit, item)).toList();
         log.debug("[finish] ItemApplicationService - uploadImages itemId={}, savedImages={}", itemId, savedPictures.size());
         return savedPictures.stream().map(ImageUrlResponseDto::new).toList();
     }
@@ -110,7 +109,7 @@ public class ItemApplicationService implements ItemService {
     @Override
     public void deleteImage(ItemDeleteImageDto itemDeleteImageDto) {
         log.info("[start] ItemApplicationService - deleteImage");
-        Picture picture = pictureRepository.findByUrl(itemDeleteImageDto.getImageUrl()).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Foto não encontrada"));
+        Picture picture = pictureRepository.findByUrl(itemDeleteImageDto.getUrlSemHost()).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Foto não encontrada"));
         Item item = itemRepository.findById(itemDeleteImageDto.getItemId()).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Item não encontrado"));
         picture.assertBelongsTo(item);
         minioClient.deleteItemImage(itemDeleteImageDto.getImageUrl());
@@ -131,9 +130,17 @@ public class ItemApplicationService implements ItemService {
     @Override
     public void deleteItem(UUID itemId) {
         log.info("[start] ItemApplicationService - deleteItem");
+        Item item = itemRepository.findById(itemId).orElseThrow(() -> APIException.build(HttpStatus.BAD_REQUEST, "Item não encontrado"));
+        verifyItemIsClaimed(item);
         this.deleteAllImages(itemId);
+
         itemRepository.deleteById(itemId);
         log.debug("[finish] ItemApplicationService - deleteItem");
+    }
+
+    private void verifyItemIsClaimed(Item item) {
+        if(item.getStatus() != Status.DISPONIBLE)
+            throw APIException.build(HttpStatus.CONFLICT, "Item não está mais disponivel, não pode ser deletado");
     }
 
     @Override
@@ -183,8 +190,9 @@ public class ItemApplicationService implements ItemService {
 
     private void validateAgenda(LocalDateTime dateTime) {
         log.info("[start] ItemApplicationService - validateAgenda");
+        verifyIfDayIsBeforeToday(dateTime);
         AvailableDay availableDay = availableDayRepository.findAllByAvailableDay(DayOfWeekEnum.valueOf(dateTime.getDayOfWeek().name())).orElseThrow(
-                () -> APIException.build(HttpStatus.BAD_REQUEST, "Dia escolhido não está disponivel"));
+                () -> APIException.build(HttpStatus.BAD_REQUEST, "Dia escolhido não está disponivel, o próximo dia disponível é: " + DayOfWeekEnum.nextAvailableDay(dateTime, availableDayRepository.findAll())));
 
         LocalTime time = LocalTime.of(dateTime.getHour(), dateTime.getMinute(), dateTime.getSecond());
         AtomicReference<AvailableTime> availableTime = new AtomicReference<>();
@@ -199,6 +207,11 @@ public class ItemApplicationService implements ItemService {
             throw APIException.build(HttpStatus.BAD_REQUEST, "O horário selecionado não está disponível");
 
         log.debug("[finish] ItemApplicationService - validateAgenda");
+    }
+
+    private void verifyIfDayIsBeforeToday(LocalDateTime dateTime) {
+        if(dateTime.isBefore(LocalDateTime.now()))
+            throw APIException.build(HttpStatus.BAD_REQUEST, "Recovery precisa ser em uma data futura");
     }
 
     @Override
@@ -254,38 +267,21 @@ public class ItemApplicationService implements ItemService {
     }
 
     @Override
-    public Page<RecoveryResponseByUser> getSelfRecoveriesByUser(
-            String token,
-            Pageable pageable,
-            RecoveryFilterDto recoveryFilterDto
-    ) {
+    public Page<RecoveryResponseByUser> getSelfRecoveriesByUser(String token, Pageable pageable, RecoveryFilterDto recoveryFilterDto) {
         log.info("[start] ItemApplicationService - getSelfRecoveriesByUser");
         User user = assertEmailBelongsToAndReturnUser(token, recoveryFilterDto.getEmail());
         validateSearchPeriod(recoveryFilterDto.getStartDate(), recoveryFilterDto.getEndDate());
-        List<Category> categories =
-                (recoveryFilterDto.getCategory() != null && !recoveryFilterDto.getCategory().isEmpty())
-                        ? recoveryFilterDto.getCategory()
-                        : null;
+        List<Category> categories = (recoveryFilterDto.getCategory() != null && !recoveryFilterDto.getCategory().isEmpty()) ? recoveryFilterDto.getCategory() : null;
         StatusRecovery status = recoveryFilterDto.getStatus();
-        LocalDateTime startDateTime = recoveryFilterDto.getStartDate() != null
-                ? recoveryFilterDto.getStartDate().atStartOfDay()
-                : null;
-        LocalDateTime endDateTime = recoveryFilterDto.getEndDate() != null
-                ? recoveryFilterDto.getEndDate().atTime(23, 59, 59, 999_999_999)
-                : null;
-        String itemNamePattern =
-                (recoveryFilterDto.getItemName() != null && !recoveryFilterDto.getItemName().isBlank())
+
+        LocalDateTime startDateTime = recoveryFilterDto.getStartDate() != null ? recoveryFilterDto.getStartDate().atStartOfDay() : null;
+        LocalDateTime endDateTime = recoveryFilterDto.getEndDate() != null ? recoveryFilterDto.getEndDate().atTime(23, 59, 59, 999_999_999) : null;
+
+        String itemNamePattern = (recoveryFilterDto.getItemName() != null && !recoveryFilterDto.getItemName().isBlank())
                         ? "%" + recoveryFilterDto.getItemName().trim() + "%"
                         : null;
-        Page<Recovery> page = recoveryRepository.findSelfRecoveriesByFilter(
-                user,
-                status,
-                categories,
-                startDateTime,
-                endDateTime,
-                itemNamePattern,
-                pageable
-        );
+
+        Page<Recovery> page = recoveryRepository.findSelfRecoveriesByFilter(user, status, categories, startDateTime, endDateTime, itemNamePattern, pageable);
         RecoveryResponseByUser response = new RecoveryResponseByUser(page.getContent(), user);
         log.debug("[finish] ItemApplicationService - getSelfRecoveriesByUser");
         return new PageImpl<>(List.of(response), pageable, page.getTotalElements());
@@ -421,8 +417,8 @@ public class ItemApplicationService implements ItemService {
             throw APIException.build(HttpStatus.BAD_REQUEST, "Você pode enviar no máximo " + MAX_IMAGES + " imagens");
     }
 
-    private Picture uploadAndSave(MultipartFile multipartFile, Item item) {
-        String urlImage = minioClient.uploadItemsImage(multipartFile, item);
+    private Picture uploadAndSave(MultipartFile multipartFile, String edit, Item item) {
+        String urlImage = minioClient.uploadItemsImage(multipartFile, edit, item);
         Picture picture = new Picture(urlImage, item);
         return pictureRepository.save(picture);
     }

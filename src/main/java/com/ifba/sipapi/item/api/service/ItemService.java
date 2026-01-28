@@ -18,7 +18,7 @@ import java.util.UUID;
 @Service
 public interface ItemService {
     ItemCreatedResponseDto createItem(ItemRequestDto itemRequestDto, String token);
-    List<ImageUrlResponseDto> uploadImages(UUID itemId, List<MultipartFile> itemImages);
+    List<ImageUrlResponseDto> uploadImages(UUID itemId, String edit, List<MultipartFile> itemImages);
     void deleteImage(ItemDeleteImageDto itemDeleteImageDto);
     void deleteAllImages(UUID itemId);
     void deleteItem(UUID itemId);

@@ -123,6 +123,10 @@ public class AuthenticationApplicationService implements AuthenticationService {
 
     private void checkLoginAttempts(LoginType loginType, String email) {
         log.info("[start] AuthenticationApplicationService - checkLoginAttempts");
+        User userFromEmail = userRepository.findByEmail(email).orElse(null);
+        if(userFromEmail != null && userFromEmail.getStatusMember().equals(StatusMember.BLOCKED))
+            return;
+
         userRepository.findByEmail(email).ifPresent(user -> {
                     user.checkLoginType(loginType);
                     userRepository.save(user);

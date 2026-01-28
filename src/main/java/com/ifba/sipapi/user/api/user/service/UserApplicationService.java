@@ -103,7 +103,6 @@ public class UserApplicationService implements UserService {
         EmailData emailData = extractPayloadFromToken(token);
         User user = userRepository.findByEmail(emailData.to())
                 .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
-        log.info(emailData.code());
         user.handleAccountReactivation(emailData.code());
         userRepository.save(user);
         log.debug("[finish] UserApplicationService - accountReactivation");
@@ -141,7 +140,11 @@ public class UserApplicationService implements UserService {
     @Override
     public void updateProfileImage(MultipartFile profileImage, String token, String email) {
         log.info("[start] UserApplicationService - updateProfileImage");
-        User user = assertEmailBelongsToAndReturnUser(token, email);
+        User user  = userRepository.findByEmail(email).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuario não encontrado!"));
+
+        if(token != null || !user.getStatusMember().equals(StatusMember.NOT_VERIFIED))
+            assertEmailBelongsToAndReturnUser(token, email);
+
         user.updateProfileImage(minioClient.uploadUserProfileImage(profileImage, user));
         userRepository.save(user);
         log.debug("[finish] UserApplicationService - updateProfileImage");

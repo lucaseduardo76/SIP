@@ -6,6 +6,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface MinioClient {
     String uploadUserProfileImage(MultipartFile profileImage, User user);
-    String uploadItemsImage(MultipartFile profileImage, Item item);
+    String uploadItemsImage(MultipartFile profileImage, String edit, Item item);
     void deleteItemImage(String imageUrl);
 }

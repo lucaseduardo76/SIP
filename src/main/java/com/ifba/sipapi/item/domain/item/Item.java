@@ -85,7 +85,7 @@ public class Item extends Auditable {
         this.category = itemRequestDto.getCategory();
         this.area = itemRequestDto.getArea();
         this.code = code;
-        this.donationDate =  LocalDate.now().plusDays(donationTime);
+        this.donationDate =  itemRequestDto.getFinding_date().plusDays(donationTime);
     }
 
     public void update(ItemEditRequestDto itemEditRequestDto) {
@@ -133,13 +133,11 @@ public class Item extends Auditable {
     private void validateRecoveryBelongsToItem(Recovery recovery) {
         if (!Objects.equals(recovery.getItem(), this))
             throw APIException.build(HttpStatus.CONFLICT, "Item da solicitação é incompatível com o item atual");
-
     }
 
     private void validateRecoveryApproved(Recovery recovery) {
         if (recovery.getStatus() != StatusRecovery.APPROVED)
             throw APIException.build(HttpStatus.BAD_REQUEST, "Solicitação ainda não foi autorizada");
-
     }
 
     public void setToCharity() {
