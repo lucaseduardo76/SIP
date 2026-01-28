@@ -166,7 +166,6 @@ public class User extends Auditable implements UserDetails {
             throw APIException.build(HttpStatus.BAD_REQUEST, "Token Inválido ou malformado.");
 
         this.changePassword(password);
-        this.updateCode(null);
     }
 
     public void updateUser(UserUpdateDto dto) {
