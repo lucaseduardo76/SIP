@@ -109,7 +109,7 @@ public class ItemApplicationService implements ItemService {
     @Override
     public void deleteImage(ItemDeleteImageDto itemDeleteImageDto) {
         log.info("[start] ItemApplicationService - deleteImage");
-        Picture picture = pictureRepository.findByUrl(itemDeleteImageDto.getImageUrl()).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Foto não encontrada"));
+        Picture picture = pictureRepository.findByUrl(itemDeleteImageDto.getUrlSemHost()).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Foto não encontrada"));
         Item item = itemRepository.findById(itemDeleteImageDto.getItemId()).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Item não encontrado"));
         picture.assertBelongsTo(item);
         minioClient.deleteItemImage(itemDeleteImageDto.getImageUrl());
