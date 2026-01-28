@@ -19,6 +19,9 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 @Service
 @Log4j2
 @RequiredArgsConstructor
@@ -41,9 +44,13 @@ public class EmailService {
                 .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
 
         String token = tokenService.generateTokenToEmail(new EmailData(user.getEmail(), user.getAccountCode()));
+        String encoded = URLEncoder.encode(token, StandardCharsets.UTF_8);
 
         Context context = new Context();
-        context.setVariable("applicationLink", applicationUrl + emailDetailsDto.getRoute() + token);
+        context.setVariable(
+                "applicationLink",
+                applicationUrl + emailDetailsDto.getRoute() + encoded
+        );
         context.setVariable("verificationCode", user.getAccountCode());
 
         String body = templateEngine.process(emailDetailsDto.getTemplate(), context);
