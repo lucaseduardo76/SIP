@@ -40,7 +40,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -101,23 +100,32 @@ public class ItemApplicationService implements ItemService {
 
         validateMaxImagesPerItem(item, itemImages);
 
-        List<Picture> savedPictures = itemImages.stream().map(file -> uploadAndSave(file, edit, item)).toList();
-        log.debug("[finish] ItemApplicationService - uploadImages itemId={}, savedImages={}", itemId, savedPictures.size());
-        return savedPictures.stream().map(ImageUrlResponseDto::new).toList();
+        try {
+            List<Picture> savedPictures = itemImages.stream().map(file -> uploadAndSave(file, item)).toList();
+            log.debug("[finish] ItemApplicationService - uploadImages itemId={}, savedImages={}", itemId, savedPictures.size());
+            return savedPictures.stream().map(ImageUrlResponseDto::new).toList();
+        } catch (RuntimeException e) {
+            if (edit == null)
+                this.deleteItem(itemId);
+            throw e;
+        }
     }
 
     @Override
+    @Transactional
     public void deleteImage(ItemDeleteImageDto itemDeleteImageDto) {
         log.info("[start] ItemApplicationService - deleteImage");
         Picture picture = pictureRepository.findByUrl(itemDeleteImageDto.getUrlSemHost()).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Foto não encontrada"));
         Item item = itemRepository.findById(itemDeleteImageDto.getItemId()).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Item não encontrado"));
         picture.assertBelongsTo(item);
-        minioClient.deleteItemImage(itemDeleteImageDto.getImageUrl());
-        pictureRepository.delete(picture);
+        minioClient.deleteItemImage(picture.getUrl());
+        item.getPictures().removeIf(p -> p.getId().equals(picture.getId()));
+        itemRepository.save(item);
         log.debug("[finish] ItemApplicationService - deleteImage");
     }
 
     @Override
+    @Transactional
     public void deleteAllImages(UUID itemId) {
         log.info("[start] ItemApplicationService - deleteAllImages");
         Item item = itemRepository.findById(itemId).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Item não encontrado"));
@@ -128,12 +136,12 @@ public class ItemApplicationService implements ItemService {
     }
 
     @Override
+    @Transactional
     public void deleteItem(UUID itemId) {
         log.info("[start] ItemApplicationService - deleteItem");
         Item item = itemRepository.findById(itemId).orElseThrow(() -> APIException.build(HttpStatus.BAD_REQUEST, "Item não encontrado"));
         verifyItemIsClaimed(item);
-        this.deleteAllImages(itemId);
-
+        item.getPictures().forEach(picture -> minioClient.deleteItemImage(picture.getUrl()));
         itemRepository.deleteById(itemId);
         log.debug("[finish] ItemApplicationService - deleteItem");
     }
@@ -144,6 +152,7 @@ public class ItemApplicationService implements ItemService {
     }
 
     @Override
+    @Transactional
     public void editItem(UUID itemId, ItemEditRequestDto itemEditRequestDto) {
         log.info("[start] ItemApplicationService - editItem");
         Item item = itemRepository.findById(itemId).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Item não encontrado"));
@@ -417,8 +426,8 @@ public class ItemApplicationService implements ItemService {
             throw APIException.build(HttpStatus.BAD_REQUEST, "Você pode enviar no máximo " + MAX_IMAGES + " imagens");
     }
 
-    private Picture uploadAndSave(MultipartFile multipartFile, String edit, Item item) {
-        String urlImage = minioClient.uploadItemsImage(multipartFile, edit, item);
+    private Picture uploadAndSave(MultipartFile multipartFile, Item item) {
+        String urlImage = minioClient.uploadItemsImage(multipartFile, item);
         Picture picture = new Picture(urlImage, item);
         return pictureRepository.save(picture);
     }
