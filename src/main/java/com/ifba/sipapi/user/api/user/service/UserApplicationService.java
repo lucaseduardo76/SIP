@@ -145,8 +145,10 @@ public class UserApplicationService implements UserService {
         if(token != null || !user.getStatusMember().equals(StatusMember.NOT_VERIFIED))
             assertEmailBelongsToAndReturnUser(token, email);
 
+        String oldImageUrl = user.getProfileImageUrl();
         user.updateProfileImage(minioClient.uploadUserProfileImage(profileImage, user));
         userRepository.save(user);
+        deleteOldProfileImageQuietly(oldImageUrl);
         log.debug("[finish] UserApplicationService - updateProfileImage");
     }
 
@@ -155,9 +157,21 @@ public class UserApplicationService implements UserService {
         log.info("[start] UserApplicationService - updateProfileImageByRoot");
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
+        String oldImageUrl = user.getProfileImageUrl();
         user.updateProfileImage(minioClient.uploadUserProfileImage(profileImage, user));
         userRepository.save(user);
+        deleteOldProfileImageQuietly(oldImageUrl);
         log.debug("[finish] UserApplicationService - updateProfileImageByRoot");
+    }
+
+    private void deleteOldProfileImageQuietly(String oldImageUrl) {
+        if (oldImageUrl == null || oldImageUrl.isBlank())
+            return;
+        try {
+            minioClient.deleteItemImage(oldImageUrl);
+        } catch (Exception e) {
+            log.warn("Falha ao remover foto de perfil antiga ({}): {}", oldImageUrl, e.getMessage());
+        }
     }
 
     @Override
@@ -166,6 +180,9 @@ public class UserApplicationService implements UserService {
         log.info("[start] UserApplicationService - deleteAdmin");
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
+        String profileImageUrl = user.getProfileImageUrl();
+        if (profileImageUrl != null && !profileImageUrl.isBlank())
+            minioClient.deleteItemImage(profileImageUrl);
         userRepository.delete(user);
         log.debug("[finish] UserApplicationService - deleteAdmin");
     }
