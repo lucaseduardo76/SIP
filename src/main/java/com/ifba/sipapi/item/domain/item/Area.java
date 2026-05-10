@@ -12,5 +12,6 @@ public enum Area {
     BLOCK_EIGHT,
     BLOCK_NINE,
     LIBRARY,
+    AUDITORIO,
     VIDEO_ROOM,
 }

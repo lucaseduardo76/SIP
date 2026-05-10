@@ -2,8 +2,6 @@ package com.ifba.sipapi.minio.infra;
 
 import com.ifba.sipapi.config.handler.APIException;
 import com.ifba.sipapi.item.domain.item.Item;
-import com.ifba.sipapi.item.domain.item.Status;
-import com.ifba.sipapi.item.infra.item.ItemRepository;
 import com.ifba.sipapi.minio.api.service.MinioClient;
 import com.ifba.sipapi.minio.dto.BucketFileDto;
 import com.ifba.sipapi.user.domain.User;
@@ -19,6 +17,7 @@ import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.UUID;
 
 @Component
@@ -27,7 +26,6 @@ import java.util.UUID;
 public class MinioStorageClient implements MinioClient {
 
     private final S3Client s3Client;
-    private final ItemRepository itemRepository;
 
     @Value("${minio.bucketItems}")
     private String itemsBucket;
@@ -36,53 +34,21 @@ public class MinioStorageClient implements MinioClient {
     private String profileBucket;
 
     @Override
-    public String uploadItemsImage(MultipartFile itemImage, String edit, Item item) {
+    public String uploadItemsImage(MultipartFile itemImage, Item item) {
         log.info("[start] MinioStorageClient - uploadItemsImage");
-        String filename;
         try {
             ensureBucketExists(itemsBucket);
             validateIsImage(itemImage);
             String prefix = item.getCode() + "_" + UUID.randomUUID() + "_item";
-            filename = generateProfileImageFilename(prefix, itemImage);
+            String filename = generateProfileImageFilename(prefix, itemImage);
             uploadFileToBucket(itemImage, filename, itemsBucket);
+            log.debug("[finish] MinioStorageClient - uploadItemsImage");
+            return buildPublicImageUrl(filename, itemsBucket);
         } catch (APIException e) {
-            if (edit != null)
-                throw APIException.build(HttpStatus.BAD_REQUEST, e.getMessage());
-
-            deleteItem(item.getId());
-            throw APIException.build(HttpStatus.BAD_REQUEST, e.getMessage());
+            throw e;
         } catch (Exception e) {
-            if (edit != null)
-                throw APIException.build(HttpStatus.BAD_REQUEST, "Erro ao tentar criar item, imagem inconsistente, tente novamente ou troque a imagem");
-
-            deleteItem(item.getId());
             throw APIException.build(HttpStatus.BAD_REQUEST, "Erro ao tentar criar item, imagem inconsistente, tente novamente ou troque a imagem");
         }
-        log.debug("[finish] MinioStorageClient - uploadItemsImage");
-        return buildPublicImageUrl(filename, itemsBucket);
-    }
-
-    private void deleteAllImagesByItem(Item item) {
-        log.info("[start] MinioStorageClient - deleteAllImagesByItem");
-        item.getPictures().forEach(picture -> this.deleteItemImage(picture.getUrl()));
-        item.getPictures().clear();
-        itemRepository.save(item);
-        log.debug("[finish] MinioStorageClient - deleteAllImagesByItem");
-    }
-
-    public void deleteItem(UUID itemId) {
-        log.info("[start] MinioStorageClient - deleteItem");
-        Item item = itemRepository.findById(itemId).orElseThrow(() -> APIException.build(HttpStatus.BAD_REQUEST, "Item não encontrado"));
-        verifyItemIsClaimed(item);
-        this.deleteAllImagesByItem(item);
-
-        itemRepository.deleteById(itemId);
-        log.debug("[finish] MinioStorageClient - deleteItem");
-    }
-
-    private void verifyItemIsClaimed(Item item) {
-        if (item.getStatus() != Status.DISPONIBLE)
-            throw APIException.build(HttpStatus.CONFLICT, "Item não está mais disponivel, não pode ser deletado");
     }
 
     @Override
@@ -112,14 +78,15 @@ public class MinioStorageClient implements MinioClient {
     }
 
     private BucketFileDto extractBucketAndFilenameFromUrl(String imageUrl) {
-        String path = imageUrl.startsWith("/") ? imageUrl.substring(1) : imageUrl;
+        String path = imageUrl.contains("://") ? URI.create(imageUrl).getPath() : imageUrl;
+        if (path.startsWith("/"))
+            path = path.substring(1);
 
         String[] parts = path.split("/", 2);
+        if (parts.length < 2)
+            throw APIException.build(HttpStatus.BAD_REQUEST, "URL de imagem inválida: " + imageUrl);
 
-        String bucket = parts[0];
-        String filename = parts[1];
-
-        return new BucketFileDto(bucket, filename);
+        return new BucketFileDto(parts[0], parts[1]);
     }
 
 
