@@ -116,4 +116,15 @@ public interface UserApi {
             @RequestHeader(name = "Authorization", required = true) String token,
             @PathVariable String email
     );
+
+    @DeleteMapping("/delete-account/{email}")
+    @ResponseStatus(HttpStatus.OK)
+    void deleteOwnAccount(
+            @RequestHeader(name = "Authorization", required = true) String token,
+            @PathVariable String email,
+            @RequestBody @Valid UserAccountDeletionDto userAccountDeletionDto);
+
+    @DeleteMapping("/root/delete-user/{email}")
+    @ResponseStatus(HttpStatus.OK)
+    void deleteUserByRoot(@PathVariable String email);
 }

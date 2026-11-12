@@ -43,4 +43,6 @@ public interface ItemRepository extends JpaRepository<Item, UUID> {
             );
 
     List<Item> findByDonationDateLessThanEqualAndStatus(LocalDate donationDateIsLessThan, Status status);
+
+    List<Item> findByDateReturnedLessThanEqualAndStatus(LocalDate dateReturned, Status status);
 }

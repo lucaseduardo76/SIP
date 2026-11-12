@@ -88,6 +88,10 @@ public interface ItemApi {
             @RequestBody @Valid ItemRecoveryRequestDto itemRecoveryRequest
     );
 
+    @PostMapping(value = "/admin/recovery/withdrawal-requests/{idRecovery}/deliver")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void confirmDelivery(@PathVariable UUID idRecovery);
+
     @ItemsAPIDocs.RecoveryReview
     @PostMapping(value = "/admin/recovery/withdrawal-requests/review")
     @ResponseStatus(HttpStatus.NO_CONTENT)

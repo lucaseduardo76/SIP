@@ -32,4 +32,7 @@ public interface ItemService {
     RecoveryResponseByUser getRecoveriesByUser(UUID idUser);
     Page<RecoveryResponseByUser> getSelfRecoveriesByUser(String token, Pageable pageable, RecoveryFilterDto recoveryFilterDto);
     void refreshItemToCharity();
+    void confirmDelivery(UUID idRecovery);
+    void expireReservations();
+    void removeExpiredPictures();
 }

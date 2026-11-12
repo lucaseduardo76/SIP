@@ -65,6 +65,31 @@ public class Recovery extends Auditable {
         validateAndUpdateStatus(newStatus);
     }
 
+    /** Registra que o objeto foi entregue ao solicitante. */
+    public void markAsDelivered() {
+        requireApproved();
+        this.status = StatusRecovery.DELIVERED;
+    }
+
+    /** Encerra a reserva quando o objeto não é retirado dentro do prazo. */
+    public void expire() {
+        requireApproved();
+        this.status = StatusRecovery.EXPIRED;
+    }
+
+    /** Cancela um pedido pendente ou aprovado, por exemplo quando o solicitante exclui a conta. */
+    public void cancel() {
+        if (this.status == StatusRecovery.PENDING)
+            this.status = StatusRecovery.REFUSED;
+        else if (this.status == StatusRecovery.APPROVED)
+            this.status = StatusRecovery.EXPIRED;
+    }
+
+    private void requireApproved() {
+        if (this.status != StatusRecovery.APPROVED)
+            throw APIException.build(HttpStatus.BAD_REQUEST, "Solicitação não está aprovada");
+    }
+
     private void validateAndUpdateStatus(StatusRecovery newStatus) {
         switch (newStatus) {
             case APPROVED -> this.status = StatusRecovery.APPROVED;

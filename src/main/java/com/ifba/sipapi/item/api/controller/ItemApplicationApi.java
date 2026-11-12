@@ -130,4 +130,10 @@ public class ItemApplicationApi implements ItemApi {
     }
 
 
+    @Override
+    public void confirmDelivery(UUID idRecovery) {
+        log.info("[start] ItemApplicationApi - confirmDelivery");
+        itemService.confirmDelivery(idRecovery);
+        log.debug("[finish] ItemApplicationApi - confirmDelivery");
+    }
 }

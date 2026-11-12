@@ -96,10 +96,6 @@ public class Item extends Auditable {
 
     public void validateItemIsAvailableToUpdate() {
         validateItemIsAvailable();
-        LocalDateTime limit = super.getCreatedAt().plusHours(24);
-
-        if(LocalDateTime.now().isAfter(limit))
-            throw APIException.build(HttpStatus.BAD_REQUEST, "Itens só podem ser editados até 24 horas após a criação");
     }
 
     private void validateItemIsAvailable() {
@@ -108,16 +104,43 @@ public class Item extends Auditable {
     }
 
 
+    /**
+     * Reserva o item para o solicitante cujo pedido foi aprovado.
+     * O item fica aguardando a retirada e ainda não é considerado devolvido.
+     */
+    public void reserve(Recovery recovery) {
+        validateRecoveryNotNull(recovery);
+        validateItemIsAvailable();
+        validateRecoveryBelongsToItem(recovery);
+        validateRecoveryApproved(recovery);
+        this.status = Status.RESERVED;
+    }
+
+    /**
+     * Registra a entrega do item ao solicitante, confirmada pelo administrador no momento da retirada.
+     */
     public void updateStatusToClaimed(Recovery recovery) {
-        if(recovery == null) {
-            throw APIException.build(HttpStatus.BAD_REQUEST, "Recovery não pode ser nulo");
-        }
+        validateRecoveryNotNull(recovery);
+        if (this.status != Status.RESERVED)
+            throw APIException.build(HttpStatus.BAD_REQUEST, "O item não está reservado para retirada");
 
         validateRecoveryBelongsToItem(recovery);
         validateRecoveryApproved(recovery);
         updateOwner(recovery.getUser());
         updateDateReturned();
         this.status = Status.CLAIMED;
+    }
+
+    /** Libera a reserva do item, que volta a ficar disponível para novos pedidos. */
+    public void releaseReservation() {
+        if (this.status != Status.RESERVED)
+            throw APIException.build(HttpStatus.BAD_REQUEST, "O item não está reservado");
+        this.status = Status.DISPONIBLE;
+    }
+
+    private void validateRecoveryNotNull(Recovery recovery) {
+        if(recovery == null)
+            throw APIException.build(HttpStatus.BAD_REQUEST, "Recovery não pode ser nulo");
     }
 
     private void updateDateReturned() {

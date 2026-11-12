@@ -101,4 +101,17 @@ public class NotificationToItemService {
         notificationConsumer.onMessage(new UserNotificationDto(notification.getNotificationContentDto(), KindOfuser.EVERYONE, null));
         log.debug("[finish] NotificationToItemService - newItemOnCharity");
     }
+
+    public void reservationExpired(Recovery recovery) {
+        log.info("[start] NotificationToItemService - reservationExpired");
+        Notification notification = new Notification(NotificationType.RESERVATION_EXPIRED,
+                recovery.getRecoveryDateTime(),
+                recovery.getItem(),
+                recovery.getUser(),
+                recovery.getUser());
+
+        notification = notificationRepository.save(notification);
+        notificationConsumer.onMessage(new UserNotificationDto(notification.getNotificationContentDto(), KindOfuser.COMMON, recovery.getUser().getEmail()));
+        log.debug("[finish] NotificationToItemService - reservationExpired");
+    }
 }
