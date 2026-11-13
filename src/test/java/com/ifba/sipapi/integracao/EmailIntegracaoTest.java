@@ -182,6 +182,40 @@ class EmailIntegracaoTest {
         assertThat(msg.destinatarios()).containsExactly(email);
     }
 
+    @Test
+    @Order(4)
+    @DisplayName("Bloqueio e reativação: conta bloqueada após 5 tentativas e reativada pelo link do e-mail")
+    void bloqueioEReativacaoPorEmail() throws Exception {
+        titulo("Teste 4 - Bloqueio após cinco tentativas e reativação da conta por e-mail (RNF03 e RF03)");
+        String email = "maria.teste@ifba.edu.br";
+        String senha = "NovaSenha@456"; // definida no teste 2
+
+        for (int i = 1; i <= 5; i++)
+            call(HttpMethod.POST, "/authentication/login", m("email", email, "password", "Errada@" + i), 403,
+                    "Tentativa de login " + i + " com senha errada");
+        assertThat(status(email)).isEqualTo("BLOCKED");
+        registro("Situação da conta após cinco tentativas sem sucesso: BLOCKED.");
+        call(HttpMethod.POST, "/authentication/login", m("email", email, "password", senha), 403,
+                "Login com a senha correta enquanto a conta está bloqueada");
+
+        call(HttpMethod.POST, "/user/account/request-reactivation/" + email, null, 200,
+                "Pedido de reativação da conta");
+        FakeSmtpServer.Mensagem msg = smtp.aguardar(30);
+        assertThat(msg).as("e-mail de reativação recebido pelo servidor SMTP").isNotNull();
+        MimeMessage mime = ler(msg);
+        String token = extrairToken(html(mime));
+        registroEmail(msg, mime);
+        assertThat(msg.destinatarios()).containsExactly(email);
+        assertThat(mime.getSubject()).isEqualTo("Reativação de conta - SIP");
+
+        call(HttpMethod.POST, "/user/account/reactivate/" + token, null, 200,
+                "Reativação da conta usando o link recebido por e-mail");
+        assertThat(status(email)).isEqualTo("ACTIVE");
+        registro("Situação da conta após a reativação: ACTIVE.");
+        call(HttpMethod.POST, "/authentication/login", m("email", email, "password", senha), 200,
+                "Login após a reativação");
+    }
+
     // ---------------------------------------------------------------- utilitários
 
     void aguardarConsumidoresKafka() throws InterruptedException {

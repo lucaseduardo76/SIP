@@ -99,9 +99,9 @@ public class UserApplicationService implements UserService {
         User user = userRepository.findByEmail(email)
                 .filter(u -> u.getStatusMember().equals(StatusMember.BLOCKED))
                 .orElseThrow(() -> APIException.build(HttpStatus.BAD_REQUEST, "Usuário não está bloqueado ou email não encontrado!"));
-        sendEmail(user.getEmail(), EmailType.REACTIVATE);
         user.updateAccountReactivationCode();
         userRepository.save(user);
+        sendEmail(user.getEmail(), EmailType.REACTIVATE);
         log.debug("[finish] AuthenticationApplicationService - checkAndSendEmail");
     }
 

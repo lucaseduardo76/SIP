@@ -11,11 +11,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.*;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.WebSocket;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -41,10 +49,11 @@ class CenariosIntegracaoTest {
     @Autowired ItemToCharitySchedule charitySchedule;
     @Autowired com.ifba.sipapi.item.api.service.ReservationExpirationSchedule reservationSchedule;
     @MockBean KafkaApplicationEmailProducer emailProducer;
+    @LocalServerPort int porta;
 
     static final ObjectMapper om = new ObjectMapper().findAndRegisterModules().enable(SerializationFeature.INDENT_OUTPUT);
     static PrintWriter out;
-    static String admin, ana, bruno;
+    static String root, admin, ana, bruno;
 
     @BeforeAll
     static void abrir() throws Exception {
@@ -83,6 +92,45 @@ class CenariosIntegracaoTest {
         out.flush();
         assertThat(r.getStatusCode().value()).as(m + " " + path).isEqualTo(esperado);
         return node;
+    }
+
+    /** Cliente WebSocket simples: guarda as mensagens recebidas para o teste verificar. */
+    class ClienteWs implements WebSocket.Listener {
+        final BlockingQueue<String> recebidas = new LinkedBlockingQueue<>();
+        final StringBuilder parcial = new StringBuilder();
+        final String quem;
+        WebSocket ws;
+        ClienteWs(String quem, String canal, String token) throws Exception {
+            this.quem = quem;
+            String url = "ws://localhost:" + porta + "/sip/api/ws/" + canal + "?access_token=" + token;
+            ws = HttpClient.newHttpClient().newWebSocketBuilder().buildAsync(URI.create(url), this).get(10, TimeUnit.SECONDS);
+            nota("_(" + quem + " conectou-se ao WebSocket em `/sip/api/ws/" + canal + "?access_token=<token>`.)_");
+        }
+        @Override public CompletionStage<?> onText(WebSocket w, CharSequence data, boolean last) {
+            parcial.append(data);
+            if (last) { recebidas.add(parcial.toString()); parcial.setLength(0); }
+            w.request(1);
+            return null;
+        }
+        /** Aguarda uma mensagem do tipo informado, registrando-a no relatório. */
+        JsonNode aguardar(String tipo) throws Exception {
+            long limite = System.currentTimeMillis() + 10_000;
+            while (System.currentTimeMillis() < limite) {
+                String msg = recebidas.poll(500, TimeUnit.MILLISECONDS);
+                if (msg == null) continue;
+                JsonNode n = om.readTree(msg);
+                if (tipo.equalsIgnoreCase(n.path("type").asText())) {
+                    out.println("Mensagem recebida por " + quem + " pelo WebSocket, sem nova requisição:");
+                    out.println("```json");
+                    out.println(om.writeValueAsString(n));
+                    out.println("```");
+                    out.flush();
+                    return n;
+                }
+            }
+            throw new AssertionError(quem + " não recebeu aviso " + tipo + " pelo WebSocket");
+        }
+        void fechar() { ws.sendClose(WebSocket.NORMAL_CLOSURE, "fim").join(); }
     }
 
     void titulo(String t) { out.println("\n## " + t + "\n"); }
@@ -128,7 +176,7 @@ class CenariosIntegracaoTest {
     @Test @Order(0)
     void preparacao() throws Exception {
         titulo("Preparação: administrador, usuários e agenda");
-        String root = login("root@sip.com", "SenhaSegura@123");
+        root = login("root@sip.com", "SenhaSegura@123");
         call(HttpMethod.POST, "/authentication/register-admin", root, m(
                 "name", "Carla Administradora", "cpf", "52998224725", "email", "carla.admin@sip.com",
                 "phone", "73988887777"), 201);
@@ -152,10 +200,23 @@ class CenariosIntegracaoTest {
     @Test @Order(1)
     void cenario1_devolucaoCompleta() throws Exception {
         titulo("Cenário 1: cadastro do item, pedido, aprovação, retirada e devolução");
+        ClienteWs wsCarla = new ClienteWs("Carla", "admin", admin);
+        ClienteWs wsAna = new ClienteWs("Ana", "common", ana);
         String item = criarItem(admin, "Garrafa térmica azul com adesivo", LocalDate.now().minusDays(2), "BOTTLE");
+        wsAna.aguardar("NEW_ITEM_CREATED");
+        nota("Ana procura o objeto usando os filtros da consulta (nome, categoria, situação e período):");
+        JsonNode busca = call(HttpMethod.GET, "/items?itemName=Garrafa&category=BOTTLE&status=DISPONIBLE&startPeriod="
+                + LocalDate.now().minusDays(7) + "&endPeriod=" + LocalDate.now(), ana, null, 200);
+        assertThat(busca.get("content").findValuesAsText("id")).contains(item);
+        nota("Filtro que não corresponde ao item (outra categoria):");
+        JsonNode vazia = call(HttpMethod.GET, "/items?category=BOOK", ana, null, 200);
+        assertThat(vazia.get("content").findValuesAsText("id")).doesNotContain(item);
         String pedido = pedir(ana, "ana.souza@ifba.edu.br", item, "Garrafa azul com um adesivo de banda na lateral");
+        wsCarla.aguardar("NEW_REQUEST");
         call(HttpMethod.GET, "/notification/byUser", admin, null, 200);
         analisar(admin, pedido, "APPROVED", 204);
+        wsAna.aguardar("REQUEST_APPROVED");
+        wsCarla.fechar(); wsAna.fechar();
         JsonNode i = call(HttpMethod.GET, "/items/" + item, ana, null, 200);
         assertThat(i.get("status").asText()).isEqualTo("RESERVED");
         assertThat(i.get("dateReturned").isNull()).isTrue();
@@ -181,6 +242,24 @@ class CenariosIntegracaoTest {
         assertThat(i.get("status").asText()).isEqualTo("RESERVED");
         nota("Tentativa de alterar novamente um pedido já analisado:");
         analisar(admin, pedidoBruno, "APPROVED", 400);
+
+        titulo("Cenário 2 (continuação): recusa automática e histórico de pedidos");
+        String mochila = criarItem(admin, "Mochila vermelha", LocalDate.now().minusDays(1), "OTHER");
+        String pBruno = pedir(bruno, "bruno.lima@ifba.edu.br", mochila, "Mochila vermelha com chaveiro");
+        String pAna = pedir(ana, "ana.souza@ifba.edu.br", mochila, "Mochila vermelha com caderno de cálculo dentro");
+        nota("Os dois pedidos estão pendentes. A administradora aprova apenas o pedido de Ana:");
+        analisar(admin, pAna, "APPROVED", 204);
+        assertThat(jdbc.queryForObject("select status from recovery_request where id = ?::uuid", String.class, pBruno)).isEqualTo("REFUSED");
+        nota("Situação do pedido de Bruno no banco, sem nenhuma ação da administradora: REFUSED. Aviso recebido por Bruno:");
+        call(HttpMethod.GET, "/notification/byUser", bruno, null, 200);
+        nota("Histórico de pedidos: os próprios pedidos de Ana, os pedidos do item e os pedidos de Bruno:");
+        JsonNode proprios = call(HttpMethod.GET, "/items/recovery-self?email=ana.souza@ifba.edu.br", ana, null, 200);
+        assertThat(proprios.get("content")).isNotEmpty();
+        JsonNode porItem = call(HttpMethod.GET, "/items/admin/recovery-by-item/" + mochila, admin, null, 200);
+        assertThat(porItem.toString()).contains(pAna).contains(pBruno);
+        String idBruno = jdbc.queryForObject("select id::text from tb_user where email=?", String.class, "bruno.lima@ifba.edu.br");
+        JsonNode porUsuario = call(HttpMethod.GET, "/items/admin/recovery-by-user/" + idBruno, admin, null, 200);
+        assertThat(porUsuario.toString()).contains(pBruno);
     }
 
     // ---------- cenário 3 ----------
@@ -241,5 +320,47 @@ class CenariosIntegracaoTest {
         nota("Registro após a exclusão: " + anon);
         assertThat(anon.get("status_member")).isEqualTo("DELETED");
         call(HttpMethod.POST, "/authentication/login", null, m("email", "bruno.lima@ifba.edu.br", "password", "Senha@123"), 403);
+    }
+
+    // ---------- cenário 5 ----------
+    @Test @Order(5)
+    void cenario5_administracaoESeguranca() throws Exception {
+        titulo("Cenário 5: gestão de administradores e segurança das contas");
+        nota("O root cadastra um segundo administrador, consulta a lista e os detalhes e depois o exclui:");
+        call(HttpMethod.POST, "/authentication/register-admin", root, m(
+                "name", "Diego Administrador", "cpf", "86288366757", "email", "diego.admin@sip.com",
+                "phone", "73988886666"), 201);
+        JsonNode lista = call(HttpMethod.GET, "/user/root/admin-users/root@sip.com", root, null, 200);
+        assertThat(lista.toString()).contains("diego.admin@sip.com").contains("carla.admin@sip.com");
+        call(HttpMethod.GET, "/user/root/admin-detail/diego.admin@sip.com", root, null, 200);
+        call(HttpMethod.DELETE, "/user/root/delete-admin/diego.admin@sip.com", root, null, 200);
+        JsonNode listaDepois = call(HttpMethod.GET, "/user/root/admin-users/root@sip.com", root, null, 200);
+        assertThat(listaDepois.toString()).doesNotContain("diego.admin@sip.com");
+        nota("Um administrador não pode gerenciar administradores:");
+        call(HttpMethod.GET, "/user/root/admin-users/carla.admin@sip.com", admin, null, 403);
+
+        nota("Armazenamento da senha: nova usuária cadastrada e valor gravado no banco:");
+        registrarComum("Eva Rocha", "71428793860", "eva.rocha@ifba.edu.br");
+        String hash = jdbc.queryForObject("select password from tb_user where email=?", String.class, "eva.rocha@ifba.edu.br");
+        nota("Coluna `password` de Eva: `" + hash.substring(0, 7) + "…` (" + hash.length() + " caracteres; a senha `Senha@123` não aparece em texto puro).");
+        assertThat(hash).startsWith("$2").hasSize(60).doesNotContain("Senha@123");
+
+        nota("Bloqueio após cinco tentativas de login sem sucesso:");
+        for (int i = 1; i <= 5; i++)
+            call(HttpMethod.POST, "/authentication/login", null, m("email", "eva.rocha@ifba.edu.br", "password", "Errada@" + i), 403);
+        assertThat(jdbc.queryForObject("select status_member from tb_user where email=?", String.class, "eva.rocha@ifba.edu.br")).isEqualTo("BLOCKED");
+        nota("Situação da conta no banco: BLOCKED. Mesmo com a senha correta, o login é recusado:");
+        call(HttpMethod.POST, "/authentication/login", null, m("email", "eva.rocha@ifba.edu.br", "password", "Senha@123"), 403);
+        nota("Pedido de reativação (o e-mail é simulado neste cenário; a reativação pelo link é verificada no teste de integração 4):");
+        call(HttpMethod.POST, "/user/account/request-reactivation/eva.rocha@ifba.edu.br", null, null, 200);
+
+        nota("Documentação OpenAPI da API, gerada pelo springdoc:");
+        ResponseEntity<String> docs = http.getForEntity("/v3/api-docs", String.class);
+        JsonNode d = om.readTree(docs.getBody());
+        out.println("```http\nGET /sip/api/v3/api-docs\n\n--> " + docs.getStatusCode().value() + " OK\n{ \"openapi\": \""
+                + d.path("openapi").asText() + "\", \"paths\": { … " + d.path("paths").size() + " rotas documentadas … } }\n```");
+        out.flush();
+        assertThat(docs.getStatusCode().value()).isEqualTo(200);
+        assertThat(d.path("paths").size()).isGreaterThan(20);
     }
 }
