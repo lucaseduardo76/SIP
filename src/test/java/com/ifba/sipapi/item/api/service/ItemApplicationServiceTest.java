@@ -252,7 +252,7 @@ class ItemApplicationServiceTest {
 
             when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
             when(pictureRepository.findByItem(item)).thenReturn(new ArrayList<>());
-            when(minioClient.uploadItemsImage(file, "edit", item)).thenReturn("http://localhost/img/test.jpg");
+            when(minioClient.uploadItemsImage(file, item)).thenReturn("http://localhost/img/test.jpg");
             when(pictureRepository.save(any(Picture.class))).thenReturn(picture);
 
             List<ImageUrlResponseDto> result = service.uploadImages(itemId, "edit", List.of(file));
@@ -314,6 +314,7 @@ class ItemApplicationServiceTest {
         void success_deletesPictureFromMinioAndRepository() {
             Item item = buildItem(Status.DISPONIBLE);
             Picture picture = new Picture(UUID.randomUUID(), "/itemsimage/test.jpg", item);
+            item.getPictures().add(picture);
             ItemDeleteImageDto dto = new ItemDeleteImageDto(itemId, "http://localhost:9000/itemsimage/test.jpg");
 
             when(pictureRepository.findByUrl("/itemsimage/test.jpg")).thenReturn(Optional.of(picture));
@@ -321,8 +322,9 @@ class ItemApplicationServiceTest {
 
             service.deleteImage(dto);
 
-            verify(minioClient).deleteItemImage("http://localhost:9000/itemsimage/test.jpg");
-            verify(pictureRepository).delete(picture);
+            verify(minioClient).deleteItemImage("/itemsimage/test.jpg");
+            verify(itemRepository).save(item);
+            assertThat(item.getPictures()).doesNotContain(picture);
         }
 
         @Test
@@ -423,7 +425,6 @@ class ItemApplicationServiceTest {
         void disponibleItem_deletesSuccessfully() {
             Item item = buildItem(Status.DISPONIBLE);
             when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
-            when(itemRepository.save(item)).thenReturn(item);
 
             service.deleteItem(itemId);
 
