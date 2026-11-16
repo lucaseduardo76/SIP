@@ -7,7 +7,12 @@ import com.ifba.sipapi.mail.domain.EmailData;
 import com.ifba.sipapi.mail.domain.EmailSender;
 import com.ifba.sipapi.mail.domain.EmailType;
 import com.ifba.sipapi.mail.infra.KafkaApplicationEmailProducer;
+import com.ifba.sipapi.item.domain.item.Status;
+import com.ifba.sipapi.item.domain.recoveryRequest.StatusRecovery;
+import com.ifba.sipapi.item.infra.item.ItemRepository;
+import com.ifba.sipapi.item.infra.recovery.RecoveryRepository;
 import com.ifba.sipapi.minio.api.service.MinioClient;
+import com.ifba.sipapi.notification.infra.NotificationRepository;
 import com.ifba.sipapi.user.domain.Role;
 import com.ifba.sipapi.user.domain.StatusMember;
 import com.ifba.sipapi.user.domain.User;
@@ -33,6 +38,9 @@ public class UserApplicationService implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final KafkaApplicationEmailProducer kafkaApplicationEmailProducer;
     private final MinioClient minioClient;
+    private final RecoveryRepository recoveryRepository;
+    private final ItemRepository itemRepository;
+    private final NotificationRepository notificationRepository;
 
     @Override
     public void verifyAccountWithToken(String token) {
@@ -91,9 +99,9 @@ public class UserApplicationService implements UserService {
         User user = userRepository.findByEmail(email)
                 .filter(u -> u.getStatusMember().equals(StatusMember.BLOCKED))
                 .orElseThrow(() -> APIException.build(HttpStatus.BAD_REQUEST, "Usuário não está bloqueado ou email não encontrado!"));
-        sendEmail(user.getEmail(), EmailType.REACTIVATE);
         user.updateAccountReactivationCode();
         userRepository.save(user);
+        sendEmail(user.getEmail(), EmailType.REACTIVATE);
         log.debug("[finish] AuthenticationApplicationService - checkAndSendEmail");
     }
 
@@ -178,13 +186,63 @@ public class UserApplicationService implements UserService {
     @Transactional
     public void deleteAdmin(String email) {
         log.info("[start] UserApplicationService - deleteAdmin");
+        deleteUserByRoot(email);
+        log.debug("[finish] UserApplicationService - deleteAdmin");
+    }
+
+    @Override
+    @Transactional
+    public void deleteOwnAccount(String token, String email, UserAccountDeletionDto userAccountDeletionDto) {
+        log.info("[start] UserApplicationService - deleteOwnAccount");
+        User user = assertEmailBelongsToAndReturnUser(token, email);
+        if (!passwordEncoder.matches(userAccountDeletionDto.getPassword(), user.getPassword()))
+            throw APIException.build(HttpStatus.BAD_REQUEST, "Senha atual informada inválida.");
+        anonymizeUser(user);
+        log.debug("[finish] UserApplicationService - deleteOwnAccount");
+    }
+
+    @Override
+    @Transactional
+    public void deleteUserByRoot(String email) {
+        log.info("[start] UserApplicationService - deleteUserByRoot");
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
-        String profileImageUrl = user.getProfileImageUrl();
-        if (profileImageUrl != null && !profileImageUrl.isBlank())
-            minioClient.deleteItemImage(profileImageUrl);
-        userRepository.delete(user);
-        log.debug("[finish] UserApplicationService - deleteAdmin");
+        anonymizeUser(user);
+        log.debug("[finish] UserApplicationService - deleteUserByRoot");
+    }
+
+    /**
+     * Elimina os dados pessoais do usuário por anonimização: cancela os pedidos em andamento,
+     * libera os itens reservados, apaga os avisos e a foto de perfil e substitui os dados cadastrais.
+     */
+    private void anonymizeUser(User user) {
+        if (user.getRole() == Role.ROOT)
+            throw APIException.build(HttpStatus.BAD_REQUEST, "O usuário root não pode ser excluído");
+        if (user.isDeleted())
+            throw APIException.build(HttpStatus.BAD_REQUEST, "Conta já excluída");
+
+        recoveryRepository.findAllByUser(user).stream()
+                .filter(r -> r.getStatus() == StatusRecovery.PENDING || r.getStatus() == StatusRecovery.APPROVED)
+                .forEach(recovery -> {
+                    boolean wasApproved = recovery.getStatus() == StatusRecovery.APPROVED;
+                    recovery.cancel();
+                    recoveryRepository.save(recovery);
+                    if (wasApproved && recovery.getItem().getStatus() == Status.RESERVED) {
+                        recovery.getItem().releaseReservation();
+                        itemRepository.save(recovery.getItem());
+                    }
+                });
+
+        notificationRepository.deleteAll(notificationRepository.getNotificationByOwner(user));
+
+        if (user.getProfileImageUrl() != null && !user.getProfileImageUrl().isBlank())
+            minioClient.deleteItemImage(user.getProfileImageUrl());
+
+        long sequence = userRepository.countByStatusMember(StatusMember.DELETED) + 1;
+        while (userRepository.existsByEmail("excluido-" + String.format("%02d", sequence) + "@excluido.sip"))
+            sequence++;
+        user.anonymize(sequence);
+        userRepository.save(user);
     }
 
     @Override

@@ -5,6 +5,7 @@ import com.ifba.sipapi.user.dto.UserDetailsResponseDto;
 import com.ifba.sipapi.user.dto.UserPasswordRecoveryDto;
 import com.ifba.sipapi.user.dto.UserPasswordUpdateDto;
 import com.ifba.sipapi.user.dto.UserUpdateDto;
+import com.ifba.sipapi.user.dto.UserAccountDeletionDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -134,5 +135,19 @@ public class UserApplicationApi implements  UserApi{
         UserDetailsResponseDto userAdminsResponseDto = userService.getAdminDetail(email);
         log.debug("[finish] UserApplicationApi - adminUserDetail");
         return userAdminsResponseDto;
+    }
+
+    @Override
+    public void deleteOwnAccount(String token, String email, UserAccountDeletionDto userAccountDeletionDto) {
+        log.info("[start] UserApplicationApi - deleteOwnAccount");
+        userService.deleteOwnAccount(token, email, userAccountDeletionDto);
+        log.debug("[finish] UserApplicationApi - deleteOwnAccount");
+    }
+
+    @Override
+    public void deleteUserByRoot(String email) {
+        log.info("[start] UserApplicationApi - deleteUserByRoot");
+        userService.deleteUserByRoot(email);
+        log.debug("[finish] UserApplicationApi - deleteUserByRoot");
     }
 }

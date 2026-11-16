@@ -95,6 +95,8 @@ application:
   time:
     donation: ${DONATION_TIME_DAYS:180}
     about-to-donate: ${ABOUT_TO_DONATE:30}
+    reservation-expiration: ${RESERVATION_EXPIRATION_DAYS:2}
+    pictures-retention: ${PICTURES_RETENTION_DAYS:45}
   item:
     max-active-requests: ${MAX_ACTIVE-REQUESTS:5}
 

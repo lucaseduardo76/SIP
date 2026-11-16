@@ -68,6 +68,12 @@ public class ItemApplicationService implements ItemService {
     @Value("${application.item.max-active-requests}")
     private Integer MAX_ACTIVE_REQUESTS;
 
+    @Value("${application.time.reservation-expiration:2}")
+    private Integer RESERVATION_EXPIRATION_DAYS;
+
+    @Value("${application.time.pictures-retention:45}")
+    private Integer PICTURES_RETENTION_DAYS;
+
     private static final LocalDate FUTURE_LIMIT_DATE = LocalDate.of(2999, 12, 31);
 
     @Override
@@ -231,7 +237,7 @@ public class ItemApplicationService implements ItemService {
         recoveryRepository.save(recovery);
 
         if (itemRequestReviewDto.getStatusRecovery().equals(StatusRecovery.APPROVED)) {
-            applyClaimToItem(recovery);
+            reserveItemFor(recovery);
             notificationToItemService.sendNotificationToRequester(recovery);
         }else {
             notificationToItemService.recoveryRejected(recovery, false);
@@ -301,24 +307,75 @@ public class ItemApplicationService implements ItemService {
     public void refreshItemToCharity() {
         log.info("[start] ItemApplicationService - refreshItemToCharity");
         itemRepository.findByDonationDateLessThanEqualAndStatus(LocalDate.now(), Status.DISPONIBLE).forEach(item -> {
-            recoveryRepository.findAllByItem(item).forEach(this::rejectAndSaveRecovery);
+            recoveryRepository.findAllByItem(item).stream()
+                    .filter(r -> r.getStatus() == StatusRecovery.PENDING)
+                    .forEach(this::rejectAndSaveRecovery);
             item.setToCharity();
             notificationToItemService.newItemOnCharity(item);
         });
         log.debug("[finish] ItemApplicationService - refreshItemToCharity");
     }
 
-    private void applyClaimToItem(Recovery recovery) {
+    private void reserveItemFor(Recovery recovery) {
         rejectAllExcept(recovery);
         Item item = recovery.getItem();
-        item.updateStatusToClaimed(recovery);
+        item.reserve(recovery);
         itemRepository.save(item);
+    }
+
+    @Override
+    public void confirmDelivery(UUID idRecovery) {
+        log.info("[start] ItemApplicationService - confirmDelivery");
+        Recovery recovery = recoveryRepository.findById(idRecovery).orElseThrow(() -> APIException.build(HttpStatus.BAD_REQUEST, "Solicitação inexistente, verifique o ID!"));
+        Item item = recovery.getItem();
+        item.updateStatusToClaimed(recovery);
+        recovery.markAsDelivered();
+        itemRepository.save(item);
+        recoveryRepository.save(recovery);
+        log.debug("[finish] ItemApplicationService - confirmDelivery");
+    }
+
+    @Override
+    public void expireReservations() {
+        log.info("[start] ItemApplicationService - expireReservations");
+        LocalDateTime limit = LocalDateTime.now().minusDays(RESERVATION_EXPIRATION_DAYS);
+        recoveryRepository.findAllByStatusAndRecoveryDateTimeBefore(StatusRecovery.APPROVED, limit).forEach(recovery -> {
+            recovery.expire();
+            recoveryRepository.save(recovery);
+            Item item = recovery.getItem();
+            if (item.getStatus() == Status.RESERVED) {
+                item.releaseReservation();
+                itemRepository.save(item);
+            }
+            notificationToItemService.reservationExpired(recovery);
+        });
+        log.debug("[finish] ItemApplicationService - expireReservations");
+    }
+
+    @Override
+    public void removeExpiredPictures() {
+        log.info("[start] ItemApplicationService - removeExpiredPictures");
+        LocalDate limit = LocalDate.now().minusDays(PICTURES_RETENTION_DAYS);
+        List<Item> items = new java.util.ArrayList<>();
+        items.addAll(itemRepository.findByDateReturnedLessThanEqualAndStatus(limit, Status.CLAIMED));
+        items.addAll(itemRepository.findByDonationDateLessThanEqualAndStatus(limit, Status.CHARITY));
+        items.stream()
+                .filter(item -> item.getPictures() != null && !item.getPictures().isEmpty())
+                .forEach(item -> {
+                    item.getPictures().forEach(picture -> minioClient.deleteItemImage(picture.getUrl()));
+                    item.getPictures().clear();
+                    itemRepository.save(item);
+                });
+        log.debug("[finish] ItemApplicationService - removeExpiredPictures");
     }
 
 
     private void rejectAllExcept(Recovery recovery) {
         List<Recovery> recoveriesByItem = recoveryRepository.findAllByItem(recovery.getItem());
-        recoveriesByItem.stream().filter(other -> !other.equals(recovery)).forEach(this::rejectAndSaveRecovery);
+        recoveriesByItem.stream()
+                .filter(other -> !other.equals(recovery))
+                .filter(other -> other.getStatus() == StatusRecovery.PENDING)
+                .forEach(this::rejectAndSaveRecovery);
     }
 
     private void rejectAndSaveRecovery(Recovery recovery) {
@@ -347,7 +404,7 @@ public class ItemApplicationService implements ItemService {
     }
 
     private void validateDuplicateRequest(User user, Item item) {
-        if (recoveryRepository.existsByUserAndItemAndStatusNot(user, item, StatusRecovery.REFUSED))
+        if (recoveryRepository.existsByUserAndItemAndStatusIn(user, item, List.of(StatusRecovery.PENDING, StatusRecovery.APPROVED, StatusRecovery.DELIVERED)))
             throw APIException.build(HttpStatus.BAD_REQUEST,
                     "Solicitação já efetuada");
     }

@@ -23,6 +23,8 @@ public interface UserService {
     void updateProfileImage(MultipartFile profileImage, String token, String email);
     void updateProfileImageByRoot(MultipartFile profileImage, String email);
     void deleteAdmin(String email);
+    void deleteOwnAccount(String token, String email, UserAccountDeletionDto userAccountDeletionDto);
+    void deleteUserByRoot(String email);
     UserDetailsResponseDto getUserDetails(String email, String token);
     List<UserDetailsResponseDto> getUserAdmins(String email, String token);
     UserDetailsResponseDto getAdminDetail(String email);

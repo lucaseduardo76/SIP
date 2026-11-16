@@ -44,4 +44,8 @@ public interface RecoveryRepository extends JpaRepository<Recovery, UUID> {
             Pageable pageable
     );
 
+
+    boolean existsByUserAndItemAndStatusIn(User user, Item item, java.util.Collection<StatusRecovery> statuses);
+
+    List<Recovery> findAllByStatusAndRecoveryDateTimeBefore(StatusRecovery status, LocalDateTime limit);
 }

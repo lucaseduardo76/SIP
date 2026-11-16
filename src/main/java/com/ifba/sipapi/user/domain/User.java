@@ -135,6 +135,27 @@ public class User extends Auditable implements UserDetails {
         return this.statusMember == StatusMember.ACTIVE;
     }
 
+    /**
+     * Elimina os dados pessoais da conta por meio de anonimização. O registro é mantido
+     * para preservar a integridade do histórico de pedidos, mas deixa de identificar a pessoa.
+     */
+    public void anonymize(long sequence) {
+        String suffix = String.format("%02d", sequence);
+        this.name = "excluido-" + suffix;
+        this.email = "excluido-" + suffix + "@excluido.sip";
+        this.cpf = String.format("%011d", sequence);
+        this.phone = null;
+        this.profileImageUrl = "";
+        this.password = null;
+        this.accountCode = GenerateNumber.generateCode();
+        this.failedLoginAttempts = 0;
+        this.statusMember = StatusMember.DELETED;
+    }
+
+    public boolean isDeleted() {
+        return this.statusMember == StatusMember.DELETED;
+    }
+
     public void checkLoginType(LoginType loginType) {
         if (loginType == LoginType.FAILED)
             incrementFailedLoginAttempts();

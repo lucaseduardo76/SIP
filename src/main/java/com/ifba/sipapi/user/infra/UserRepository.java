@@ -23,6 +23,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     @Transactional
     void deleteAllByRole(Role role);
     long countByRole(Role role);
+    long countByStatusMember(com.ifba.sipapi.user.domain.StatusMember statusMember);
 
     List<User> findByRole(Role role);
 

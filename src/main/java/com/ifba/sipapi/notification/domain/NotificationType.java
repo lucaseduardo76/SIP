@@ -6,7 +6,8 @@ public enum NotificationType {
     REQUEST_REFUSED("request_refused"),
     REQUEST_REFUSED_ANOTHER_USER("request_refused_another_user"),
     NEW_ITEM_ON_CHARITY("new_item_on_charity"),
-    NEW_ITEM_CREATED("new_item_created"),;
+    NEW_ITEM_CREATED("new_item_created"),
+    RESERVATION_EXPIRED("reservation_expired"),;
 
     private String description;
 
